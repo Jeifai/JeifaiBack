@@ -11,12 +11,17 @@ func main() {
 	files := http.FileServer(http.Dir(config.Static))
 	mux.Handle("/public/", http.StripPrefix("/static/", files))
 
-	mux.HandleFunc("/", index)
+    mux.HandleFunc("/", index)
+    
 	mux.HandleFunc("/login", login)
 	mux.HandleFunc("/logout", logout)
 	mux.HandleFunc("/signup", signup)
 	mux.HandleFunc("/signup_account", signupAccount)
-	mux.HandleFunc("/authenticate", authenticate)
+    mux.HandleFunc("/authenticate", authenticate)
+    
+    mux.HandleFunc("/targets", targets)
+    mux.HandleFunc("/target_add", target_add)
+	mux.HandleFunc("/target_add_url", target_add_url)
 
 	fmt.Println("Application is running")
 
