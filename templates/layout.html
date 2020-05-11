@@ -1,0 +1,16 @@
+{{ define "layout" }}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>TITLE</title>
+  </head>
+  <body>
+    {{ template "navbar" . }}
+    <div>
+    {{ template "content" . }}
+    </div>
+  </body>
+</html>
+
+{{ end }}
