@@ -1,8 +1,14 @@
 {{ define "content" }}
     <div>
-        HERE SHOW ALL TARGETS
+        <a href="/target_add">ADD TARGET</a>
     </div>
+    <br>
     <div>
-        <a href="/target_add">Add target</a>
+        YOUR TARGETS
     </div>
+    {{ range .Targets }}
+        <div>
+            - {{ .Url }}
+        </div>
+    {{ end }}
 {{ end }}

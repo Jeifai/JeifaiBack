@@ -54,8 +54,13 @@ func logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func signup(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Generating HTML for signup...") 
-	generateHTML(w, nil, "layout", "public.navbar", "signup")
+    fmt.Println("Generating HTML for signup...")
+    templates := template.Must(
+        template.ParseFiles(
+            "templates/layout.html",
+            "templates/public.navbar.html",
+            "templates/signup.html"))
+    templates.ExecuteTemplate(w, "layout", nil)
 }
 
 func signupAccount(w http.ResponseWriter, r *http.Request) {

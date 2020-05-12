@@ -3,32 +3,57 @@ package main
 import (
     "./data"
     "fmt"
-	"net/http"
+    "net/http"
+    "html/template"
 )
 
 func targets(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Generating HTML for targets...")
-	generateHTML(w, nil, "layout", "private.navbar", "targets")
+    fmt.Println("Generating HTML for targets...")
+    sess, err := session(w, r)
+	user, err := data.UserByEmail(sess.Email)
+    if err != nil {
+        danger(err, "Cannot find user")
+    }
+	targets, err := user.UsersTargets()
+
+	templates := template.Must(
+        template.ParseFiles(
+            "templates/layout.html",
+            "templates/private.navbar.html",
+            "templates/targets.html"))
+    
+    type TempStruct struct {
+        User data.User
+        Targets []data.Target
+    }
+    infos := TempStruct{user, targets}
+
+	templates.ExecuteTemplate(w, "layout", infos)
 }
 
 func target_add(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Generating HTML for target_add...")
-	generateHTML(w, nil, "layout", "private.navbar", "target_add")
+    fmt.Println("Generating HTML for target_add...")
+    templates := template.Must(
+        template.ParseFiles(
+            "templates/layout.html",
+            "templates/private.navbar.html",
+            "templates/target_add.html"))
+    templates.ExecuteTemplate(w, "layout", nil)
 }
 
 func target_save(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting target_add_url...")
     err := r.ParseForm()
-    sess, err := session(w, r)
 	if err != nil {
 		danger(err, "Cannot parse form")
-	}
+    }
 	target := data.Target{
 		Url: r.PostFormValue("url"),
     }
 	if err := target.CreateTarget(); err != nil {
 		danger(err, "Cannot create target")
-	}
+    }
+    sess, err := session(w, r)
 	user, err := data.UserByEmail(sess.Email)
     if err != nil {
         danger(err, "Cannot find user")

@@ -38,3 +38,25 @@ func (target *Target) CreateUserTarget(user User) (err error) {
     fmt.Println("Closing CreateUserTarget...")
 	return
 }
+
+// Get all the targets for a specific user
+func (user *User) UsersTargets() (targets []Target, err error) {
+    fmt.Println("Starting UsersTargets...")
+    rows, err := Db.Query(`SELECT t.url, t.created_at 
+                            FROM users u
+                            INNER JOIN users_targets ut ON(u.id = ut.user_id) 
+                            INNER JOIN targets t ON(ut.target_id = t.id)
+                            WHERE u.id=$1`, user.Id)
+    if err != nil {
+        return
+    }
+	for rows.Next() {
+        target := Target{}
+        if err = rows.Scan(&target.Url, &target.CreatedAt); err != nil {
+            return
+        }
+        targets = append(targets, target)
+    }
+    rows.Close()
+    return
+}
