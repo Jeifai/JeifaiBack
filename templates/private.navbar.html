@@ -1,16 +1,10 @@
 {{ define "navbar" }}
+    <div class="topnav">
+        <a href="/">Home</a>
+        <a href="/targets">Targets</a>
+        <a href="/logout">Logout</a>
+    </div>
     <div>
-        <h1>
-            <div>HI {{.User.Name}}, YOU ARE LOGGED IN</div>
-        </h1>
-      <ul>
-        <li><a href="/">Home</a></li>
-      </ul>
-      <ul>
-        <li><a href="/logout">Logout</a></li>
-      </ul>
-      <ul>
-        <li><a href="/targets">Targets</a></li>
-      </ul>
+        <h1>HI {{.User.Name}}, YOU ARE LOGGED IN</h1>
     </div>
 {{ end }}

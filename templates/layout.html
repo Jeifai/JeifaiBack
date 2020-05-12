@@ -1,19 +1,19 @@
 {{ define "layout" }}
-
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="JeiFai" content="Know first when your favourite companies publish new offers.">
-    <link rel="stylesheet" href="/static/css/style.css"/>
-    <title>JeiFai - Know First</title>
-  </head>
-  <body>
-    {{ template "navbar" . }}
-    <div>
-    {{ template "content" . }}
-    </div>
-  </body>
-</html>
-
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="JeiFai" content="Know first when your favourite companies publish new offers.">
+            <link rel="stylesheet" href="/static/css/style.css"/>
+            <title>JeiFai - Know First</title>
+        </head>
+        <body>
+            <div>
+                {{ template "navbar" . }}
+            </div>
+            <div>
+                {{ template "content" . }}
+            </div>
+        </body>
+    </html>
 {{ end }}
