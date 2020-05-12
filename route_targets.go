@@ -7,11 +7,12 @@ import (
 )
 
 func targets(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Generating HTML for targets...")
 	generateHTML(w, nil, "layout", "private.navbar", "targets")
 }
 
 func target_add(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Generating HTML for target...")
+	fmt.Println("Generating HTML for target_add...")
 	generateHTML(w, nil, "layout", "private.navbar", "target_add")
 }
 
