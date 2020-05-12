@@ -9,7 +9,7 @@ import (
 
 func login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting login...")
-    login_template := template.Must(template.ParseFiles("templates/login.html"))
+	login_template := template.Must(template.ParseFiles("templates/login.html"))
 	fmt.Println("Closing login...")
 	login_template.ExecuteTemplate(w, "login.html", nil)
 }
@@ -31,12 +31,12 @@ func authenticate(w http.ResponseWriter, r *http.Request) {
 			Value:    session.Uuid,
 			HttpOnly: true,
 		}
-        http.SetCookie(w, &cookie)
-	    fmt.Println("Closing login...")
+		http.SetCookie(w, &cookie)
+		fmt.Println("Closing login...")
 		http.Redirect(w, r, "/", 302)
 	} else {
-        fmt.Println("Log in not valid...")
-	    fmt.Println("Closing login...")
+		fmt.Println("Log in not valid...")
+		fmt.Println("Closing login...")
 		http.Redirect(w, r, "/login", 302)
 	}
 }
@@ -54,13 +54,13 @@ func logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func signup(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("Generating HTML for signup...")
-    templates := template.Must(
-        template.ParseFiles(
-            "templates/layout.html",
-            "templates/public.navbar.html",
-            "templates/signup.html"))
-    templates.ExecuteTemplate(w, "layout", nil)
+	fmt.Println("Generating HTML for signup...")
+	templates := template.Must(
+		template.ParseFiles(
+			"templates/layout.html",
+			"templates/public.navbar.html",
+			"templates/signup.html"))
+	templates.ExecuteTemplate(w, "layout", nil)
 }
 
 func signupAccount(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +76,7 @@ func signupAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := user.Create(); err != nil {
 		danger(err, "Cannot create user")
-    }
+	}
 	fmt.Println("Closing signupAccount...")
 	http.Redirect(w, r, "/login", 302)
 }

@@ -1,41 +1,41 @@
 package data
 
 import (
-    "os"
-    "log"
-    "strconv"
-    "github.com/joho/godotenv"
-    "crypto/rand"
+	"crypto/rand"
 	"crypto/sha1"
-    "database/sql"
-    "fmt"
-    _ "github.com/lib/pq"
+	"database/sql"
+	"fmt"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"log"
+	"os"
+	"strconv"
 )
 
 var Db *sql.DB
 
 func init() {
 
-    // Load Environmental Variables
-    err := godotenv.Load()
-    if err != nil {
-        log.Fatal("Error loading .env file")
-    }
-    dbhost := os.Getenv("DBHOST")
-    dbuser := os.Getenv("DBUSER")
-    dbport, err := strconv.ParseInt(os.Getenv("DBPORT"), 10, 64)
-    dbname := os.Getenv("DBNAME")
-    dbpassword := os.Getenv("DBPASSWORD") 
+	// Load Environmental Variables
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	dbhost := os.Getenv("DBHOST")
+	dbuser := os.Getenv("DBUSER")
+	dbport, err := strconv.ParseInt(os.Getenv("DBPORT"), 10, 64)
+	dbname := os.Getenv("DBNAME")
+	dbpassword := os.Getenv("DBPASSWORD")
 
-    psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-    "password=%s dbname=%s sslmode=disable",
-    dbhost, dbport, dbuser, dbpassword, dbname)
-    db, err := sql.Open("postgres", psqlInfo)
-    Db = db
-    if err != nil {
-    panic(err)
-    }
-    fmt.Println("Successfully connected to the database")
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		dbhost, dbport, dbuser, dbpassword, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
+	Db = db
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Successfully connected to the database")
 }
 
 func createUUID() (uuid string) {
