@@ -1,0 +1,17 @@
+{{ define "navigation" }}
+    <div class="topnav">
+        <a href="/logout">Logout</a>
+        <a href="/">Home</a>
+        <a>HI {{.User.Name}}</a>
+    </div>
+    <div class="sidenav">
+        <ul>
+            <li><a href="/targets">Targets</a>
+                <ul>
+                    <li><a href="/target_add">Add Target</a></li>
+                    <li><a href="/targets_delete">Delete Target</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+{{ end }}
