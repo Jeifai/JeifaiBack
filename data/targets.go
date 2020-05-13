@@ -63,6 +63,18 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 	return
 }
 
+// Get the target for a specific user and url, must return a unique value
+func (user *User) UsersTargetsByUserAndUrl(url string) (target Target, err error) {
+    fmt.Println("Starting UsersTargetsByUserAndUrl...")
+	err = Db.QueryRow(`SELECT t.id, t.url, t.created_at 
+                       FROM users u
+                       INNER JOIN users_targets ut ON(u.id = ut.user_id) 
+                       INNER JOIN targets t ON(ut.target_id = t.id)
+                       WHERE u.id=$1
+                       AND t.url=$2`, user.Id, url).Scan(&target.Id, &target.Url, &target.CreatedAt)
+	return
+}
+
 // Delete a relation user <--> target
 func (target *Target) DeleteUserTargetByUserAndTarget(user User) (err error) {
     fmt.Println("Starting DeleteUserTargetByUserAndTarget...")

@@ -89,23 +89,19 @@ func target_delete__run(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		danger(err, "Cannot find user")
 	}
-    targets, err := user.UsersTargetsByUser()
-    for _, elem := range targets {
-        if target.Url == elem.Url {
-            // HERE LOGIC IF A TARGET EXISTS
-            fmt.Println("-------------------YES MATCH")
-            fmt.Println(elem.Id)
-            err := elem.DeleteUserTargetByUserAndTarget(user)
-            if err != nil {
-                danger(err, "Cannot find user")
-            } else {
-                fmt.Println("-------------------TARGET CORRECTELY REMOVED")
-                http.Redirect(w, r, "/targets", 302)
-            }
+    targetToBeDeleted, err := user.UsersTargetsByUserAndUrl(target.Url)
+    if (data.Target{}) == targetToBeDeleted  {
+        // If the target inserted by the user exists
+            fmt.Println("-------------------TARGET NOT CORRECTELY REMOVED")
+            http.Redirect(w, r, "/targets", 302)
+    } else {
+        // If the target inserted by the user exists
+        err := targetToBeDeleted.DeleteUserTargetByUserAndTarget(user)
+        if err != nil {
+            danger(err, "Cannot delete user <--> target")
+        } else {
+            fmt.Println("-------------------TARGET CORRECTELY REMOVED")
+            http.Redirect(w, r, "/targets", 302)
         }
     }
-    // HERE LOGIC IF A TARGET DOES NOT EXISTS
-    fmt.Println("-------------------NO MATCH")
-	fmt.Println("Closing target_delete__run...")
-    http.Redirect(w, r, "/targets", 302)
 }
