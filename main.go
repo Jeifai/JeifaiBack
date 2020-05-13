@@ -21,7 +21,7 @@ func main() {
 
 	mux.HandleFunc("/targets", targets)
 	mux.HandleFunc("/target_add", target_add)
-	mux.HandleFunc("/target_save", target_save)
+	mux.HandleFunc("/target_add__run", target_add__run)
 
 	fmt.Println("Application is running")
 

@@ -41,7 +41,7 @@ func target_add(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "layout", nil)
 }
 
-func target_save(w http.ResponseWriter, r *http.Request) {
+func target_add__run(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting target_add_url...")
 	err := r.ParseForm()
 	if err != nil {
