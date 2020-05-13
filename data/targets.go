@@ -14,7 +14,7 @@ type Target struct {
 // Add a new target
 func (target *Target) CreateTarget() (err error) {
 	fmt.Println("Starting CreateTarget...")
-    statement := `INSERT INTO targets (url, created_at)
+	statement := `INSERT INTO targets (url, created_at)
                   VALUES ($1, $2) RETURNING id, url, created_at`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
@@ -29,7 +29,7 @@ func (target *Target) CreateTarget() (err error) {
 // Add a new relation user <--> target
 func (target *Target) CreateUserTarget(user User) (err error) {
 	fmt.Println("Starting CreateUserTarget...")
-    statement := `INSERT INTO users_targets (uuid, user_id, target_id, created_at) 
+	statement := `INSERT INTO users_targets (uuid, user_id, target_id, created_at) 
                   VALUES ($1, $2, $3, $4) RETURNING id, uuid, user_id, target_id, created_at`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
@@ -65,7 +65,7 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 
 // Get the target for a specific user and url, must return a unique value
 func (user *User) UsersTargetsByUserAndUrl(url string) (target Target, err error) {
-    fmt.Println("Starting UsersTargetsByUserAndUrl...")
+	fmt.Println("Starting UsersTargetsByUserAndUrl...")
 	err = Db.QueryRow(`SELECT t.id, t.url, t.created_at 
                        FROM users u
                        INNER JOIN users_targets ut ON(u.id = ut.user_id) 
@@ -77,8 +77,8 @@ func (user *User) UsersTargetsByUserAndUrl(url string) (target Target, err error
 
 // Delete a relation user <--> target
 func (target *Target) DeleteUserTargetByUserAndTarget(user User) (err error) {
-    fmt.Println("Starting DeleteUserTargetByUserAndTarget...")
-    statement := `DELETE FROM users_targets 
+	fmt.Println("Starting DeleteUserTargetByUserAndTarget...")
+	statement := `DELETE FROM users_targets 
                   WHERE user_id = $1
                   AND target_id = $2;`
 	stmt, err := Db.Prepare(statement)
@@ -86,6 +86,6 @@ func (target *Target) DeleteUserTargetByUserAndTarget(user User) (err error) {
 		return
 	}
 	defer stmt.Close()
-    _, err = stmt.Exec(user.Id, target.Id)
+	_, err = stmt.Exec(user.Id, target.Id)
 	return
 }

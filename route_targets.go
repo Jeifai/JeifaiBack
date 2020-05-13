@@ -76,7 +76,7 @@ func target_delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func target_delete__run(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("Starting target_delete__run...")
+	fmt.Println("Starting target_delete__run...")
 	err := r.ParseForm()
 	if err != nil {
 		danger(err, "Cannot parse form")
@@ -89,19 +89,17 @@ func target_delete__run(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		danger(err, "Cannot find user")
 	}
-    targetToBeDeleted, err := user.UsersTargetsByUserAndUrl(target.Url)
-    if (data.Target{}) == targetToBeDeleted  {
-        // If the target inserted by the user exists
-            fmt.Println("-------------------TARGET NOT CORRECTELY REMOVED")
-            http.Redirect(w, r, "/targets", 302)
-    } else {
-        // If the target inserted by the user exists
-        err := targetToBeDeleted.DeleteUserTargetByUserAndTarget(user)
-        if err != nil {
-            danger(err, "Cannot delete user <--> target")
-        } else {
-            fmt.Println("-------------------TARGET CORRECTELY REMOVED")
-            http.Redirect(w, r, "/targets", 302)
-        }
-    }
+	targetToBeDeleted, err := user.UsersTargetsByUserAndUrl(target.Url)
+	if (data.Target{}) == targetToBeDeleted {
+		// If the target inserted by the user does not exists
+		http.Redirect(w, r, "/targets", 302)
+	} else {
+		// If the target inserted by the user exists
+		err := targetToBeDeleted.DeleteUserTargetByUserAndTarget(user)
+		if err != nil {
+			danger(err, "Cannot delete user <--> target")
+		} else {
+			http.Redirect(w, r, "/targets", 302)
+		}
+	}
 }
