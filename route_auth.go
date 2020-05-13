@@ -58,7 +58,7 @@ func signup(w http.ResponseWriter, r *http.Request) {
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
-			"templates/public.navbar.html",
+			"templates/public.navigation.html",
 			"templates/signup.html"))
 	templates.ExecuteTemplate(w, "layout", nil)
 }

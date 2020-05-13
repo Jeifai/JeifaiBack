@@ -19,7 +19,7 @@ func targets(w http.ResponseWriter, r *http.Request) {
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
-			"templates/private.navbar.html",
+			"templates/private.navigation.html",
 			"templates/targets.html"))
 
 	type TempStruct struct {
@@ -36,7 +36,7 @@ func target_add(w http.ResponseWriter, r *http.Request) {
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
-			"templates/private.navbar.html",
+			"templates/private.navigation.html",
 			"templates/target_add.html"))
 	templates.ExecuteTemplate(w, "layout", nil)
 }

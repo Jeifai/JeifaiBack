@@ -26,7 +26,7 @@ func main() {
 	fmt.Println("Application is running")
 
 	server := &http.Server{
-		Addr:           "0.0.0.0:8080",
+		Addr:           "0.0.0.0:9090",
 		Handler:        mux,
 		ReadTimeout:    time.Duration(10 * int64(time.Second)),
 		WriteTimeout:   time.Duration(600 * int64(time.Second)),
