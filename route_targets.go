@@ -15,18 +15,17 @@ func targets(w http.ResponseWriter, r *http.Request) {
 		danger(err, "Cannot find user")
 	}
 	targets, err := user.UsersTargetsByUser()
-
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
 			"templates/private.navigation.html",
 			"templates/targets.html"))
-
 	type TempStruct struct {
 		User    data.User
-		Targets []data.Target
+        Targets []data.Target
+        Message string
 	}
-	infos := TempStruct{user, targets}
+	infos := TempStruct{user, targets, ""}
 
 	templates.ExecuteTemplate(w, "layout", infos)
 }
@@ -60,9 +59,21 @@ func target_add__run(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := target.CreateUserTarget(user); err != nil {
 		danger(err, "Cannot create relation user <--> target")
-	}
+    }
+    targets, err := user.UsersTargetsByUser()
+    templates := template.Must(
+        template.ParseFiles(
+            "templates/layout.html",
+            "templates/private.navigation.html",
+            "templates/targets.html"))
+    type TempStruct struct {
+        User    data.User
+        Targets []data.Target
+        Message string
+    }
+    infos := TempStruct{user, targets, "Target successfully added"}
 	fmt.Println("Closing target_add__run...")
-	http.Redirect(w, r, "/targets", 302)
+    templates.ExecuteTemplate(w, "layout", infos)
 }
 
 func target_delete(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +87,7 @@ func target_delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func target_delete__run(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Starting target_delete__run...")
+    fmt.Println("Starting target_delete__run...")
 	err := r.ParseForm()
 	if err != nil {
 		danger(err, "Cannot parse form")
@@ -88,18 +99,41 @@ func target_delete__run(w http.ResponseWriter, r *http.Request) {
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		danger(err, "Cannot find user")
-	}
-	targetToBeDeleted, err := user.UsersTargetsByUserAndUrl(target.Url)
-	if (data.Target{}) == targetToBeDeleted {
-		// If the target inserted by the user does not exists
-		http.Redirect(w, r, "/targets", 302)
-	} else {
-		// If the target inserted by the user exists
-		err := targetToBeDeleted.DeleteUserTargetByUserAndTarget(user)
-		if err != nil {
-			danger(err, "Cannot delete user <--> target")
-		} else {
-			http.Redirect(w, r, "/targets", 302)
-		}
-	}
+    }
+    targets, err := user.UsersTargetsByUser()
+    targetToBeDeleted, err := user.UsersTargetsByUserAndUrl(target.Url)
+    if (data.Target{}) == targetToBeDeleted  {
+        // If the target inserted by the user does not exists
+        templates := template.Must(
+            template.ParseFiles(
+                "templates/layout.html",
+                "templates/private.navigation.html",
+                "templates/targets.html"))
+        type TempStruct struct {
+            User    data.User
+            Targets []data.Target
+            Message string
+        }
+        infos := TempStruct{user, targets, "Target does not exists"}
+        templates.ExecuteTemplate(w, "layout", infos)
+    } else {
+        // If the target inserted by the user exists
+        err := targetToBeDeleted.DeleteUserTargetByUserAndTarget(user)
+        if err != nil {
+            danger(err, "Cannot delete user <--> target")
+        } else {
+            templates := template.Must(
+                template.ParseFiles(
+                    "templates/layout.html",
+                    "templates/private.navigation.html",
+                    "templates/targets.html"))
+            type TempStruct struct {
+                User    data.User
+                Targets []data.Target
+                Message string
+            }
+            infos := TempStruct{user, targets, "Target successfully deleted"}
+            templates.ExecuteTemplate(w, "layout", infos)
+        }
+    }
 }
