@@ -42,7 +42,7 @@ func target_add(w http.ResponseWriter, r *http.Request) {
 }
 
 func target_add__run(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Starting target_add_url...")
+	fmt.Println("Starting target_add__run...")
 	err := r.ParseForm()
 	if err != nil {
 		danger(err, "Cannot parse form")
@@ -61,6 +61,16 @@ func target_add__run(w http.ResponseWriter, r *http.Request) {
 	if err := target.CreateUserTarget(user); err != nil {
 		danger(err, "Cannot create relation user <--> target")
 	}
-	fmt.Println("Closing target_add_url...")
+	fmt.Println("Closing target_add__run...")
 	http.Redirect(w, r, "/targets", 302)
+}
+
+func target_delete(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Generating HTML for target_delete...")
+	templates := template.Must(
+		template.ParseFiles(
+			"templates/layout.html",
+			"templates/private.navigation.html",
+			"templates/target_delete.html"))
+	templates.ExecuteTemplate(w, "layout", nil)
 }
