@@ -90,8 +90,6 @@ func target_delete__run(w http.ResponseWriter, r *http.Request) {
 		danger(err, "Cannot find user")
 	}
     targets, err := user.UsersTargetsByUser()
-    fmt.Println("-------------------ALL TARGETS")
-    fmt.Println(targets)
     for _, elem := range targets {
         if target.Url == elem.Url {
             // HERE LOGIC IF A TARGET EXISTS
