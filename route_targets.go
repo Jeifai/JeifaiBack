@@ -14,7 +14,7 @@ func targets(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		danger(err, "Cannot find user")
 	}
-	targets, err := user.UsersTargets()
+	targets, err := user.UsersTargetsByUser()
 
 	templates := template.Must(
 		template.ParseFiles(
@@ -73,4 +73,41 @@ func target_delete(w http.ResponseWriter, r *http.Request) {
 			"templates/private.navigation.html",
 			"templates/target_delete.html"))
 	templates.ExecuteTemplate(w, "layout", nil)
+}
+
+func target_delete__run(w http.ResponseWriter, r *http.Request) {
+    fmt.Println("Starting target_delete__run...")
+	err := r.ParseForm()
+	if err != nil {
+		danger(err, "Cannot parse form")
+	}
+	target := data.Target{
+		Url: r.PostFormValue("url"),
+	}
+	sess, err := session(w, r)
+	user, err := data.UserByEmail(sess.Email)
+	if err != nil {
+		danger(err, "Cannot find user")
+	}
+    targets, err := user.UsersTargetsByUser()
+    fmt.Println("-------------------ALL TARGETS")
+    fmt.Println(targets)
+    for _, elem := range targets {
+        if target.Url == elem.Url {
+            // HERE LOGIC IF A TARGET EXISTS
+            fmt.Println("-------------------YES MATCH")
+            fmt.Println(elem.Id)
+            err := elem.DeleteUserTargetByUserAndTarget(user)
+            if err != nil {
+                danger(err, "Cannot find user")
+            } else {
+                fmt.Println("-------------------TARGET CORRECTELY REMOVED")
+                http.Redirect(w, r, "/targets", 302)
+            }
+        }
+    }
+    // HERE LOGIC IF A TARGET DOES NOT EXISTS
+    fmt.Println("-------------------NO MATCH")
+	fmt.Println("Closing target_delete__run...")
+    http.Redirect(w, r, "/targets", 302)
 }
