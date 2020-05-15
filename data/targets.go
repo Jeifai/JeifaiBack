@@ -7,21 +7,22 @@ import (
 
 type Target struct {
 	Id        int
-	Url       string
+    Url       string
+    Host      string
 	CreatedAt time.Time
 }
 
 // Add a new target
 func (target *Target) CreateTarget() (err error) {
 	fmt.Println("Starting CreateTarget...")
-	statement := `INSERT INTO targets (url, created_at)
-                  VALUES ($1, $2) RETURNING id, url, created_at`
+	statement := `INSERT INTO targets (url, host, created_at)
+                  VALUES ($1, $2, $3) RETURNING id, url, host, created_at`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
-	}
+    }
 	defer stmt.Close()
-	err = stmt.QueryRow(target.Url, time.Now()).Scan(&target.Id, &target.Url, &target.CreatedAt)
+	err = stmt.QueryRow(target.Url, target.Host, time.Now()).Scan(&target.Id, &target.Url, &target.Host, &target.CreatedAt)
 	fmt.Println("Closing CreateTarget...")
 	return err
 }
