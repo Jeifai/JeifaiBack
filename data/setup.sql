@@ -19,7 +19,8 @@ create table targets (
   id         serial primary key,
   url        varchar(64) not null unique,
   host       varchar(64) not null,             
-  created_at timestamp not null       
+  created_at timestamp not null,
+  name       varchar(64)
 );
 
 
@@ -29,4 +30,17 @@ create table users_targets (
   user_id	 integer references users(id),
   target_id  integer references targets(id),
   created_at timestamp not null       
+);
+
+create table scrapers (
+  id         serial primary key,
+  name       varchar(64) not null unique,
+  created_at timestamp not null  
+);
+
+create table targets_scrapers (
+  id         serial primary key,
+  scraper_id integer references scrapers(id),
+  target_id  integer references targets(id),
+  created_at timestamp not null     
 );
