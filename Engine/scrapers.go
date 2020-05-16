@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
-	"strings"
+    "strings"
+    "encoding/json"
+    "time"
 )
 
 type Runtime struct {
@@ -26,6 +28,17 @@ func runner(name string) (job []Job) {
 	temp_job := m.Call(nil)
 	job = temp_job[0].Interface().([]Job)
 	return
+}
+
+func getJson(url string, target interface{}) error {
+    var client = &http.Client{Timeout: 10 * time.Second}
+    r, err := client.Get(url)
+    if err != nil {
+        return err
+    }
+    defer r.Body.Close()
+
+    return json.NewDecoder(r.Body).Decode(target)
 }
 
 func (runtime Runtime) Kununu() (jobs []Job) {
@@ -54,17 +67,41 @@ func (runtime Runtime) Kununu() (jobs []Job) {
 }
 
 func (runtime Runtime) Mitte() (jobs []Job) {
-	url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Println("Error")
-	}
+    url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
+    res, err := http.Get(url)
+    if err != nil {
+        panic(err.Error())
+    }
+    body, err := ioutil.ReadAll(res.Body)
+    if err != nil {
+        panic(err.Error())
+    }
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error")
-	}
+    type Postings struct {
+        Title    string  `json:"text"`
+        Url      string  `json:"hostedUrl"`
+    }
 
-	fmt.Println(string(body))
+    type JsonJob struct {
+        Positions   []Postings `json:"postings"`
+    }
+    type JsonJobs []JsonJob
+    var jsonJobs JsonJobs
+    err = json.Unmarshal(body, &jsonJobs)
+    if err != nil {
+            fmt.Println(err)
+        }
+    for _, elem := range jsonJobs {
+        fmt.Println("\t")
+        job_title := elem.Positions[0].Title
+		job_url := elem.Positions[0].Url
+        fmt.Println(elem.Positions[0].Title)
+        fmt.Println(elem.Positions[0].Url)
+        jobs = append(jobs, Job{
+            runtime.Name,
+			url,
+			job_title,
+			job_url})
+    }
 	return
 }

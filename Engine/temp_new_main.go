@@ -8,14 +8,14 @@ import (
 )
 
 func main() {
-	scraper := Scraper{Name: "Kununu"}
+	scraper := Scraper{Name: "Mitte"}
 	scraper.ScraperByName()
 	scraping, err := scraper.Scraping()
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(scraping)
-	jobs := runner(scraper.Name)
-	// fmt.Println(jobs)
+    jobs := runner(scraper.Name)
+	fmt.Println(jobs)
 	SaveJobs(scraper, scraping, jobs)
 }
