@@ -3,7 +3,10 @@ package main
 import (
 	"github.com/gocolly/colly"
 	"reflect"
-	"strings"
+    "strings"
+    "net/http"
+    "fmt"
+	"io/ioutil"
 )
 
 type Runtime struct {
@@ -48,4 +51,20 @@ func (runtime Runtime) Kununu() (jobs []Job) {
 	c.Visit(url)
 
 	return
+}
+
+func (runtime Runtime) Mitte() (jobs []Job) {
+    url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
+    resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error")
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error")
+	}
+
+    fmt.Println(string(body))
+    return
 }

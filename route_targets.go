@@ -42,39 +42,82 @@ func target_add(w http.ResponseWriter, r *http.Request) {
 }
 
 func target_add__run(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Starting target_add__run...")
-	err := r.ParseForm()
-	if err != nil {
-		danger(err, "Cannot parse form")
-	}
-	temp_url := r.PostFormValue("url")
-	temp_host, err := url.Parse(temp_url)
-	target := data.Target{Url: temp_url, Host: temp_host.Host}
-	if err := target.CreateTarget(); err != nil {
-		danger(err, "Cannot create target")
-	}
+    fmt.Println("Starting target_add__run...")
+    
+    // Get useful information about user and session  
 	sess, err := session(w, r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		danger(err, "Cannot find user")
+    }
+
+    // Get data provided by the user
+	err = r.ParseForm()
+	if err != nil {
+		danger(err, "Cannot parse form")
 	}
-	if err := target.CreateUserTarget(user); err != nil {
-		danger(err, "Cannot create relation user <--> target")
-	}
-	targets, err := user.UsersTargetsByUser()
-	templates := template.Must(
-		template.ParseFiles(
-			"templates/layout.html",
-			"templates/private.navigation.html",
-			"templates/targets.html"))
-	type TempStruct struct {
-		User    data.User
-		Targets []data.Target
-		Message string
-	}
-	infos := TempStruct{user, targets, "Target successfully added"}
-	fmt.Println("Closing target_add__run...")
-	templates.ExecuteTemplate(w, "layout", infos)
+	temp_url := r.PostFormValue("url")
+    temp_host, err := url.Parse(temp_url)
+    
+    // Instantiate a struct Target with the data available atm
+    target := data.Target{Url: temp_url, Host: temp_host.Host}
+
+    // Try to create a target
+	if err := target.CreateTarget(); err != nil {
+        fmt.Println("Target already exists")
+        // If already exists, get its url
+        err := target.TargetsByUrl()
+        if err != nil {
+		    fmt.Println("Cannot retrive already existing Target")
+	    }
+    }
+
+    // Before creating the relation user <-> target, check if it is not already present
+    targetsAlreadyExisting, err := user.UsersTargetsByUserAndUrl(target.Url)
+    if (data.Target{}) == targetsAlreadyExisting {
+        // If the relation does not exists create a new relation
+        if err := target.CreateUserTarget(user); err != nil {
+		    danger(err, "Cannot create relation user <--> target")
+        }
+        // Finally extract all the relations of the user to properly print HTML
+        targets, err := user.UsersTargetsByUser()
+        if err != nil {
+            danger(err, "Error on UsersTargetsByUser")
+        }
+        templates := template.Must(
+            template.ParseFiles(
+                "templates/layout.html",
+                "templates/private.navigation.html",
+                "templates/targets.html"))
+        type TempStruct struct {
+            User    data.User
+            Targets []data.Target
+            Message string
+        }
+        infos := TempStruct{user, targets, "Target successfully added"}
+        fmt.Println("Closing target_add__run...")
+        templates.ExecuteTemplate(w, "layout", infos)
+    } else {
+        // If the relation already exists DO NOT create a new relation
+        // Finally extract all the relations of the user to properly print HTML
+        targets, err := user.UsersTargetsByUser()
+        if err != nil {
+            danger(err, "Error on UsersTargetsByUser")
+        }
+        templates := template.Must(
+            template.ParseFiles(
+                "templates/layout.html",
+                "templates/private.navigation.html",
+                "templates/targets.html"))
+        type TempStruct struct {
+            User    data.User
+            Targets []data.Target
+            Message string
+        }
+        infos := TempStruct{user, targets, "Target already present"}
+        fmt.Println("Closing target_add__run...")
+        templates.ExecuteTemplate(w, "layout", infos)
+    }
 }
 
 func target_delete(w http.ResponseWriter, r *http.Request) {
@@ -123,6 +166,10 @@ func target_delete__run(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			danger(err, "Cannot delete user <--> target")
 		} else {
+            targets, err := user.UsersTargetsByUser()
+            if err != nil {
+                danger(err, "Error on UsersTargetsByUser")
+            }
 			templates := template.Must(
 				template.ParseFiles(
 					"templates/layout.html",

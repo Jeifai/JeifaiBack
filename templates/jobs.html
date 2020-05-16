@@ -1,5 +1,13 @@
 {{ define "content" }}
     <div class="content">
-        SHOW JOBS
+        {{if .Message}} <h2>{{.Message}}</h2><br> {{else}}  {{end}}
+        <div>
+            YOUR JOBS
+        </div>
+        {{ range .Jobs }}
+        <div>
+            - {{ .Target }} <a href="{{ .Url }}">{{ .Title }}</a>
+        </div>
+        {{ end }}
     </div>
 {{ end }}

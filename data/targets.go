@@ -29,7 +29,10 @@ func (target *Target) CreateTarget() (err error) {
 
 // Add a new relation user <--> target
 func (target *Target) CreateUserTarget(user User) (err error) {
-	fmt.Println("Starting CreateUserTarget...")
+    fmt.Println("Starting CreateUserTarget...")
+    fmt.Println(user.Id)
+    fmt.Println(target.Id)
+	fmt.Println(target.Id)
 	statement := `INSERT INTO users_targets (uuid, user_id, target_id, created_at) 
                   VALUES ($1, $2, $3, $4) RETURNING id, uuid, user_id, target_id, created_at`
 	stmt, err := Db.Prepare(statement)
@@ -61,6 +64,13 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 		targets = append(targets, target)
 	}
 	rows.Close()
+	return
+}
+
+// Get all the targets for a specific url
+func (target *Target) TargetsByUrl() (err error) {
+    fmt.Println("Starting TargetsByUrl...")
+    err = Db.QueryRow(`SELECT t.id FROM targets t WHERE t.url=$1`, target.Url).Scan(&target.Id)
 	return
 }
 

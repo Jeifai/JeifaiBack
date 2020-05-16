@@ -8,7 +8,7 @@ TRUNCATE scrapers RESTART IDENTITY;
 UPDATE targets SET name = 'Kununu' WHERE id = 45;
 
 /* Insert in table */
-INSERT INTO scrapers (name, version, created_at) VALUES('Kununu', 1, current_timestamp);
+INSERT INTO scrapers (name, version, target_id, created_at) VALUES('Kununu', 1, current_timestamp);
 
 /* Extract all the jobs by user */
 SELECT t.url, j.created_at, j.title, j.url FROM users_targets ut
