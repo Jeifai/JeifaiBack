@@ -23,7 +23,7 @@ func main() {
 	mux.HandleFunc("/target_add", target_add)
 	mux.HandleFunc("/target_add__run", target_add__run)
 	mux.HandleFunc("/target_delete", target_delete)
-    mux.HandleFunc("/target_delete__run", target_delete__run)
+	mux.HandleFunc("/target_delete__run", target_delete__run)
 
 	mux.HandleFunc("/jobs", jobs)
 

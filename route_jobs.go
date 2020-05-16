@@ -2,19 +2,19 @@ package main
 
 import (
 	"./data"
-    "fmt"
+	"fmt"
 	"html/template"
-    "net/http"
+	"net/http"
 )
 
 func jobs(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("Generating HTML for jobs...")
-    sess, err := session(w, r)
-    user, err := data.UserByEmail(sess.Email)
+	fmt.Println("Generating HTML for jobs...")
+	sess, err := session(w, r)
+	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		danger(err, "Cannot find user")
 	}
-    jobs, err := user.JobsByUser()
+	jobs, err := user.JobsByUser()
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
@@ -25,6 +25,6 @@ func jobs(w http.ResponseWriter, r *http.Request) {
 		Jobs    []data.Job
 		Message string
 	}
-    infos := TempStruct{user, jobs, "Here the list of all your job opportunities"}
+	infos := TempStruct{user, jobs, "Here the list of all your job opportunities"}
 	templates.ExecuteTemplate(w, "layout", infos)
 }

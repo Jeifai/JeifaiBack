@@ -19,6 +19,7 @@ func (target *Target) CreateTarget() (err error) {
                   VALUES ($1, $2, $3) RETURNING id, url, host, created_at`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
+		fmt.Println("Error on CreateTarget")
 		return
 	}
 	defer stmt.Close()
@@ -29,15 +30,12 @@ func (target *Target) CreateTarget() (err error) {
 
 // Add a new relation user <--> target
 func (target *Target) CreateUserTarget(user User) (err error) {
-    fmt.Println("Starting CreateUserTarget...")
-    fmt.Println(user.Id)
-    fmt.Println(target.Id)
-	fmt.Println(target.Id)
+	fmt.Println("Starting CreateUserTarget...")
 	statement := `INSERT INTO users_targets (uuid, user_id, target_id, created_at) 
                   VALUES ($1, $2, $3, $4) RETURNING id, uuid, user_id, target_id, created_at`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
-		return
+		fmt.Println("Error on CreateUserTarget")
 	}
 	defer stmt.Close()
 	err = stmt.QueryRow(createUUID(), user.Id, target.Id, time.Now()).Scan()
@@ -54,23 +52,25 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
                            INNER JOIN targets t ON(ut.target_id = t.id)
                            WHERE u.id=$1`, user.Id)
 	if err != nil {
-		return
+		fmt.Println("Error on UsersTargetsByUser")
 	}
 	for rows.Next() {
 		target := Target{}
 		if err = rows.Scan(&target.Id, &target.Url, &target.CreatedAt); err != nil {
-			return
+			fmt.Println("Error on UsersTargetsByUser")
 		}
 		targets = append(targets, target)
 	}
 	rows.Close()
+	fmt.Println("Closing UsersTargetsByUser...")
 	return
 }
 
 // Get all the targets for a specific url
 func (target *Target) TargetsByUrl() (err error) {
-    fmt.Println("Starting TargetsByUrl...")
-    err = Db.QueryRow(`SELECT t.id FROM targets t WHERE t.url=$1`, target.Url).Scan(&target.Id)
+	fmt.Println("Starting TargetsByUrl...")
+	err = Db.QueryRow(`SELECT t.id FROM targets t WHERE t.url=$1`, target.Url).Scan(&target.Id)
+	fmt.Println("Closing TargetsByUrl...")
 	return
 }
 
@@ -83,6 +83,7 @@ func (user *User) UsersTargetsByUserAndUrl(url string) (target Target, err error
                        INNER JOIN targets t ON(ut.target_id = t.id)
                        WHERE u.id=$1
                        AND t.url=$2`, user.Id, url).Scan(&target.Id, &target.Url, &target.CreatedAt)
+	fmt.Println("Closing UsersTargetsByUserAndUrl...")
 	return
 }
 
@@ -94,9 +95,10 @@ func (target *Target) DeleteUserTargetByUserAndTarget(user User) (err error) {
                   AND target_id = $2;`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
-		return
+		fmt.Println("Error on DeleteUserTargetByUserAndTarget")
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(user.Id, target.Id)
+	fmt.Println("Closing DeleteUserTargetByUserAndTarget...")
 	return
 }
