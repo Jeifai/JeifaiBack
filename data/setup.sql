@@ -40,11 +40,19 @@ create table scrapers (
   created_at timestamp not null  
 );
 
-create table jobs (
+create table scraping (
   id         serial primary key,
   uuid       varchar(64) not null unique,
   scraper_id integer references scrapers(id),
-  title      varchar(1000) not null,
-  url        varchar(1000) not null,
   created_at timestamp
+);
+
+create table jobs (
+  id          serial primary key,
+  uuid        varchar(64) not null unique,
+  scraper_id  integer references scrapers(id),
+  scraping_id integer references scraping(id),
+  title       varchar(1000) not null,
+  url         varchar(1000) not null,
+  created_at  timestamp
 );

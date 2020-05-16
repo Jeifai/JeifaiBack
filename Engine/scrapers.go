@@ -1,22 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gocolly/colly"
-	"reflect"
-    "strings"
-    "net/http"
-    "fmt"
 	"io/ioutil"
+	"net/http"
+	"reflect"
+	"strings"
 )
 
 type Runtime struct {
 	Name string
 }
 type Job struct {
-	CompanyName    string
-	CompanyUrl     string
-	Title          string
-	JobUrl         string
+	CompanyName string
+	CompanyUrl  string
+	Title       string
+	JobUrl      string
 }
 
 func runner(name string) (job []Job) {
@@ -54,8 +54,8 @@ func (runtime Runtime) Kununu() (jobs []Job) {
 }
 
 func (runtime Runtime) Mitte() (jobs []Job) {
-    url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
-    resp, err := http.Get(url)
+	url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
+	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println("Error")
 	}
@@ -65,6 +65,6 @@ func (runtime Runtime) Mitte() (jobs []Job) {
 		fmt.Println("Error")
 	}
 
-    fmt.Println(string(body))
-    return
+	fmt.Println(string(body))
+	return
 }

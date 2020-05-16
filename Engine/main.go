@@ -7,7 +7,7 @@
 package main
 
 import (
-    "fmt"
+	"fmt"
 )
 
 func scrape(scraper Scraper) (jobs []Job, err error) {
@@ -21,13 +21,13 @@ func main() {
 		return
 	}
 	for _, elem := range scrapers {
-        if elem.Name == "Mitte" {
-            fmt.Println(elem.Name)
-            jobs, err_2 := scrape(elem)
-            if err_2 != nil {
-                return
-            }
-            SaveJobs(elem, jobs)
-        }
-    }
+		if elem.Name == "Mitte" {
+			fmt.Println(elem.Name)
+			jobs, err_2 := scrape(elem)
+			if err_2 != nil {
+				return
+			}
+			SaveJobs(elem, jobs)
+		}
+	}
 }

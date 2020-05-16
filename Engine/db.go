@@ -12,10 +12,18 @@ import (
 	"time"
 )
 
+type Scraping struct {
+	Id        int
+	ScraperId int
+	Uuid      string
+	CreatedAt time.Time
+}
+
 type Scraper struct {
-	Id      int
-	Version int
-	Name    string
+	Id       int
+	Version  int
+	Name     string
+	TargetId int
 }
 
 var Db *sql.DB
@@ -78,15 +86,37 @@ func Scrapers() (scrapers []Scraper, err error) {
 	return
 }
 
+// Get all the information about a scraper based on its name
+func (scraper *Scraper) ScraperByName() (err error) {
+	fmt.Println("Starting ScraperByName...")
+	err = Db.QueryRow(`SELECT s.id, s.target_id 
+                       FROM scrapers s WHERE s.name=$1`, scraper.Name).Scan(&scraper.Id, &scraper.TargetId)
+	fmt.Println("Closing ScraperByName...")
+	return
+}
+
+// Save in the database a new Scraping session and return its values
+func (scraper *Scraper) Scraping() (scraping Scraping, err error) {
+	statement := "insert into scraping (uuid, scraper_id, created_at) values ($1, $2, $3) returning id, uuid, scraper_id, created_at"
+	stmt, err := Db.Prepare(statement)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	// use QueryRow to return a row and scan the returned id into the Session struct
+	err = stmt.QueryRow(createUUID(), scraper.Id, time.Now()).Scan(&scraping.Id, &scraping.Uuid, &scraping.ScraperId, &scraping.CreatedAt)
+	return
+}
+
 // Save all the jobs extracted
-func SaveJobs(scraper Scraper, jobs []Job) {
-    fmt.Println("Starting SaveJobs...")
+func SaveJobs(scraper Scraper, scraping Scraping, jobs []Job) {
+	fmt.Println("Starting SaveJobs...")
 	for _, elem := range jobs {
 		fmt.Println(elem.Title)
-		statement := "INSERT INTO jobs (uuid, scraper_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5)"
-        _, err := Db.Exec(statement, createUUID(), scraper.Id, elem.Title, elem.JobUrl, time.Now())
-        if err != nil {
-            return
-        }
+		statement := "INSERT INTO jobs (uuid, scraper_id, scraping_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
+		_, err := Db.Exec(statement, createUUID(), scraper.Id, scraping.Id, elem.Title, elem.JobUrl, time.Now())
+		if err != nil {
+			return
+		}
 	}
 }

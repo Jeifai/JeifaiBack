@@ -16,3 +16,5 @@ LEFT JOIN targets t ON(ut.target_id = t.id)
 LEFT JOIN scrapers s ON(ut.target_id = s.target_id)
 LEFT JOIN jobs j ON(s.id = j.scraper_id)
 WHERE ut.user_id = 13;
+
+ALTER TABLE jobs ADD COLUMN scraping_id integer references scraping(id);
