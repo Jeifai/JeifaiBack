@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -51,7 +50,11 @@ func createUUID() (uuid string) {
 	if err != nil {
 		return
 	}
+
+	// 0x40 is reserved variant from RFC 4122
 	u[8] = (u[8] | 0x40) & 0x7F
+	// Set the four most significant bits (bits 12 through 15) of the
+	// time_hi_and_version field to the 4-bit version number.
 	u[6] = (u[6] & 0xF) | (0x4 << 4)
 	uuid = fmt.Sprintf("%x-%x-%x-%x-%x", u[0:4], u[4:6], u[6:8], u[8:10], u[10:])
 	return
@@ -77,22 +80,13 @@ func Scrapers() (scrapers []Scraper, err error) {
 
 // Save all the jobs extracted
 func SaveJobs(scraper Scraper, jobs []Job) {
-	fmt.Println("Starting SaveJobs...")
+    fmt.Println("Starting SaveJobs...")
 	for _, elem := range jobs {
-		fmt.Println(elem.JobTitle)
-		statement := `INSERT INTO jobs (uuid, scraper_id, job_title, job_url, created_at) 
-                      VALUES ($1, $2, $3, $4, $5)`
-		_, err := Db.Exec(
-			statement,
-			createUUID(),
-			scraper.Id,
-			elem.JobTitle,
-			elem.JobUrl,
-			time.Now())
-		if strings.Contains(err.Error(), "duplicate key value violates") {
-			fmt.Println(err)
-		} else {
-			panic(err)
-		}
+		fmt.Println(elem.Title)
+		statement := "INSERT INTO jobs (uuid, scraper_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5)"
+        _, err := Db.Exec(statement, createUUID(), scraper.Id, elem.Title, elem.JobUrl, time.Now())
+        if err != nil {
+            return
+        }
 	}
 }

@@ -44,7 +44,7 @@ create table jobs (
   id         serial primary key,
   uuid       varchar(64) not null unique,
   scraper_id integer references scrapers(id),
-  job_title  varchar(1000) not null,
-  job_url    varchar(1000) not null unique,
-  created_at timestamp not null
+  title      varchar(1000) not null,
+  url        varchar(1000) not null,
+  created_at timestamp
 );

@@ -7,29 +7,26 @@ import (
 )
 
 type Runtime struct {
-	CompanyName string
+	Name string
 }
 type Job struct {
-	ScraperVersion int
 	CompanyName    string
 	CompanyUrl     string
-	JobTitle       string
+	Title          string
 	JobUrl         string
 }
 
-func runner(companyName string) (job []Job) {
-	r := Runtime{companyName}
+func runner(name string) (job []Job) {
+	r := Runtime{name}
 	v := reflect.ValueOf(r)
-	m := v.MethodByName(r.CompanyName)
+	m := v.MethodByName(r.Name)
 	temp_job := m.Call(nil)
 	job = temp_job[0].Interface().([]Job)
 	return
 }
 
 func (runtime Runtime) Kununu() (jobs []Job) {
-	version := 1
-
-	company_url := "https://www.kununu.com/at/kununu/jobs"
+	url := "https://www.kununu.com/at/kununu/jobs"
 	main_tag := "div"
 	main_tag_attr := "class"
 	main_tag_value := "company-profile-job-item"
@@ -42,14 +39,13 @@ func (runtime Runtime) Kununu() (jobs []Job) {
 			job_title := e.ChildText(tag_title)
 			job_url := e.ChildAttr(tag_url, "href")
 			jobs = append(jobs, Job{
-				version,
-				runtime.CompanyName,
-				company_url,
+				runtime.Name,
+				url,
 				job_title,
 				job_url})
 		}
 	})
-	c.Visit(company_url)
+	c.Visit(url)
 
 	return
 }
