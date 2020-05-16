@@ -7,8 +7,8 @@ import (
 
 type Target struct {
 	Id        int
-    Url       string
-    Host      string
+	Url       string
+	Host      string
 	CreatedAt time.Time
 }
 
@@ -20,7 +20,7 @@ func (target *Target) CreateTarget() (err error) {
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
-    }
+	}
 	defer stmt.Close()
 	err = stmt.QueryRow(target.Url, target.Host, time.Now()).Scan(&target.Id, &target.Url, &target.Host, &target.CreatedAt)
 	fmt.Println("Closing CreateTarget...")

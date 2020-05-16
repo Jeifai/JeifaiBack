@@ -9,8 +9,8 @@ import (
 	"log"
 	"os"
 	"strconv"
-    "time"
 	"strings"
+	"time"
 )
 
 type Scraper struct {
@@ -80,19 +80,19 @@ func SaveJobs(scraper Scraper, jobs []Job) {
 	fmt.Println("Starting SaveJobs...")
 	for _, elem := range jobs {
 		fmt.Println(elem.JobTitle)
-        statement := `INSERT INTO jobs (uuid, scraper_id, job_title, job_url, created_at) 
+		statement := `INSERT INTO jobs (uuid, scraper_id, job_title, job_url, created_at) 
                       VALUES ($1, $2, $3, $4, $5)`
 		_, err := Db.Exec(
-            statement,
-            createUUID(),
-            scraper.Id,
-            elem.JobTitle,
-            elem.JobUrl,
-            time.Now())
+			statement,
+			createUUID(),
+			scraper.Id,
+			elem.JobTitle,
+			elem.JobUrl,
+			time.Now())
 		if strings.Contains(err.Error(), "duplicate key value violates") {
-            fmt.Println(err)
+			fmt.Println(err)
 		} else {
-            panic(err)
-        }
+			panic(err)
+		}
 	}
 }
