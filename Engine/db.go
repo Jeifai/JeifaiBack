@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"log"
 	"os"
 	"strconv"
-	"time"
+    "time"
+    "log"
 )
 
 type Scraping struct {

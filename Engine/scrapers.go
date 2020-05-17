@@ -92,11 +92,8 @@ func (runtime Runtime) Mitte() (jobs []Job) {
             fmt.Println(err)
         }
     for _, elem := range jsonJobs {
-        fmt.Println("\t")
         job_title := elem.Positions[0].Title
 		job_url := elem.Positions[0].Url
-        fmt.Println(elem.Positions[0].Title)
-        fmt.Println(elem.Positions[0].Url)
         jobs = append(jobs, Job{
             runtime.Name,
 			url,

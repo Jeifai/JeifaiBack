@@ -16,6 +16,5 @@ func main() {
 	}
 	fmt.Println(scraping)
     jobs := runner(scraper.Name)
-	fmt.Println(jobs)
 	SaveJobs(scraper, scraping, jobs)
 }
