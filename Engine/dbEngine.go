@@ -94,9 +94,6 @@ func (scraper *Scraper) Scraping() (scraping Scraping, err error) {
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	fmt.Println("Starting SaveResults...")
 	for _, elem := range results {
-		fmt.Println(scraper.Name)
-		fmt.Println("\t", elem.Title)
-		fmt.Println("\t\t", elem.Title)
 		statement := "INSERT INTO results (scraper_id, scraping_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5)"
 		_, err := Db.Exec(statement, scraper.Id, scraping.Id, elem.Title, elem.ResultUrl, time.Now())
 		if err != nil {

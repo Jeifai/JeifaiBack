@@ -14,6 +14,11 @@ import (
 type Runtime struct {
 	Name string
 }
+
+type Response struct {
+	Html []byte
+}
+
 type Result struct {
 	CompanyName string
 	CompanyUrl  string
@@ -21,13 +26,14 @@ type Result struct {
 	ResultUrl   string
 }
 
-func runner(scraper_name string, scraper_version int) (result []Result) {
+func runner(scraper_name string, scraper_version int) (response Response, result []Result) {
 	runtime := Runtime{scraper_name}
 	strucReflected := reflect.ValueOf(runtime)
 	method := strucReflected.MethodByName(scraper_name)
 	params := []reflect.Value{reflect.ValueOf(scraper_version)}
-	temp_result := method.Call(params)
-	result = temp_result[0].Interface().([]Result)
+	function_output := method.Call(params)
+	response = function_output[0].Interface().(Response)
+	result = function_output[1].Interface().([]Result)
 	return
 }
 
@@ -41,7 +47,7 @@ func getJson(url string, target interface{}) error {
 	return json.NewDecoder(r.Body).Decode(target)
 }
 
-func (runtime Runtime) Kununu(version int) (results []Result) {
+func (runtime Runtime) Kununu(version int) (response Response, results []Result) {
 	if version == 1 {
 		url := "https://www.kununu.com/at/kununu/jobs"
 		main_tag := "div"
@@ -62,12 +68,15 @@ func (runtime Runtime) Kununu(version int) (results []Result) {
 					result_url})
 			}
 		})
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
 		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Mitte(version int) (results []Result) {
+func (runtime Runtime) Mitte(version int) (response Response, results []Result) {
 	if version == 1 {
 		url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
 		res, err := http.Get(url)
@@ -78,6 +87,7 @@ func (runtime Runtime) Mitte(version int) (results []Result) {
 		if err != nil {
 			panic(err.Error())
 		}
+		response = Response{body}
 
 		type Postings struct {
 			Title string `json:"text"`

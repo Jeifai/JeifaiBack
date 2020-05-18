@@ -56,7 +56,6 @@ func (session *Session) Check() (valid bool, err error) {
 	return
 }
 
-
 // Delete session from database
 func (session *Session) DeleteByUUID() (err error) {
 	statement := "delete from sessions where uuid = $1"

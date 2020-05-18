@@ -4,7 +4,7 @@ import (
 // "fmt"
 )
 
-var scraper_name = "Kununu"
+var scraper_name = "Mitte"
 
 func main() {
 	scrapers, err := Scrapers()
@@ -17,7 +17,8 @@ func main() {
 			if err != nil {
 				return
 			}
-			results := runner(elem.Name, elem.Version)
+			response, results := runner(elem.Name, elem.Version)
+			SaveResponse(elem, scraping, response)
 			SaveResults(elem, scraping, results)
 		}
 	}
