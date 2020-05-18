@@ -21,9 +21,9 @@ func results(w http.ResponseWriter, r *http.Request) {
 			"templates/private.navigation.html",
 			"templates/results.html"))
 	type TempStruct struct {
-		User        data.User
-		Results     []data.Result
-		Message     string
+		User    data.User
+		Results []data.Result
+		Message string
 	}
 	infos := TempStruct{user, results, "Here the list of all your results"}
 	templates.ExecuteTemplate(w, "layout", infos)

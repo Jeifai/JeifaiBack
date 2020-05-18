@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"log"
 	"os"
 	"strconv"
-    "time"
-    "log"
+	"time"
 )
 
 type Scraping struct {
@@ -20,9 +20,9 @@ type Scraping struct {
 }
 
 type Scraper struct {
-    Id       int
-	Name     string
-	Version  int
+	Id      int
+	Name    string
+	Version int
 }
 
 var Db *sql.DB
@@ -70,7 +70,7 @@ func createUUID() (uuid string) {
 // Get all the scraper that need to be executed
 func Scrapers() (scrapers []Scraper, err error) {
 	fmt.Println("Starting Scrapers...")
-    rows, err := Db.Query(`SELECT s.name, MAX(s.version) AS version, MAX(s.id) AS id 
+	rows, err := Db.Query(`SELECT s.name, MAX(s.version) AS version, MAX(s.id) AS id 
                            FROM scrapers s GROUP BY 1;`)
 	if err != nil {
 		return
@@ -81,7 +81,7 @@ func Scrapers() (scrapers []Scraper, err error) {
 			return
 		}
 		scrapers = append(scrapers, scraper)
-    }
+	}
 	rows.Close()
 	return
 }
@@ -112,8 +112,8 @@ func (scraper *Scraper) Scraping() (scraping Scraping, err error) {
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	fmt.Println("Starting SaveResults...")
 	for _, elem := range results {
-        fmt.Println(scraper.Name)
-        fmt.Println("\t", elem.Title)
+		fmt.Println(scraper.Name)
+		fmt.Println("\t", elem.Title)
 		fmt.Println("\t\t", elem.Title)
 		statement := "INSERT INTO results (uuid, scraper_id, scraping_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
 		_, err := Db.Exec(statement, createUUID(), scraper.Id, scraping.Id, elem.Title, elem.ResultUrl, time.Now())
