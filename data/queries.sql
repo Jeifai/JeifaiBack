@@ -4,6 +4,9 @@ DROP TABLE author; --
 /* Delete row from table */
 DELETE FROM scrapers WHERE version = 2;
 
+/* Delete column from table */
+ALTER TABLE users_targets DROP COLUMN uuid;
+
 /* Make a table empty and reset id */
 TRUNCATE scrapers RESTART IDENTITY;
 

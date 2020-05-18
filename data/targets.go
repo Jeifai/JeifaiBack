@@ -31,14 +31,14 @@ func (target *Target) CreateTarget() (err error) {
 // Add a new relation user <--> target
 func (target *Target) CreateUserTarget(user User) (err error) {
 	fmt.Println("Starting CreateUserTarget...")
-	statement := `INSERT INTO users_targets (uuid, user_id, target_id, created_at) 
-                  VALUES ($1, $2, $3, $4) RETURNING id, uuid, user_id, target_id, created_at`
+	statement := `INSERT INTO users_targets (user_id, target_id, created_at) 
+                  VALUES ($1, $2, $3) RETURNING id, user_id, target_id, created_at`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		fmt.Println("Error on CreateUserTarget")
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(createUUID(), user.Id, target.Id, time.Now()).Scan()
+	err = stmt.QueryRow(user.Id, target.Id, time.Now()).Scan()
 	fmt.Println("Closing CreateUserTarget...")
 	return
 }

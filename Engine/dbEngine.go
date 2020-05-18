@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
 	"database/sql"
 	"fmt"
 	"github.com/joho/godotenv"
@@ -15,7 +14,6 @@ import (
 type Scraping struct {
 	Id        int
 	ScraperId int
-	Uuid      string
 	CreatedAt time.Time
 }
 
@@ -51,22 +49,6 @@ func init() {
 	fmt.Println("Successfully connected to the database")
 }
 
-func createUUID() (uuid string) {
-	u := new([16]byte)
-	_, err := rand.Read(u[:])
-	if err != nil {
-		return
-	}
-
-	// 0x40 is reserved variant from RFC 4122
-	u[8] = (u[8] | 0x40) & 0x7F
-	// Set the four most significant bits (bits 12 through 15) of the
-	// time_hi_and_version field to the 4-bit version number.
-	u[6] = (u[6] & 0xF) | (0x4 << 4)
-	uuid = fmt.Sprintf("%x-%x-%x-%x-%x", u[0:4], u[4:6], u[6:8], u[8:10], u[10:])
-	return
-}
-
 // Get all the scraper that need to be executed
 func Scrapers() (scrapers []Scraper, err error) {
 	fmt.Println("Starting Scrapers...")
@@ -97,14 +79,14 @@ func (scraper *Scraper) ScraperByName() (err error) {
 
 // Save in the database a new Scraping session and return its values
 func (scraper *Scraper) Scraping() (scraping Scraping, err error) {
-	statement := "insert into scraping (uuid, scraper_id, created_at) values ($1, $2, $3) returning id, uuid, scraper_id, created_at"
+	statement := "insert into scraping (scraper_id, created_at) values ($1, $2) returning id, scraper_id, created_at"
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
 	// use QueryRow to return a row and scan the returned id into the Session struct
-	err = stmt.QueryRow(createUUID(), scraper.Id, time.Now()).Scan(&scraping.Id, &scraping.Uuid, &scraping.ScraperId, &scraping.CreatedAt)
+	err = stmt.QueryRow(scraper.Id, time.Now()).Scan(&scraping.Id, &scraping.ScraperId, &scraping.CreatedAt)
 	return
 }
 
@@ -115,8 +97,8 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 		fmt.Println(scraper.Name)
 		fmt.Println("\t", elem.Title)
 		fmt.Println("\t\t", elem.Title)
-		statement := "INSERT INTO results (uuid, scraper_id, scraping_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
-		_, err := Db.Exec(statement, createUUID(), scraper.Id, scraping.Id, elem.Title, elem.ResultUrl, time.Now())
+		statement := "INSERT INTO results (scraper_id, scraping_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5)"
+		_, err := Db.Exec(statement, scraper.Id, scraping.Id, elem.Title, elem.ResultUrl, time.Now())
 		if err != nil {
 			return
 		}
