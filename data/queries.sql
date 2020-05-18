@@ -1,6 +1,9 @@
 /* Delete a whole table */
 DROP TABLE author; -- 
 
+/* Delete row from table */
+DELETE FROM scrapers WHERE version = 2;
+
 /* Make a table empty and reset id */
 TRUNCATE scrapers RESTART IDENTITY;
 
@@ -8,7 +11,7 @@ TRUNCATE scrapers RESTART IDENTITY;
 UPDATE targets SET name = 'Kununu' WHERE id = 45;
 
 /* Insert in table */
-INSERT INTO scrapers (name, version, target_id, created_at) VALUES('Kununu', 1, current_timestamp);
+INSERT INTO scrapers (name, version, target_id, created_at) VALUES('Kununu', 1, 45, current_timestamp);
 
 /* Extract all the jobs by user */
 SELECT t.url, j.created_at, j.title, j.url FROM users_targets ut

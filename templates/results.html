@@ -2,9 +2,9 @@
     <div class="content">
         {{if .Message}} <h2>{{.Message}}</h2><br> {{else}}  {{end}}
         <div>
-            YOUR JOBS
+            YOUR RESULTS
         </div>
-        {{ range .Jobs }}
+        {{ range .Results }}
         <div>
             - {{ .Target }} <a href="{{ .Url }}">{{ .Title }}</a>
         </div>

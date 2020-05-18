@@ -25,7 +25,7 @@ func main() {
 	mux.HandleFunc("/target_delete", target_delete)
 	mux.HandleFunc("/target_delete__run", target_delete__run)
 
-	mux.HandleFunc("/jobs", jobs)
+	mux.HandleFunc("/results", results)
 
 	fmt.Println("Application is running")
 

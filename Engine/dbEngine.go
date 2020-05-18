@@ -20,10 +20,9 @@ type Scraping struct {
 }
 
 type Scraper struct {
-	Id       int
-	Version  int
+    Id       int
 	Name     string
-	TargetId int
+	Version  int
 }
 
 var Db *sql.DB
@@ -71,17 +70,18 @@ func createUUID() (uuid string) {
 // Get all the scraper that need to be executed
 func Scrapers() (scrapers []Scraper, err error) {
 	fmt.Println("Starting Scrapers...")
-	rows, err := Db.Query(`SELECT s.id, s.version, s.name FROM scrapers s`)
+    rows, err := Db.Query(`SELECT s.name, MAX(s.version) AS version, MAX(s.id) AS id 
+                           FROM scrapers s GROUP BY 1;`)
 	if err != nil {
 		return
 	}
 	for rows.Next() {
 		scraper := Scraper{}
-		if err = rows.Scan(&scraper.Id, &scraper.Version, &scraper.Name); err != nil {
+		if err = rows.Scan(&scraper.Name, &scraper.Version, &scraper.Id); err != nil {
 			return
 		}
 		scrapers = append(scrapers, scraper)
-	}
+    }
 	rows.Close()
 	return
 }
@@ -89,8 +89,8 @@ func Scrapers() (scrapers []Scraper, err error) {
 // Get all the information about a scraper based on its name
 func (scraper *Scraper) ScraperByName() (err error) {
 	fmt.Println("Starting ScraperByName...")
-	err = Db.QueryRow(`SELECT s.id, s.target_id 
-                       FROM scrapers s WHERE s.name=$1`, scraper.Name).Scan(&scraper.Id, &scraper.TargetId)
+	err = Db.QueryRow(`SELECT s.id
+                       FROM scrapers s WHERE s.name=$1`, scraper.Name).Scan(&scraper.Id)
 	fmt.Println("Closing ScraperByName...")
 	return
 }
@@ -108,13 +108,15 @@ func (scraper *Scraper) Scraping() (scraping Scraping, err error) {
 	return
 }
 
-// Save all the jobs extracted
-func SaveJobs(scraper Scraper, scraping Scraping, jobs []Job) {
-	fmt.Println("Starting SaveJobs...")
-	for _, elem := range jobs {
-		fmt.Println(elem.Title)
-		statement := "INSERT INTO jobs (uuid, scraper_id, scraping_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
-		_, err := Db.Exec(statement, createUUID(), scraper.Id, scraping.Id, elem.Title, elem.JobUrl, time.Now())
+// Save all the results extracted
+func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
+	fmt.Println("Starting SaveResults...")
+	for _, elem := range results {
+        fmt.Println(scraper.Name)
+        fmt.Println("\t", elem.Title)
+		fmt.Println("\t\t", elem.Title)
+		statement := "INSERT INTO results (uuid, scraper_id, scraping_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
+		_, err := Db.Exec(statement, createUUID(), scraper.Id, scraping.Id, elem.Title, elem.ResultUrl, time.Now())
 		if err != nil {
 			return
 		}

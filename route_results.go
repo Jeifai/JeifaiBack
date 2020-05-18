@@ -7,24 +7,24 @@ import (
 	"net/http"
 )
 
-func jobs(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Generating HTML for jobs...")
+func results(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Generating HTML for results...")
 	sess, err := session(w, r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		danger(err, "Cannot find user")
 	}
-	jobs, err := user.JobsByUser()
+	results, err := user.ResultsByUser()
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
 			"templates/private.navigation.html",
-			"templates/jobs.html"))
+			"templates/results.html"))
 	type TempStruct struct {
-		User    data.User
-		Jobs    []data.Job
-		Message string
+		User        data.User
+		Results     []data.Result
+		Message     string
 	}
-	infos := TempStruct{user, jobs, "Here the list of all your job opportunities"}
+	infos := TempStruct{user, results, "Here the list of all your results"}
 	templates.ExecuteTemplate(w, "layout", infos)
 }

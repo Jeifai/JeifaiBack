@@ -34,7 +34,7 @@ create table users_targets (
 
 create table scrapers (
   id         serial primary key,
-  name       varchar(64) not null unique,
+  name       varchar(64) not null,
   version    integer not null,
   target_id  integer references targets(id),
   created_at timestamp not null  
@@ -47,7 +47,7 @@ create table scraping (
   created_at timestamp
 );
 
-create table jobs (
+create table results (
   id          serial primary key,
   uuid        varchar(64) not null unique,
   scraper_id  integer references scrapers(id),
