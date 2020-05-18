@@ -56,6 +56,7 @@ func (session *Session) Check() (valid bool, err error) {
 	return
 }
 
+
 // Delete session from database
 func (session *Session) DeleteByUUID() (err error) {
 	statement := "delete from sessions where uuid = $1"
@@ -69,6 +70,8 @@ func (session *Session) DeleteByUUID() (err error) {
 	return
 }
 
+
+/**
 // Get the user from the session
 func (session *Session) User() (user User, err error) {
 	user = User{}
@@ -76,13 +79,16 @@ func (session *Session) User() (user User, err error) {
 		Scan(&user.Id, &user.Uuid, &user.Name, &user.Email, &user.CreatedAt)
 	return
 }
+*/
 
+/**
 // Delete all sessions from database
 func SessionDeleteAll() (err error) {
 	statement := "delete from sessions"
 	_, err = Db.Exec(statement)
 	return
 }
+*/
 
 // Create a new user, save user info into the database
 func (user *User) Create() (err error) {
@@ -101,6 +107,7 @@ func (user *User) Create() (err error) {
 	return
 }
 
+/**
 // Delete user from database
 func (user *User) Delete() (err error) {
 	statement := "delete from users where id = $1"
@@ -113,7 +120,9 @@ func (user *User) Delete() (err error) {
 	_, err = stmt.Exec(user.Id)
 	return
 }
+*/
 
+/**
 // Update user information in the database
 func (user *User) Update() (err error) {
 	statement := "update users set name = $2, email = $3 where id = $1"
@@ -126,14 +135,18 @@ func (user *User) Update() (err error) {
 	_, err = stmt.Exec(user.Id, user.Name, user.Email)
 	return
 }
+*/
 
+/**
 // Delete all users from database
 func UserDeleteAll() (err error) {
 	statement := "delete from users"
 	_, err = Db.Exec(statement)
 	return
 }
+*/
 
+/**
 // Get all users in the database and returns it
 func Users() (users []User, err error) {
 	rows, err := Db.Query("SELECT id, uuid, name, email, password, created_at FROM users")
@@ -150,6 +163,7 @@ func Users() (users []User, err error) {
 	rows.Close()
 	return
 }
+*/
 
 // Get a single user given the email
 func UserByEmail(email string) (user User, err error) {
@@ -159,6 +173,7 @@ func UserByEmail(email string) (user User, err error) {
 	return
 }
 
+/**
 // Get a single user given the UUID
 func UserByUUID(uuid string) (user User, err error) {
 	user = User{}
@@ -166,7 +181,9 @@ func UserByUUID(uuid string) (user User, err error) {
 		Scan(&user.Id, &user.Uuid, &user.Name, &user.Email, &user.Password, &user.CreatedAt)
 	return
 }
+*/
 
+/**
 // Get a single user given the session UUID
 func (session *Session) UserBySession() (user User, err error) {
 	user = User{}
@@ -174,3 +191,4 @@ func (session *Session) UserBySession() (user User, err error) {
 		Scan(&user.Id, &user.Uuid, &user.Name, &user.Email, &user.Password, &user.CreatedAt)
 	return
 }
+*/
