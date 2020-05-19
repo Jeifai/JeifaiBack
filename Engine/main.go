@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	// scrape("Kununu")
-	test("Kununu", 1)
+	// scrape("Mitte")
+	test("Mitte", 1)
 }
 func scrape(scraper_name string) {
 	scrapers, err := Scrapers()
@@ -48,11 +48,11 @@ func test(scraper_name string, scraper_version int) {
 	_ = httpResponse
 	_ = newResults
 
-	// fmt.Println("storedResults:")
-	// fmt.Println(storedResults)
-	// fmt.Println("\n")
-	// fmt.Println("newResults:")
-	// fmt.Println(newResults)
+	fmt.Println("storedResults:")
+	fmt.Println(storedResults)
+	fmt.Println("\n")
+	fmt.Println("newResults:")
+	fmt.Println(newResults)
 
 	// COMPARE RESULTS
 }

@@ -7,8 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
-	"strings"
-	"time"
+    "strings"
 )
 
 type Runtime struct {
@@ -38,16 +37,6 @@ func runner(scraper_name string, scraper_version int, isTest bool) (response Res
 	response = function_output[0].Interface().(Response)
 	result = function_output[1].Interface().([]Result)
 	return
-}
-
-func getJson(url string, target interface{}) error {
-	var client = &http.Client{Timeout: 10 * time.Second}
-	r, err := client.Get(url)
-	if err != nil {
-		return err
-	}
-	defer r.Body.Close()
-	return json.NewDecoder(r.Body).Decode(target)
 }
 
 func (runtime Runtime) Kununu(version int, isTest bool) (response Response, results []Result) {
@@ -88,19 +77,28 @@ func (runtime Runtime) Kununu(version int, isTest bool) (response Response, resu
 	return
 }
 
-func (runtime Runtime) Mitte(version int) (response Response, results []Result) {
-	if version == 1 {
-		url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
+func (runtime Runtime) Mitte(version int, isTest bool) (response Response, results []Result) {
+    var body []byte
+	url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
+	if isTest {
+        temp_body, err := ioutil.ReadFile("/home/robimalco/jeifai/Engine/response.html")
+        if err != nil {
+			panic(err.Error()) 
+        }
+        body = temp_body
+	} else {
 		res, err := http.Get(url)
 		if err != nil {
 			panic(err.Error())
 		}
-		body, err := ioutil.ReadAll(res.Body)
+        temp_body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			panic(err.Error())
-		}
-		response = Response{body}
-
+        }
+        body = temp_body
+    }
+	if version == 1 {
+        response = Response{body}
 		type Postings struct {
 			Title string `json:"text"`
 			Url   string `json:"hostedUrl"`
@@ -110,7 +108,7 @@ func (runtime Runtime) Mitte(version int) (response Response, results []Result) 
 		}
 		type JsonJobs []JsonJob
 		var jsonJobs JsonJobs
-		err = json.Unmarshal(body, &jsonJobs)
+		err := json.Unmarshal(body, &jsonJobs)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -127,7 +125,13 @@ func (runtime Runtime) Mitte(version int) (response Response, results []Result) 
 	return
 }
 
-func (runtime Runtime) IMusician(version int) (response Response, results []Result) {
+func (runtime Runtime) IMusician(version int, isTest bool) (response Response, results []Result) {
+	c := colly.NewCollector()
+	if isTest {
+		t := &http.Transport{}
+		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+		c.WithTransport(t)
+	}
 	if version == 1 {
 		url := "https://imusician-digital-jobs.personio.de/"
 		main_tag := "a"
@@ -150,7 +154,11 @@ func (runtime Runtime) IMusician(version int) (response Response, results []Resu
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
 		})
-		c.Visit(url)
+		if isTest {
+			c.Visit("file:" + "/home/robimalco/jeifai/Engine/response.html")
+		} else {
+			c.Visit(url)
+		}
 	}
 	return
 }
