@@ -26,6 +26,10 @@ func (test *Test) GetResponse() (response string) {
 
     file_path := generate_file_path(test.Name, test.Scraping)
 
+    fmt.Println(file_path)
+
+    response = "CIAO"
+
     ctx := context.Background()
     client, err := storage.NewClient(ctx)
     ctx, cancel := context.WithTimeout(ctx, time.Second*50)

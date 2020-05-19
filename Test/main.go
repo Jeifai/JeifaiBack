@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "time"
 )
 
 var scraper_name = "Mitte"
@@ -12,14 +13,22 @@ type Test struct {
     Version     int
     FilePath    string
     Scraping    int
+    Results     []Result
 }
 
+type Result struct {
+	Title     string
+	Url       string
+}
 func main() {
     test := Test{Name: scraper_name, Version: scraper_version}
     response := test.GetResponse()
-    fmt.Println(response)
-
-    // extract latest results from specific DB table
+    results, err := test.ResultsByScraping()
+    if err != nil {
+        fmt.Println(err)
+    }
+    fmt.Println(results)
+    _ = response
 
     // run scraper and get the results
 
