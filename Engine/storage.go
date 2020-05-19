@@ -6,10 +6,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"path/filepath"
 	"strconv"
-    "time"
-    "io/ioutil"
+	"time"
 )
 
 func generate_file_path(scraper_name string, scraper_version int) (file_path string) {
@@ -17,9 +17,9 @@ func generate_file_path(scraper_name string, scraper_version int) (file_path str
 	return
 }
 
-func SaveResponse(scraper Scraper, scraping Scraping, response Response) {
+func SaveResponseToStorage(scraper Scraper, scraping Scraping, response Response) {
 
-	fmt.Println("Starting SaveResponse...")
+	fmt.Println("Starting SaveResponseToStorage...")
 
 	file_path := generate_file_path(scraper.Name, scraping.Id)
 
@@ -36,34 +36,33 @@ func SaveResponse(scraper Scraper, scraping Scraping, response Response) {
 	}
 }
 
-func (test *Test) GetResponse() (response string) {
+func (test *Test) GetResponseFromStorage() (response string) {
 
-    fmt.Println("Starting GetResponse...")
-    
-    err := test.LatestScrapingByNameAndVersion()
-    if err != nil {
-        fmt.Println(err)
-    }
+	fmt.Println("Starting GetResponseFromStorage...")
 
-    file_path := generate_file_path(test.Name, test.Scraping)
+	err := test.LatestScrapingByNameAndVersion()
+	if err != nil {
+		fmt.Println(err)
+	}
 
-    ctx := context.Background()
-    client, err := storage.NewClient(ctx)
-    ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-    defer cancel()
-    rc, err := client.Bucket("jeifai").Object(file_path).NewReader(ctx)
-    if err != nil {
-        fmt.Println(err)
-    }
-    defer rc.Close()
+	file_path := generate_file_path(test.Name, test.Scraping)
 
-    data, err := ioutil.ReadAll(rc)
-    if err != nil {
-        fmt.Println(err)
-    }
-    
-    response = string(data)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+	rc, err := client.Bucket("jeifai").Object(file_path).NewReader(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer rc.Close()
 
-    return 
+	data, err := ioutil.ReadAll(rc)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	response = string(data)
+
+	return
 }
-

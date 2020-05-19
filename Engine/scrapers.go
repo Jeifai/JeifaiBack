@@ -26,11 +26,14 @@ type Result struct {
 	ResultUrl   string
 }
 
-func runner(scraper_name string, scraper_version int) (response Response, result []Result) {
+func runner(scraper_name string, scraper_version int, isTest bool) (response Response, result []Result) {
+	fmt.Println("Starting runner...")
 	runtime := Runtime{scraper_name}
 	strucReflected := reflect.ValueOf(runtime)
-    method := strucReflected.MethodByName(scraper_name)
-    params := []reflect.Value{reflect.ValueOf(scraper_version)}
+	method := strucReflected.MethodByName(scraper_name)
+	params := []reflect.Value{
+		reflect.ValueOf(scraper_version),
+		reflect.ValueOf(isTest)}
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
 	result = function_output[1].Interface().([]Result)
@@ -47,7 +50,13 @@ func getJson(url string, target interface{}) error {
 	return json.NewDecoder(r.Body).Decode(target)
 }
 
-func (runtime Runtime) Kununu(version int) (response Response, results []Result) {
+func (runtime Runtime) Kununu(version int, isTest bool) (response Response, results []Result) {
+	c := colly.NewCollector()
+	if isTest {
+		t := &http.Transport{}
+		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+		c.WithTransport(t)
+	}
 	if version == 1 {
 		url := "https://www.kununu.com/at/kununu/jobs"
 		main_tag := "div"
@@ -55,12 +64,11 @@ func (runtime Runtime) Kununu(version int) (response Response, results []Result)
 		main_tag_value := "company-profile-job-item"
 		tag_title := "a"
 		tag_url := "a"
-
-		c := colly.NewCollector()
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
 				result_url := e.ChildAttr(tag_url, "href")
+				fmt.Println(result_url)
 				results = append(results, Result{
 					runtime.Name,
 					url,
@@ -71,7 +79,11 @@ func (runtime Runtime) Kununu(version int) (response Response, results []Result)
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
 		})
-		c.Visit(url)
+		if isTest {
+			c.Visit("file:" + "/home/robimalco/jeifai/Engine/response.html")
+		} else {
+			c.Visit(url)
+		}
 	}
 	return
 }
@@ -121,18 +133,18 @@ func (runtime Runtime) IMusician(version int) (response Response, results []Resu
 		main_tag := "a"
 		main_tag_attr := "class"
 		main_tag_value := "job-box-link"
-        tag_title := ".jb-title"
+		tag_title := ".jb-title"
 
 		c := colly.NewCollector()
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
-                result_url := e.Attr("href")
+				result_url := e.Attr("href")
 				results = append(results, Result{
 					runtime.Name,
 					url,
 					result_title,
-                    result_url})
+					result_url})
 			}
 		})
 		c.OnResponse(func(r *colly.Response) {

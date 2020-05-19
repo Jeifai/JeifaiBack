@@ -1,15 +1,15 @@
 package main
 
 import (
-    "fmt"
+	"fmt"
+	"os"
 )
 
 func main() {
-    test()
+	// scrape("Kununu")
+	test("Kununu", 1)
 }
-
-func scrape() {
-    var scraper_name = "IMusician"
+func scrape(scraper_name string) {
 	scrapers, err := Scrapers()
 	if err != nil {
 		return
@@ -18,33 +18,57 @@ func scrape() {
 		if elem.Name == scraper_name {
 			scraping, err := elem.Scraping()
 			if err != nil {
-                return
-            }
-            response, results := runner(elem.Name, elem.Version)
-            SaveResponse(elem, scraping, response)
+				return
+			}
+			response, results := runner(elem.Name, elem.Version, false)
+			SaveResponseToStorage(elem, scraping, response)
 			SaveResults(elem, scraping, results)
 		}
 	}
 }
 
 type Test struct {
-    Name            string
-    Version         int
-    FilePath        string
-    Scraping        int
+	Name     string
+	Version  int
+	FilePath string
+	Scraping int
 }
-func test() {
-    var scraper_name = "IMusician"
-    var scraper_version = 1
-    test := Test{Name: scraper_name, Version: scraper_version}
-    response := test.GetResponse()
-    results, err := test.ResultsByScraping()
-    if err != nil {
-        fmt.Println(err)
-    }
-    fmt.Println(results)
-    _ = response
-    // run scraper and get the results
-    // compare the results and evaluate accuracy of the test
-    //test("Mitte")       // Test Mitte with the latest version
+
+func test(scraper_name string, scraper_version int) {
+	test := Test{Name: scraper_name, Version: scraper_version}
+	fileResponse := test.GetResponseFromStorage()
+	storedResults, err := test.ResultsByScraping()
+	if err != nil {
+		fmt.Println(err)
+	}
+	save_response_to_file(fileResponse)
+	httpResponse, newResults := runner(scraper_name, scraper_version, true)
+	remove_file()
+	_ = storedResults
+	_ = httpResponse
+	_ = newResults
+
+	// fmt.Println("storedResults:")
+	// fmt.Println(storedResults)
+	// fmt.Println("\n")
+	// fmt.Println("newResults:")
+	// fmt.Println(newResults)
+
+	// COMPARE RESULTS
+}
+
+func save_response_to_file(response string) {
+	f, err := os.Create("response.html")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer f.Close()
+	f.WriteString(response)
+}
+
+func remove_file() {
+	err := os.Remove("response.html")
+	if err != nil {
+		fmt.Println(err)
+	}
 }
