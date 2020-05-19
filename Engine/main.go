@@ -1,12 +1,15 @@
 package main
 
 import (
-// "fmt"
+    "fmt"
 )
 
-var scraper_name = "Mitte"
-
 func main() {
+    test()
+}
+
+func scrape() {
+    var scraper_name = "Mitte"
 	scrapers, err := Scrapers()
 	if err != nil {
 		return
@@ -22,4 +25,26 @@ func main() {
 			SaveResults(elem, scraping, results)
 		}
 	}
+}
+
+type Test struct {
+    Name            string
+    Version         int
+    FilePath        string
+    Scraping        int
+}
+func test() {
+    var scraper_name = "Mitte"
+    var scraper_version = 1
+    test := Test{Name: scraper_name, Version: scraper_version}
+    response := test.GetResponse()
+    results, err := test.ResultsByScraping()
+    if err != nil {
+        fmt.Println(err)
+    }
+    fmt.Println(results)
+    _ = response
+    // run scraper and get the results
+    // compare the results and evaluate accuracy of the test
+    //test("Mitte")       // Test Mitte with the latest version
 }

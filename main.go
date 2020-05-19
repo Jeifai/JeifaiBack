@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
+
 	mux := http.NewServeMux()
 	files := http.FileServer(http.Dir(config.Static))
 	mux.Handle("/static/", http.StripPrefix("/static/", files))
@@ -36,5 +37,5 @@ func main() {
 		WriteTimeout:   time.Duration(600 * int64(time.Second)),
 		MaxHeaderBytes: 1 << 20,
 	}
-	server.ListenAndServe()
+    server.ListenAndServe()
 }
