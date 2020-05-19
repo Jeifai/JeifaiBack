@@ -9,7 +9,7 @@ func main() {
 }
 
 func scrape() {
-    var scraper_name = "Mitte"
+    var scraper_name = "IMusician"
 	scrapers, err := Scrapers()
 	if err != nil {
 		return
@@ -18,10 +18,10 @@ func scrape() {
 		if elem.Name == scraper_name {
 			scraping, err := elem.Scraping()
 			if err != nil {
-				return
-			}
-			response, results := runner(elem.Name, elem.Version)
-			SaveResponse(elem, scraping, response)
+                return
+            }
+            response, results := runner(elem.Name, elem.Version)
+            SaveResponse(elem, scraping, response)
 			SaveResults(elem, scraping, results)
 		}
 	}
@@ -34,7 +34,7 @@ type Test struct {
     Scraping        int
 }
 func test() {
-    var scraper_name = "Mitte"
+    var scraper_name = "IMusician"
     var scraper_version = 1
     test := Test{Name: scraper_name, Version: scraper_version}
     response := test.GetResponse()
