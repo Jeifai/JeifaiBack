@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
+    "os"
 )
 
 func main() {
-	// scrape("Mitte")
-	test("Mitte", 1)
+	// scrape("IMusician")
+	test("IMusician", 1)
 }
 func scrape(scraper_name string) {
 	scrapers, err := Scrapers()
@@ -36,39 +36,54 @@ type Test struct {
 
 func test(scraper_name string, scraper_version int) {
 	test := Test{Name: scraper_name, Version: scraper_version}
-	fileResponse := test.GetResponseFromStorage()
+    fileResponse := test.GetResponseFromStorage()
 	storedResults, err := test.ResultsByScraping()
 	if err != nil {
 		fmt.Println(err)
 	}
 	save_response_to_file(fileResponse)
 	httpResponse, newResults := runner(scraper_name, scraper_version, true)
-	remove_file()
-	_ = storedResults
-	_ = httpResponse
-	_ = newResults
+    remove_file()
+    _ = httpResponse
 
-	fmt.Println("storedResults:")
-	fmt.Println(storedResults)
-	fmt.Println("\n")
-	fmt.Println("newResults:")
-	fmt.Println(newResults)
-
-	// COMPARE RESULTS
+    var bool_array []bool
+	for _, stored_element := range storedResults {
+        for _, new_element := range newResults {
+            if stored_element.ResultUrl == new_element.ResultUrl {
+                bool_url := new_element.ResultUrl == stored_element.ResultUrl
+                bool_title := new_element.Title == stored_element.Title
+                bool_comparison := bool_url == bool_title
+                bool_array = append(bool_array, bool_comparison)
+            }
+        }
+    }
+    if len(storedResults) == len(bool_array) {
+        fmt.Println("TEST STATUS: OK")
+    } else {
+         fmt.Println("TEST STATUS: KO")       
+    }
 }
 
 func save_response_to_file(response string) {
-	f, err := os.Create("response.html")
+    dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer f.Close()
+	f, err := os.Create(dir + "/response.html")
+	if err != nil {
+		fmt.Println(err)
+	}
+    defer f.Close()
 	f.WriteString(response)
 }
 
 func remove_file() {
-	err := os.Remove("response.html")
+    dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
+	}
+	err_2 := os.Remove(dir + "/response.html")
+	if err_2 != nil {
+		fmt.Println(err_2)
 	}
 }

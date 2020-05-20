@@ -2,12 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+    "fmt"
+    "os"
 	"github.com/gocolly/colly"
 	"io/ioutil"
 	"net/http"
 	"reflect"
     "strings"
+    "github.com/gocolly/colly/debug"
 )
 
 type Runtime struct {
@@ -57,7 +59,6 @@ func (runtime Runtime) Kununu(version int, isTest bool) (response Response, resu
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
 				result_url := e.ChildAttr(tag_url, "href")
-				fmt.Println(result_url)
 				results = append(results, Result{
 					runtime.Name,
 					url,
@@ -67,9 +68,16 @@ func (runtime Runtime) Kununu(version int, isTest bool) (response Response, resu
 		})
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
-		})
+        })
+        c.OnError(func(r *colly.Response, err error) {
+            fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+        })
 		if isTest {
-			c.Visit("file:" + "/home/robimalco/jeifai/Engine/response.html")
+            dir, err := os.Getwd()
+            if err != nil {
+                fmt.Println(err)
+            }
+			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(url)
 		}
@@ -81,7 +89,11 @@ func (runtime Runtime) Mitte(version int, isTest bool) (response Response, resul
     var body []byte
 	url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
 	if isTest {
-        temp_body, err := ioutil.ReadFile("/home/robimalco/jeifai/Engine/response.html")
+        dir, err := os.Getwd()
+        if err != nil {
+            fmt.Println(err)
+        }
+        temp_body, err := ioutil.ReadFile(dir + "/response.html")
         if err != nil {
 			panic(err.Error()) 
         }
@@ -113,7 +125,7 @@ func (runtime Runtime) Mitte(version int, isTest bool) (response Response, resul
 			fmt.Println(err)
 		}
 		for _, elem := range jsonJobs {
-			result_title := elem.Positions[0].Title
+            result_title := elem.Positions[0].Title
 			result_url := elem.Positions[0].Url
 			results = append(results, Result{
 				runtime.Name,
@@ -126,7 +138,7 @@ func (runtime Runtime) Mitte(version int, isTest bool) (response Response, resul
 }
 
 func (runtime Runtime) IMusician(version int, isTest bool) (response Response, results []Result) {
-	c := colly.NewCollector()
+	c := colly.NewCollector(colly.Debugger(&debug.LogDebugger{}))
 	if isTest {
 		t := &http.Transport{}
 		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
@@ -143,7 +155,7 @@ func (runtime Runtime) IMusician(version int, isTest bool) (response Response, r
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
-				result_url := e.Attr("href")
+                result_url := e.Attr("href")
 				results = append(results, Result{
 					runtime.Name,
 					url,
@@ -152,10 +164,19 @@ func (runtime Runtime) IMusician(version int, isTest bool) (response Response, r
 			}
 		})
 		c.OnResponse(func(r *colly.Response) {
+            fmt.Println(r.Body)
 			response = Response{r.Body}
-		})
+        })
+
+        c.OnError(func(r *colly.Response, err error) {
+            fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+        })
 		if isTest {
-			c.Visit("file:" + "/home/robimalco/jeifai/Engine/response.html")
+            dir, err := os.Getwd()
+            if err != nil {
+                fmt.Println(err)
+            }
+			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(url)
 		}
