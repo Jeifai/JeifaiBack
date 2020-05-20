@@ -38,8 +38,25 @@ func runner(scraper_name string, scraper_version int, isTest bool) (response Res
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
     result = function_output[1].Interface().([]Result)
+    result = unique(result)
 	fmt.Println("Number of results scraped: " + strconv.Itoa(len(result)))
 	return
+}
+
+func unique(result []Result) []Result {
+    var unique []Result
+    type key struct{ CompanyName, CompanyUrl, Title, ResultUrl string }
+    m := make(map[key]int)
+    for _, v := range result {
+        k := key{v.CompanyName, v.CompanyUrl, v.Title, v.ResultUrl}
+        if i, ok := m[k]; ok {
+            unique[i] = v
+        } else {
+            m[k] = len(unique)
+            unique = append(unique, v)
+        }
+    }
+    return unique
 }
 
 func (runtime Runtime) Kununu(version int, isTest bool) (response Response, results []Result) {

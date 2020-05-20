@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	// scrape("Mitte")
-	test("Mitte", 1)
+	// scrape("Babelforce")
+	test("IMusician", 1)
 }
 func scrape(scraper_name string) {
 	scrapers, err := Scrapers()
