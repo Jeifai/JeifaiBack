@@ -13,9 +13,6 @@ TRUNCATE scrapers RESTART IDENTITY;
 /* Update value in column based on condition */
 UPDATE targets SET name = 'Kununu' WHERE id = 45;
 
-/* Insert in table */
-INSERT INTO scrapers (name, version, target_id, created_at) VALUES('Kununu', 1, 45, current_timestamp);
-
 /* Extract all the jobs by user */
 SELECT t.url, j.created_at, j.title, j.url FROM users_targets ut
 LEFT JOIN targets t ON(ut.target_id = t.id)
@@ -24,3 +21,8 @@ LEFT JOIN jobs j ON(s.id = j.scraper_id)
 WHERE ut.user_id = 13;
 
 ALTER TABLE jobs ADD COLUMN scraping_id integer references scraping(id);
+
+/* New scraper process */
+INSERT INTO targets (url, host, created_at, name) VALUES('https://www.babelforce.com/jobs/', 'https://www.babelforce.com', current_timestamp, 'Babelforce');
+SELECT id FROM targets WHERE name = 'Babelforce';
+INSERT INTO scrapers (name, version, target_id, created_at) VALUES('Babelforce', 1, 86, current_timestamp);

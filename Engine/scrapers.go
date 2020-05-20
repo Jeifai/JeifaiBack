@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"reflect"
     "strings"
-    "github.com/gocolly/colly/debug"
+	"strconv"
 )
 
 type Runtime struct {
@@ -34,10 +34,11 @@ func runner(scraper_name string, scraper_version int, isTest bool) (response Res
 	method := strucReflected.MethodByName(scraper_name)
 	params := []reflect.Value{
 		reflect.ValueOf(scraper_version),
-		reflect.ValueOf(isTest)}
+        reflect.ValueOf(isTest)}
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
-	result = function_output[1].Interface().([]Result)
+    result = function_output[1].Interface().([]Result)
+	fmt.Println("Number of results scraped: " + strconv.Itoa(len(result)))
 	return
 }
 
@@ -69,6 +70,9 @@ func (runtime Runtime) Kununu(version int, isTest bool) (response Response, resu
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
         })
+        c.OnRequest(func(r *colly.Request) {
+            fmt.Println("Visiting", r.URL.String())
+        })
         c.OnError(func(r *colly.Response, err error) {
             fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
         })
@@ -94,12 +98,14 @@ func (runtime Runtime) Mitte(version int, isTest bool) (response Response, resul
             fmt.Println(err)
         }
         temp_body, err := ioutil.ReadFile(dir + "/response.html")
+        fmt.Println("Visiting", dir + "/response.html")
         if err != nil {
 			panic(err.Error()) 
         }
         body = temp_body
 	} else {
-		res, err := http.Get(url)
+        res, err := http.Get(url)
+        fmt.Println("Visiting", url)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -138,7 +144,7 @@ func (runtime Runtime) Mitte(version int, isTest bool) (response Response, resul
 }
 
 func (runtime Runtime) IMusician(version int, isTest bool) (response Response, results []Result) {
-	c := colly.NewCollector(colly.Debugger(&debug.LogDebugger{}))
+	c := colly.NewCollector()
 	if isTest {
 		t := &http.Transport{}
 		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
@@ -151,7 +157,6 @@ func (runtime Runtime) IMusician(version int, isTest bool) (response Response, r
 		main_tag_value := "job-box-link"
 		tag_title := ".jb-title"
 
-		c := colly.NewCollector()
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
@@ -164,10 +169,59 @@ func (runtime Runtime) IMusician(version int, isTest bool) (response Response, r
 			}
 		})
 		c.OnResponse(func(r *colly.Response) {
-            fmt.Println(r.Body)
 			response = Response{r.Body}
         })
+        c.OnRequest(func(r *colly.Request) {
+            fmt.Println("Visiting", r.URL.String())
+        })
+        c.OnError(func(r *colly.Response, err error) {
+            fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+        })
+		if isTest {
+            dir, err := os.Getwd()
+            if err != nil {
+                fmt.Println(err)
+            }
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
+	return
+}
 
+func (runtime Runtime) Babelforce(version int, isTest bool) (response Response, results []Result) {
+	c := colly.NewCollector()
+	if isTest {
+		t := &http.Transport{}
+		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+		c.WithTransport(t)
+	}
+	if version == 1 {
+		url := "https://www.babelforce.com/jobs/"
+		main_tag := "div"
+		main_tag_attr := "class"
+		main_tag_value := "qodef-portfolio"
+		tag_title := "h5"
+		tag_url := "a"
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+				result_title := e.ChildText(tag_title)
+                result_url := e.ChildAttr(tag_url, "href")
+				results = append(results, Result{
+					runtime.Name,
+					url,
+					result_title,
+					result_url})
+			}
+        })
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+        })
+        c.OnRequest(func(r *colly.Request) {
+            fmt.Println("Visiting", r.URL.String())
+        })
         c.OnError(func(r *colly.Response, err error) {
             fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
         })

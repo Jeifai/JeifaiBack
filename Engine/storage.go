@@ -45,7 +45,8 @@ func (test *Test) GetResponseFromStorage() (response string) {
 		fmt.Println(err)
 	}
 
-	file_path := generate_file_path(test.Name, test.Scraping)
+    file_path := generate_file_path(test.Name, test.Scraping)
+    fmt.Println("Correctely loaded: " + file_path)
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)

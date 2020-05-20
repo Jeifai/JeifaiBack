@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
+    "time"
 )
 
 type Scraping struct {
@@ -120,7 +120,7 @@ func (test *Test) ResultsByScraping() (results []Result, err error) {
                             WHERE r.scraping_id = $1`, test.Scraping)
 	if err != nil {
 		return
-	}
+    }
 	for rows.Next() {
 		result := Result{}
 		if err = rows.Scan(&result.Title, &result.ResultUrl); err != nil {
@@ -128,6 +128,7 @@ func (test *Test) ResultsByScraping() (results []Result, err error) {
 		}
 		results = append(results, result)
 	}
-	rows.Close()
+    rows.Close()
+	fmt.Println("Number of results loaded: " + strconv.Itoa(len(results)))
 	return
 }
