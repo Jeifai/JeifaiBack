@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-    "os"
 )
 
 func main() {
@@ -23,7 +22,7 @@ func scrape(scraper_name string) {
 			}
             response, results := runner(elem.Name, elem.Version, false)
             file_path := GenerateFilePath(elem.Name, scraping.Id)
-			SaveResponseToStorage(elem, scraping, response, file_path)
+			SaveResponseToStorage(response, file_path)
 			SaveResults(elem, scraping, results)
 		}
 	}
@@ -50,9 +49,9 @@ func test(scraper_name string, scraper_version int) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	save_response_to_file(fileResponse)
+	SaveResponseToFile(fileResponse)
 	httpResponse, newResults := runner(scraper_name, scraper_version, true)
-    remove_file()
+    RemoveFile()
     _ = httpResponse
 
     var bool_array []bool
@@ -71,28 +70,4 @@ func test(scraper_name string, scraper_version int) {
     } else {
          fmt.Println("TEST STATUS: KO")       
     }
-}
-
-func save_response_to_file(response string) {
-    dir, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
-	}
-	f, err := os.Create(dir + "/response.html")
-	if err != nil {
-		fmt.Println(err)
-	}
-    defer f.Close()
-	f.WriteString(response)
-}
-
-func remove_file() {
-    dir, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
-	}
-	err_2 := os.Remove(dir + "/response.html")
-	if err_2 != nil {
-		fmt.Println(err_2)
-	}
 }

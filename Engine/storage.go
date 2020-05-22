@@ -17,7 +17,7 @@ func GenerateFilePath(scraper_name string, scraper_version int) (file_path strin
 	return
 }
 
-func SaveResponseToStorage(scraper Scraper, scraping Scraping, response Response, file_path string) {
+func SaveResponseToStorage(response Response, file_path string) {
 
     fmt.Println("Starting SaveResponseToStorage...")
 
