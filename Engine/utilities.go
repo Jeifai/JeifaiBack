@@ -21,6 +21,11 @@ func Unique(result []Result) []Result {
     return unique
 }
 
+func GenerateFilePath(scraper_name string, scraper_version int) (file_path string) {
+	file_path = filepath.Join(scraper_name, strconv.Itoa(scraper_version), "response.html")
+	return
+}
+
 func SaveResponseToFile(response string) {
     dir, err := os.Getwd()
 	if err != nil {

@@ -12,11 +12,6 @@ import (
 	"time"
 )
 
-func GenerateFilePath(scraper_name string, scraper_version int) (file_path string) {
-	file_path = filepath.Join(scraper_name, strconv.Itoa(scraper_version), "response.html")
-	return
-}
-
 func SaveResponseToStorage(response Response, file_path string) {
 
     fmt.Println("Starting SaveResponseToStorage...")
