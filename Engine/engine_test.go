@@ -3,6 +3,7 @@ package main
 import (
     "os"
     "time"
+    "sort"
 	"context"
     "testing"
 	"io/ioutil"
@@ -81,4 +82,31 @@ func TestDbConnect(t *testing.T) {
     err := Db.QueryRow(`SELECT MIN(s.id) FROM users s`).Scan(&temp_result.MinUser)
     _ = err
     assert.Equal(t, temp_result.MinUser, 1, "The two integer should be the same")   
+}
+
+func TestRunner(t *testing.T) {
+    scraper_name := "Mitte"
+    scraper_version := 1
+    /**
+    type Test struct {
+        Name     string
+        Version  int
+        FilePath string
+        Scraping int
+    }
+    */
+	test := Test{Name: scraper_name, Version: scraper_version}
+	err := test.LatestScrapingByNameAndVersion()
+	file_path := GenerateFilePath(scraper_name, test.Scraping)
+	fileResponse := GetResponseFromStorage(file_path)
+	got, err := test.ResultsByScraping()
+	SaveResponseToFile(fileResponse)
+	httpResponse, want := Runner(scraper_name, scraper_version, true)
+	RemoveFile()
+    _ = httpResponse
+    _ = err
+
+    sort.Slice(got, func(i, j int) bool { return got[i].ResultUrl < got[j].ResultUrl })
+    sort.Slice(want, func(i, j int) bool { return want[i].ResultUrl < want[j].ResultUrl })
+	assert.ElementsMatch(t, got, want, "The two []Result should be the same.")
 }

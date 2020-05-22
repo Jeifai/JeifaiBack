@@ -6,8 +6,8 @@ import (
 
 func main() {
 	DbConnect()
-	// scrape("Babelforce")
-	test("Babelforce", 1)
+	// scrape("Mitte")
+	test("Mitte", 1)
 }
 func scrape(scraper_name string) {
 	scrapers, err := Scrapers()
@@ -20,7 +20,7 @@ func scrape(scraper_name string) {
 			if err != nil {
 				return
 			}
-			response, results := runner(elem.Name, elem.Version, false)
+			response, results := Runner(elem.Name, elem.Version, false)
 			file_path := GenerateFilePath(elem.Name, scraping.Id)
 			SaveResponseToStorage(response, file_path)
 			SaveResults(elem, scraping, results)
@@ -50,7 +50,7 @@ func test(scraper_name string, scraper_version int) {
 		fmt.Println(err)
 	}
 	SaveResponseToFile(fileResponse)
-	httpResponse, newResults := runner(scraper_name, scraper_version, true)
+	httpResponse, newResults := Runner(scraper_name, scraper_version, true)
 	RemoveFile()
 	_ = httpResponse
 

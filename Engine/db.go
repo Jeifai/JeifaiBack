@@ -94,8 +94,8 @@ func (scraper *Scraper) Scraping() (scraping Scraping, err error) {
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	fmt.Println("Starting SaveResults...")
 	for _, elem := range results {
-		statement := "INSERT INTO results (scraper_id, scraping_id, title, url, created_at) VALUES ($1, $2, $3, $4, $5)"
-		_, err := Db.Exec(statement, scraper.Id, scraping.Id, elem.Title, elem.ResultUrl, time.Now())
+		statement := "INSERT INTO results (scraper_id, scraping_id, title, url, scraping_url, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
+		_, err := Db.Exec(statement, scraper.Id, scraping.Id, elem.Title, elem.ResultUrl, elem.ScrapingUrl, time.Now())
 		if err != nil {
 			return
 		}
@@ -115,15 +115,18 @@ func (test *Test) LatestScrapingByNameAndVersion() (err error) {
 // Get all the results belonging to a specific scraping session
 func (test *Test) ResultsByScraping() (results []Result, err error) {
 	fmt.Println("Starting ResultsByScraping...")
-	rows, err := Db.Query(`SELECT r.title, r.url
+	rows, err := Db.Query(`SELECT t.name, r.scraping_url, r.title, r.url
                             FROM results r
+                            LEFT JOIN scraping s ON(r.scraping_id = s.id)
+                            LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
+                            LEFT JOIN targets t ON(ss.target_id = t.id)
                             WHERE r.scraping_id = $1`, test.Scraping)
 	if err != nil {
 		return
 	}
 	for rows.Next() {
 		result := Result{}
-		if err = rows.Scan(&result.Title, &result.ResultUrl); err != nil {
+		if err = rows.Scan(&result.CompanyName, &result.ScrapingUrl, &result.Title, &result.ResultUrl); err != nil {
 			return
 		}
 		results = append(results, result)

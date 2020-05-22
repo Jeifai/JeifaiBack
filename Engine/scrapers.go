@@ -21,13 +21,13 @@ type Response struct {
 }
 
 type Result struct {
-	CompanyName string
-	CompanyUrl  string
-	Title       string
-	ResultUrl   string
+	CompanyName     string
+	ScrapingUrl     string
+	Title           string
+	ResultUrl       string
 }
 
-func runner(scraper_name string, scraper_version int, isTest bool) (response Response, result []Result) {
+func Runner(scraper_name string, scraper_version int, isTest bool) (response Response, result []Result) {
 	fmt.Println("Starting runner...")
 	runtime := Runtime{scraper_name}
 	strucReflected := reflect.ValueOf(runtime)
