@@ -73,3 +73,12 @@ func TestGetResponseFromStorage(t *testing.T) {
     got := GetResponseFromStorage(file_path)
     assert.Equal(t, got, want, "The two string should be the same")
 }
+
+func TestDbConnect(t *testing.T) {
+    type TempResult struct {MinUser int}
+    temp_result := TempResult{}
+    DbConnect()
+    err := Db.QueryRow(`SELECT MIN(s.id) FROM users s`).Scan(&temp_result.MinUser)
+    _ = err
+    assert.Equal(t, temp_result.MinUser, 1, "The two integer should be the same")   
+}
