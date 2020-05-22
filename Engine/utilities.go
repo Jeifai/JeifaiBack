@@ -1,24 +1,26 @@
 package main
 
 import (
-    "os"
-    "fmt"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
 )
 
 func Unique(result []Result) []Result {
-    var unique []Result
-    type key struct{ CompanyName, CompanyUrl, Title, ResultUrl string }
-    m := make(map[key]int)
-    for _, v := range result {
-        k := key{v.CompanyName, v.CompanyUrl, v.Title, v.ResultUrl}
-        if i, ok := m[k]; ok {
-            unique[i] = v
-        } else {
-            m[k] = len(unique)
-            unique = append(unique, v)
-        }
-    }
-    return unique
+	var unique []Result
+	type key struct{ CompanyName, CompanyUrl, Title, ResultUrl string }
+	m := make(map[key]int)
+	for _, v := range result {
+		k := key{v.CompanyName, v.CompanyUrl, v.Title, v.ResultUrl}
+		if i, ok := m[k]; ok {
+			unique[i] = v
+		} else {
+			m[k] = len(unique)
+			unique = append(unique, v)
+		}
+	}
+	return unique
 }
 
 func GenerateFilePath(scraper_name string, scraper_version int) (file_path string) {
@@ -27,7 +29,7 @@ func GenerateFilePath(scraper_name string, scraper_version int) (file_path strin
 }
 
 func SaveResponseToFile(response string) {
-    dir, err := os.Getwd()
+	dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -35,12 +37,12 @@ func SaveResponseToFile(response string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-    defer f.Close()
+	defer f.Close()
 	f.WriteString(response)
 }
 
 func RemoveFile() {
-    dir, err := os.Getwd()
+	dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-    DbConnect()
+	DbConnect()
 	// scrape("Babelforce")
 	test("Babelforce", 1)
 }
@@ -20,8 +20,8 @@ func scrape(scraper_name string) {
 			if err != nil {
 				return
 			}
-            response, results := runner(elem.Name, elem.Version, false)
-            file_path := GenerateFilePath(elem.Name, scraping.Id)
+			response, results := runner(elem.Name, elem.Version, false)
+			file_path := GenerateFilePath(elem.Name, scraping.Id)
 			SaveResponseToStorage(response, file_path)
 			SaveResults(elem, scraping, results)
 		}
@@ -36,38 +36,38 @@ type Test struct {
 }
 
 func test(scraper_name string, scraper_version int) {
-    test := Test{Name: scraper_name, Version: scraper_version}
+	test := Test{Name: scraper_name, Version: scraper_version}
 
 	err := test.LatestScrapingByNameAndVersion()
 	if err != nil {
 		fmt.Println(err)
-    }
+	}
 
-    file_path := GenerateFilePath(scraper_name, test.Scraping)
-    fileResponse := test.GetResponseFromStorage(file_path)
+	file_path := GenerateFilePath(scraper_name, test.Scraping)
+	fileResponse := test.GetResponseFromStorage(file_path)
 	storedResults, err := test.ResultsByScraping()
 	if err != nil {
 		fmt.Println(err)
 	}
 	SaveResponseToFile(fileResponse)
 	httpResponse, newResults := runner(scraper_name, scraper_version, true)
-    RemoveFile()
-    _ = httpResponse
+	RemoveFile()
+	_ = httpResponse
 
-    var bool_array []bool
+	var bool_array []bool
 	for _, stored_element := range storedResults {
-        for _, new_element := range newResults {
-            if stored_element.ResultUrl == new_element.ResultUrl {
-                bool_url := new_element.ResultUrl == stored_element.ResultUrl
-                bool_title := new_element.Title == stored_element.Title
-                bool_comparison := bool_url == bool_title
-                bool_array = append(bool_array, bool_comparison)
-            }
-        }
-    }
-    if len(storedResults) == len(bool_array) {
-        fmt.Println("TEST STATUS: OK")
-    } else {
-         fmt.Println("TEST STATUS: KO")       
-    }
+		for _, new_element := range newResults {
+			if stored_element.ResultUrl == new_element.ResultUrl {
+				bool_url := new_element.ResultUrl == stored_element.ResultUrl
+				bool_title := new_element.Title == stored_element.Title
+				bool_comparison := bool_url == bool_title
+				bool_array = append(bool_array, bool_comparison)
+			}
+		}
+	}
+	if len(storedResults) == len(bool_array) {
+		fmt.Println("TEST STATUS: OK")
+	} else {
+		fmt.Println("TEST STATUS: KO")
+	}
 }

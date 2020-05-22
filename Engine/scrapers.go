@@ -2,14 +2,14 @@ package main
 
 import (
 	"encoding/json"
-    "fmt"
-    "os"
+	"fmt"
 	"github.com/gocolly/colly"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"reflect"
-    "strings"
 	"strconv"
+	"strings"
 )
 
 type Runtime struct {
@@ -34,11 +34,11 @@ func runner(scraper_name string, scraper_version int, isTest bool) (response Res
 	method := strucReflected.MethodByName(scraper_name)
 	params := []reflect.Value{
 		reflect.ValueOf(scraper_version),
-        reflect.ValueOf(isTest)}
+		reflect.ValueOf(isTest)}
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
-    result = function_output[1].Interface().([]Result)
-    result = Unique(result)
+	result = function_output[1].Interface().([]Result)
+	result = Unique(result)
 	fmt.Println("Number of results scraped: " + strconv.Itoa(len(result)))
 	return
 }
@@ -70,18 +70,18 @@ func (runtime Runtime) Kununu(version int, isTest bool) (response Response, resu
 		})
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
-        })
-        c.OnRequest(func(r *colly.Request) {
-            fmt.Println("Visiting", r.URL.String())
-        })
-        c.OnError(func(r *colly.Response, err error) {
-            fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
-        })
+		})
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+		})
 		if isTest {
-            dir, err := os.Getwd()
-            if err != nil {
-                fmt.Println(err)
-            }
+			dir, err := os.Getwd()
+			if err != nil {
+				fmt.Println(err)
+			}
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(url)
@@ -91,33 +91,33 @@ func (runtime Runtime) Kununu(version int, isTest bool) (response Response, resu
 }
 
 func (runtime Runtime) Mitte(version int, isTest bool) (response Response, results []Result) {
-    var body []byte
+	var body []byte
 	url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
 	if isTest {
-        dir, err := os.Getwd()
-        if err != nil {
-            fmt.Println(err)
-        }
-        temp_body, err := ioutil.ReadFile(dir + "/response.html")
-        fmt.Println("Visiting", dir + "/response.html")
-        if err != nil {
-			panic(err.Error()) 
-        }
-        body = temp_body
-	} else {
-        res, err := http.Get(url)
-        fmt.Println("Visiting", url)
+		dir, err := os.Getwd()
+		if err != nil {
+			fmt.Println(err)
+		}
+		temp_body, err := ioutil.ReadFile(dir + "/response.html")
+		fmt.Println("Visiting", dir+"/response.html")
 		if err != nil {
 			panic(err.Error())
 		}
-        temp_body, err := ioutil.ReadAll(res.Body)
+		body = temp_body
+	} else {
+		res, err := http.Get(url)
+		fmt.Println("Visiting", url)
 		if err != nil {
 			panic(err.Error())
-        }
-        body = temp_body
-    }
+		}
+		temp_body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			panic(err.Error())
+		}
+		body = temp_body
+	}
 	if version == 1 {
-        response = Response{body}
+		response = Response{body}
 		type Postings struct {
 			Title string `json:"text"`
 			Url   string `json:"hostedUrl"`
@@ -132,7 +132,7 @@ func (runtime Runtime) Mitte(version int, isTest bool) (response Response, resul
 			fmt.Println(err)
 		}
 		for _, elem := range jsonJobs {
-            result_title := elem.Positions[0].Title
+			result_title := elem.Positions[0].Title
 			result_url := elem.Positions[0].Url
 			results = append(results, Result{
 				runtime.Name,
@@ -161,7 +161,7 @@ func (runtime Runtime) IMusician(version int, isTest bool) (response Response, r
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
-                result_url := e.Attr("href")
+				result_url := e.Attr("href")
 				results = append(results, Result{
 					runtime.Name,
 					url,
@@ -171,18 +171,18 @@ func (runtime Runtime) IMusician(version int, isTest bool) (response Response, r
 		})
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
-        })
-        c.OnRequest(func(r *colly.Request) {
-            fmt.Println("Visiting", r.URL.String())
-        })
-        c.OnError(func(r *colly.Response, err error) {
-            fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
-        })
+		})
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+		})
 		if isTest {
-            dir, err := os.Getwd()
-            if err != nil {
-                fmt.Println(err)
-            }
+			dir, err := os.Getwd()
+			if err != nil {
+				fmt.Println(err)
+			}
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(url)
@@ -209,28 +209,28 @@ func (runtime Runtime) Babelforce(version int, isTest bool) (response Response, 
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
-                result_url := e.ChildAttr(tag_url, "href")
+				result_url := e.ChildAttr(tag_url, "href")
 				results = append(results, Result{
 					runtime.Name,
 					url,
 					result_title,
 					result_url})
 			}
-        })
+		})
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
-        })
-        c.OnRequest(func(r *colly.Request) {
-            fmt.Println("Visiting", r.URL.String())
-        })
-        c.OnError(func(r *colly.Response, err error) {
-            fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
-        })
+		})
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+		})
 		if isTest {
-            dir, err := os.Getwd()
-            if err != nil {
-                fmt.Println(err)
-            }
+			dir, err := os.Getwd()
+			if err != nil {
+				fmt.Println(err)
+			}
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(url)
