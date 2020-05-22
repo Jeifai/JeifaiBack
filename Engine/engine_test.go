@@ -37,20 +37,22 @@ func TestSaveResponseToFile(t *testing.T) {
 }
 
 func TestRemoveFile(t *testing.T) {
-	want := "this is a test string"
-	SaveResponseToFile(want) // DO NOT USE THIS FUNCTON BUT os.
-	RemoveFile()
+    want := "this is a test string"
 	dir, err := os.Getwd()
+    f, err := os.Create(dir + "/response.html")
+	defer f.Close()
+    f.WriteString(want)
+	RemoveFile()
 	file, err := ioutil.ReadFile(dir + "/response.html")
-	_ = file
+    _ = file
 	if assert.Error(t, err) {
 		assert.NotNil(t, err, "The error should be nil")
 	}
 }
 
 func TestSaveResponseToStorage(t *testing.T) {
-    want := "this is a test"
-    file_path := "test/test.txt"
+    want := "this is a test to TestSaveResponseToStorage"
+    file_path := "test/TestSaveResponseToStorage.txt"
     response := Response{[]byte(want)}
     SaveResponseToStorage(response, file_path)
 	ctx := context.Background()
@@ -66,8 +68,8 @@ func TestSaveResponseToStorage(t *testing.T) {
 }
 
 func TestGetResponseFromStorage(t *testing.T) {
-    want := "this is a test"
-    file_path := "test/test.txt"
+    want := "this is a test to TestGetResponseFromStorage"
+    file_path := "test/TestGetResponseFromStorage.txt"
     got := GetResponseFromStorage(file_path)
     assert.Equal(t, got, want, "The two string should be the same")
 }
