@@ -44,7 +44,7 @@ func test(scraper_name string, scraper_version int) {
 	}
 
 	file_path := GenerateFilePath(scraper_name, test.Scraping)
-	fileResponse := test.GetResponseFromStorage(file_path)
+	fileResponse := GetResponseFromStorage(file_path)
 	storedResults, err := test.ResultsByScraping()
 	if err != nil {
 		fmt.Println(err)

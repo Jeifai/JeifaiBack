@@ -1,10 +1,13 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
+    "os"
+    "time"
+	"context"
+    "testing"
 	"io/ioutil"
-	"os"
-	"testing"
+    "cloud.google.com/go/storage"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnique(t *testing.T) {
@@ -35,7 +38,7 @@ func TestSaveResponseToFile(t *testing.T) {
 
 func TestRemoveFile(t *testing.T) {
 	want := "this is a test string"
-	SaveResponseToFile(want)
+	SaveResponseToFile(want) // DO NOT USE THIS FUNCTON BUT os.
 	RemoveFile()
 	dir, err := os.Getwd()
 	file, err := ioutil.ReadFile(dir + "/response.html")
@@ -43,4 +46,28 @@ func TestRemoveFile(t *testing.T) {
 	if assert.Error(t, err) {
 		assert.NotNil(t, err, "The error should be nil")
 	}
+}
+
+func TestSaveResponseToStorage(t *testing.T) {
+    want := "this is a test"
+    file_path := "test/test.txt"
+    response := Response{[]byte(want)}
+    SaveResponseToStorage(response, file_path)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+	rc, err := client.Bucket("jeifai").Object(file_path).NewReader(ctx)
+	defer rc.Close()
+    data, err := ioutil.ReadAll(rc)
+    _ = err
+	got := string(data)
+	assert.Equal(t, got, want, "The two string should be the same.")
+}
+
+func TestGetResponseFromStorage(t *testing.T) {
+    want := "this is a test"
+    file_path := "test/test.txt"
+    got := GetResponseFromStorage(file_path)
+    assert.Equal(t, got, want, "The two string should be the same")
 }

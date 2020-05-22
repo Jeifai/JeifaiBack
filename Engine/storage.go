@@ -28,7 +28,7 @@ func SaveResponseToStorage(response Response, file_path string) {
 	}
 }
 
-func (test *Test) GetResponseFromStorage(file_path string) (response string) {
+func GetResponseFromStorage(file_path string) (response string) {
 
 	fmt.Println("Starting GetResponseFromStorage...")
 
