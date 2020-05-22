@@ -8,7 +8,7 @@ import (
 func main() {
     DbConnect()
 	// scrape("Babelforce")
-	test("IMusician", 1)
+	test("Babelforce", 1)
 }
 func scrape(scraper_name string) {
 	scrapers, err := Scrapers()
@@ -21,8 +21,9 @@ func scrape(scraper_name string) {
 			if err != nil {
 				return
 			}
-			response, results := runner(elem.Name, elem.Version, false)
-			SaveResponseToStorage(elem, scraping, response)
+            response, results := runner(elem.Name, elem.Version, false)
+            file_path := GenerateFilePath(elem.Name, scraping.Id)
+			SaveResponseToStorage(elem, scraping, response, file_path)
 			SaveResults(elem, scraping, results)
 		}
 	}
@@ -36,8 +37,15 @@ type Test struct {
 }
 
 func test(scraper_name string, scraper_version int) {
-	test := Test{Name: scraper_name, Version: scraper_version}
-    fileResponse := test.GetResponseFromStorage()
+    test := Test{Name: scraper_name, Version: scraper_version}
+
+	err := test.LatestScrapingByNameAndVersion()
+	if err != nil {
+		fmt.Println(err)
+    }
+
+    file_path := GenerateFilePath(scraper_name, test.Scraping)
+    fileResponse := test.GetResponseFromStorage(file_path)
 	storedResults, err := test.ResultsByScraping()
 	if err != nil {
 		fmt.Println(err)

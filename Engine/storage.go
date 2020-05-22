@@ -17,16 +17,15 @@ func GenerateFilePath(scraper_name string, scraper_version int) (file_path strin
 	return
 }
 
-func SaveResponseToStorage(scraper Scraper, scraping Scraping, response Response) {
+func SaveResponseToStorage(scraper Scraper, scraping Scraping, response Response, file_path string) {
 
-	fmt.Println("Starting SaveResponseToStorage...")
-
-	file_path := GenerateFilePath(scraper.Name, scraping.Id)
+    fmt.Println("Starting SaveResponseToStorage...")
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel()
+    defer cancel()
+    
 	wc := client.Bucket("jeifai").Object(file_path).NewWriter(ctx)
 	if _, err = io.Copy(wc, bytes.NewReader(response.Html)); err != nil {
 		fmt.Println(err)
@@ -36,34 +35,26 @@ func SaveResponseToStorage(scraper Scraper, scraping Scraping, response Response
 	}
 }
 
-func (test *Test) GetResponseFromStorage() (response string) {
+func (test *Test) GetResponseFromStorage(file_path string) (response string) {
 
-	fmt.Println("Starting GetResponseFromStorage...")
-
-	err := test.LatestScrapingByNameAndVersion()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-    file_path := GenerateFilePath(test.Name, test.Scraping)
-    fmt.Println("Correctely loaded: " + file_path)
-
+    fmt.Println("Starting GetResponseFromStorage...")
+    
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel()
+    defer cancel()
+    
 	rc, err := client.Bucket("jeifai").Object(file_path).NewReader(ctx)
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer rc.Close()
-
+    defer rc.Close()
+    
 	data, err := ioutil.ReadAll(rc)
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	response = string(data)
-
+    response = string(data)
+    
 	return
 }
