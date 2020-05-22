@@ -25,7 +25,7 @@ type Scraper struct {
 
 var Db *sql.DB
 
-func init() {
+func DbConnect() {
 
 	// Load Environmental Variables
 	err := godotenv.Load()

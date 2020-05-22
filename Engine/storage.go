@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func generate_file_path(scraper_name string, scraper_version int) (file_path string) {
+func GenerateFilePath(scraper_name string, scraper_version int) (file_path string) {
 	file_path = filepath.Join(scraper_name, strconv.Itoa(scraper_version), "response.html")
 	return
 }
@@ -21,7 +21,7 @@ func SaveResponseToStorage(scraper Scraper, scraping Scraping, response Response
 
 	fmt.Println("Starting SaveResponseToStorage...")
 
-	file_path := generate_file_path(scraper.Name, scraping.Id)
+	file_path := GenerateFilePath(scraper.Name, scraping.Id)
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -45,7 +45,7 @@ func (test *Test) GetResponseFromStorage() (response string) {
 		fmt.Println(err)
 	}
 
-    file_path := generate_file_path(test.Name, test.Scraping)
+    file_path := GenerateFilePath(test.Name, test.Scraping)
     fmt.Println("Correctely loaded: " + file_path)
 
 	ctx := context.Background()

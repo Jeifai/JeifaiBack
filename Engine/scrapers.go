@@ -38,12 +38,12 @@ func runner(scraper_name string, scraper_version int, isTest bool) (response Res
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
     result = function_output[1].Interface().([]Result)
-    result = unique(result)
+    result = Unique(result)
 	fmt.Println("Number of results scraped: " + strconv.Itoa(len(result)))
 	return
 }
 
-func unique(result []Result) []Result {
+func Unique(result []Result) []Result {
     var unique []Result
     type key struct{ CompanyName, CompanyUrl, Title, ResultUrl string }
     m := make(map[key]int)

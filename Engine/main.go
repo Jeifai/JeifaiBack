@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+    DbConnect()
 	// scrape("Babelforce")
 	test("IMusician", 1)
 }
