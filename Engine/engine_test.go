@@ -3,6 +3,9 @@ package main
 import (
     "github.com/stretchr/testify/assert"
     "testing"
+    "io/ioutil"
+    "os"
+
 )
 
 func TestUnique(t *testing.T) {
@@ -20,4 +23,25 @@ func TestGenerateFilePath(t *testing.T) {
     got := GenerateFilePath("scraper_name", 1)
     want := "scraper_name/1/response.html"
     assert.Equal(t, got, want, "The two path should be the same.")    
+}
+
+func TestSaveResponseToFile(t *testing.T) {
+    want := "this is a test string"
+    SaveResponseToFile(want)
+    dir, err := os.Getwd()
+    got, err := ioutil.ReadFile(dir + "/response.html")
+    _ = err
+    assert.Equal(t, got, []byte(want), "The two string should be the same.")  
+}
+
+func TestRemoveFile(t *testing.T) {
+    want := "this is a test string"
+    SaveResponseToFile(want)
+    RemoveFile()
+    dir, err := os.Getwd()
+    file, err := ioutil.ReadFile(dir + "/response.html")
+    _ = file
+    if assert.Error(t, err) {
+        assert.NotNil(t, err, "The error should be nil")
+    }
 }
