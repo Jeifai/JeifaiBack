@@ -21,20 +21,22 @@ type Response struct {
 }
 
 type Result struct {
-	CompanyName     string
-	ScrapingUrl     string
-	Title           string
-	ResultUrl       string
+	CompanyName string
+	ScrapingUrl string
+	Title       string
+	ResultUrl   string
 }
 
-func Runner(scraper_name string, scraper_version int, isTest bool) (response Response, result []Result) {
-	fmt.Println("Starting runner...")
+func Scrape(
+	scraper_name string, scraper_version int, isLocal bool) (
+	response Response, result []Result) {
+	fmt.Println("Starting Scrape...")
 	runtime := Runtime{scraper_name}
 	strucReflected := reflect.ValueOf(runtime)
 	method := strucReflected.MethodByName(scraper_name)
 	params := []reflect.Value{
 		reflect.ValueOf(scraper_version),
-		reflect.ValueOf(isTest)}
+		reflect.ValueOf(isLocal)}
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
 	result = function_output[1].Interface().([]Result)
@@ -43,9 +45,11 @@ func Runner(scraper_name string, scraper_version int, isTest bool) (response Res
 	return
 }
 
-func (runtime Runtime) Kununu(version int, isTest bool) (response Response, results []Result) {
+func (runtime Runtime) Kununu(
+	version int, isLocal bool) (
+	response Response, results []Result) {
 	c := colly.NewCollector()
-	if isTest {
+	if isLocal {
 		t := &http.Transport{}
 		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
 		c.WithTransport(t)
@@ -75,9 +79,12 @@ func (runtime Runtime) Kununu(version int, isTest bool) (response Response, resu
 			fmt.Println("Visiting", r.URL.String())
 		})
 		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
 		})
-		if isTest {
+		if isLocal {
 			dir, err := os.Getwd()
 			if err != nil {
 				fmt.Println(err)
@@ -90,10 +97,12 @@ func (runtime Runtime) Kununu(version int, isTest bool) (response Response, resu
 	return
 }
 
-func (runtime Runtime) Mitte(version int, isTest bool) (response Response, results []Result) {
+func (runtime Runtime) Mitte(
+	version int, isLocal bool) (
+	response Response, results []Result) {
 	var body []byte
 	url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
-	if isTest {
+	if isLocal {
 		dir, err := os.Getwd()
 		if err != nil {
 			fmt.Println(err)
@@ -144,9 +153,11 @@ func (runtime Runtime) Mitte(version int, isTest bool) (response Response, resul
 	return
 }
 
-func (runtime Runtime) IMusician(version int, isTest bool) (response Response, results []Result) {
+func (runtime Runtime) IMusician(
+	version int, isLocal bool) (
+	response Response, results []Result) {
 	c := colly.NewCollector()
-	if isTest {
+	if isLocal {
 		t := &http.Transport{}
 		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
 		c.WithTransport(t)
@@ -176,9 +187,12 @@ func (runtime Runtime) IMusician(version int, isTest bool) (response Response, r
 			fmt.Println("Visiting", r.URL.String())
 		})
 		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
 		})
-		if isTest {
+		if isLocal {
 			dir, err := os.Getwd()
 			if err != nil {
 				fmt.Println(err)
@@ -191,9 +205,11 @@ func (runtime Runtime) IMusician(version int, isTest bool) (response Response, r
 	return
 }
 
-func (runtime Runtime) Babelforce(version int, isTest bool) (response Response, results []Result) {
+func (runtime Runtime) Babelforce(
+	version int, isLocal bool) (
+	response Response, results []Result) {
 	c := colly.NewCollector()
-	if isTest {
+	if isLocal {
 		t := &http.Transport{}
 		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
 		c.WithTransport(t)
@@ -224,9 +240,12 @@ func (runtime Runtime) Babelforce(version int, isTest bool) (response Response, 
 			fmt.Println("Visiting", r.URL.String())
 		})
 		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println("Request URL:", r.Request.URL, "failed with response:", r, "\nError:", err)
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
 		})
-		if isTest {
+		if isLocal {
 			dir, err := os.Getwd()
 			if err != nil {
 				fmt.Println(err)

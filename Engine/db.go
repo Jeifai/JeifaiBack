@@ -27,7 +27,6 @@ var Db *sql.DB
 
 func DbConnect() {
 
-	// Load Environmental Variables
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -45,27 +44,33 @@ func DbConnect() {
 	Db = db
 	if err != nil {
 		panic(err)
-    }
-    // Send a ping to make sure the database connection is alive.
-    if err = Db.Ping(); err != nil {
-        Db.Close()
-	    fmt.Println("Unsuccessfully connected to the database")
-        return
-    }
+	}
+
+	if err = Db.Ping(); err != nil {
+		Db.Close()
+		fmt.Println("Unsuccessfully connected to the database")
+		return
+	}
 	fmt.Println("Successfully connected to the database")
 }
 
-// Get all the scraper that need to be executed
-func Scrapers() (scrapers []Scraper, err error) {
-	fmt.Println("Starting Scrapers...")
-	rows, err := Db.Query(`SELECT s.name, MAX(s.version) AS version, MAX(s.id) AS id 
-                           FROM scrapers s GROUP BY 1;`)
+func GetScrapers() (scrapers []Scraper, err error) {
+	fmt.Println("Starting GetScrapers...")
+	rows, err := Db.Query(`SELECT
+                                s.name, 
+                                MAX(s.version) AS version, 
+                                MAX(s.id) AS id 
+                           FROM scrapers s
+                           GROUP BY 1;`)
 	if err != nil {
 		return
 	}
 	for rows.Next() {
 		scraper := Scraper{}
-		if err = rows.Scan(&scraper.Name, &scraper.Version, &scraper.Id); err != nil {
+		if err = rows.Scan(
+			&scraper.Name,
+			&scraper.Version,
+			&scraper.Id); err != nil {
 			return
 		}
 		scrapers = append(scrapers, scraper)
@@ -74,65 +79,79 @@ func Scrapers() (scrapers []Scraper, err error) {
 	return
 }
 
-// Get all the information about a scraper based on its name
 func (scraper *Scraper) ScraperByName() (err error) {
 	fmt.Println("Starting ScraperByName...")
 	err = Db.QueryRow(`SELECT s.id
-                       FROM scrapers s WHERE s.name=$1`, scraper.Name).Scan(&scraper.Id)
-	fmt.Println("Closing ScraperByName...")
+                       FROM scrapers s
+                       WHERE s.name=$1`, scraper.Name).Scan(&scraper.Id)
 	return
 }
 
-// Save in the database a new Scraping session and return its values
-func (scraper *Scraper) Scraping() (scraping Scraping, err error) {
-	statement := "insert into scraping (scraper_id, created_at) values ($1, $2) returning id, scraper_id, created_at"
+func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
+	fmt.Println("Starting StartScrapingSession...")
+	statement := `INSERT INTO scraping (scraper_id, created_at)
+                  VALUES ($1, $2) 
+                  RETURNING id, scraper_id, created_at`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
-	// use QueryRow to return a row and scan the returned id into the Session struct
-	err = stmt.QueryRow(scraper.Id, time.Now()).Scan(&scraping.Id, &scraping.ScraperId, &scraping.CreatedAt)
+	err = stmt.QueryRow(scraper.Id, time.Now()).Scan(
+		&scraping.Id, &scraping.ScraperId, &scraping.CreatedAt)
 	return
 }
 
-// Save all the results extracted
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	fmt.Println("Starting SaveResults...")
 	for _, elem := range results {
-		statement := "INSERT INTO results (scraper_id, scraping_id, title, url, scraping_url, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
-		_, err := Db.Exec(statement, scraper.Id, scraping.Id, elem.Title, elem.ResultUrl, elem.ScrapingUrl, time.Now())
+		statement := `INSERT INTO results 
+                        (scraper_id, scraping_id, 
+                            title, url, scraping_url, created_at)
+                      VALUES ($1, $2, $3, $4, $5, $6)`
+		_, err := Db.Exec(
+			statement, scraper.Id, scraping.Id, elem.Title,
+			elem.ResultUrl, elem.ScrapingUrl, time.Now())
 		if err != nil {
 			return
 		}
 	}
 }
 
-// Get the latest scraping session by scraper name and scraper version
-func LatestScrapingByNameAndVersion(scraper_name string, scraper_version int) (scraping int, err error) {
-    fmt.Println("Starting LatestScrapingByNameAndVersion...")
-	err = Db.QueryRow(`SELECT MAX(s.id) FROM scraping s 
-                        LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
-                        LEFT JOIN targets t ON(ss.target_id = t.id)
-                        WHERE t.name = $1 AND ss.version = $2;`, scraper_name, scraper_version).Scan(&scraping)
+func LastScrapingByNameVersion(
+	scraper_name string, scraper_version int) (scraping int, err error) {
+	fmt.Println("Starting LastScrapingByNameVersion...")
+	err = Db.QueryRow(`SELECT MAX(s.id)
+                       FROM scraping s 
+                       LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
+                       LEFT JOIN targets t ON(ss.target_id = t.id)
+                       WHERE t.name = $1 AND ss.version = $2;`,
+		scraper_name, scraper_version).Scan(&scraping)
 	return
 }
 
-// Get all the results belonging to a specific scraping session
 func ResultsByScraping(scraping int) (results []Result, err error) {
 	fmt.Println("Starting ResultsByScraping...")
-	rows, err := Db.Query(`SELECT t.name, r.scraping_url, r.title, r.url
-                            FROM results r
-                            LEFT JOIN scraping s ON(r.scraping_id = s.id)
-                            LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
-                            LEFT JOIN targets t ON(ss.target_id = t.id)
-                            WHERE r.scraping_id = $1`, scraping)
+	rows, err := Db.Query(`SELECT
+                                t.name, 
+                                r.scraping_url, 
+                                r.title, 
+                                r.url
+                           FROM results r
+                           LEFT JOIN scraping s ON(r.scraping_id = s.id)
+                           LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
+                           LEFT JOIN targets t ON(ss.target_id = t.id)
+                           WHERE r.scraping_id = $1`, scraping)
 	if err != nil {
 		return
 	}
 	for rows.Next() {
 		result := Result{}
-		if err = rows.Scan(&result.CompanyName, &result.ScrapingUrl, &result.Title, &result.ResultUrl); err != nil {
+		if err = rows.Scan(
+			&result.CompanyName,
+			&result.ScrapingUrl,
+			&result.Title,
+			&result.ResultUrl); err != nil {
 			return
 		}
 		results = append(results, result)
