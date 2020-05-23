@@ -55,13 +55,10 @@ func DbConnect() {
 	fmt.Println("Successfully connected to the database")
 }
 
-// Get all the scrapers and the latests versions
+// Get all the scraper that need to be executed
 func Scrapers() (scrapers []Scraper, err error) {
 	fmt.Println("Starting Scrapers...")
-    rows, err := Db.Query(`SELECT
-                                s.name,
-                                MAX(s.version) AS version,
-                                MAX(s.id) AS id 
+	rows, err := Db.Query(`SELECT s.name, MAX(s.version) AS version, MAX(s.id) AS id 
                            FROM scrapers s GROUP BY 1;`)
 	if err != nil {
 		return
@@ -77,37 +74,33 @@ func Scrapers() (scrapers []Scraper, err error) {
 	return
 }
 
-// Get the id of a scraper based on name
+// Get all the information about a scraper based on its name
 func (scraper *Scraper) ScraperByName() (err error) {
 	fmt.Println("Starting ScraperByName...")
 	err = Db.QueryRow(`SELECT s.id
-                       FROM scrapers s
-                       WHERE s.name=$1`, scraper.Name).Scan(&scraper.Id)
+                       FROM scrapers s WHERE s.name=$1`, scraper.Name).Scan(&scraper.Id)
+	fmt.Println("Closing ScraperByName...")
 	return
 }
 
 // Save in the database a new Scraping session and return its values
 func (scraper *Scraper) Scraping() (scraping Scraping, err error) {
-    statement := "INSERT INTO scraping
-                        (scraper_id, created_at)
-                  VALUES ($1, $2) 
-                  RETURNING id, scraper_id, created_at"
+	statement := "insert into scraping (scraper_id, created_at) values ($1, $2) returning id, scraper_id, created_at"
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
+	// use QueryRow to return a row and scan the returned id into the Session struct
 	err = stmt.QueryRow(scraper.Id, time.Now()).Scan(&scraping.Id, &scraping.ScraperId, &scraping.CreatedAt)
 	return
 }
 
-// Save all the results
+// Save all the results extracted
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	fmt.Println("Starting SaveResults...")
 	for _, elem := range results {
-        statement := "INSERT INTO results
-                            (scraper_id, scraping_id, title, url, scraping_url, created_at)
-                      VALUES ($1, $2, $3, $4, $5, $6)"
+		statement := "INSERT INTO results (scraper_id, scraping_id, title, url, scraping_url, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
 		_, err := Db.Exec(statement, scraper.Id, scraping.Id, elem.Title, elem.ResultUrl, elem.ScrapingUrl, time.Now())
 		if err != nil {
 			return
@@ -125,7 +118,7 @@ func LatestScrapingByNameAndVersion(scraper_name string, scraper_version int) (s
 	return
 }
 
-// Get all the results by scraping session
+// Get all the results belonging to a specific scraping session
 func ResultsByScraping(scraping int) (results []Result, err error) {
 	fmt.Println("Starting ResultsByScraping...")
 	rows, err := Db.Query(`SELECT t.name, r.scraping_url, r.title, r.url
