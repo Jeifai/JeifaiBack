@@ -32,15 +32,26 @@ func TestSaveResponseToFile(t *testing.T) {
 	want := "this is a test string"
 	SaveResponseToFile(want)
 	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
 	got, err := ioutil.ReadFile(dir + "/response.html")
-	_ = err
+	if err != nil {
+		panic(err.Error())
+	}
 	assert.Equal(t, got, []byte(want), "The two string should be the same.")
 }
 
 func TestRemoveFile(t *testing.T) {
 	want := "this is a test string"
 	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
 	f, err := os.Create(dir + "/response.html")
+	if err != nil {
+		panic(err.Error())
+	}
 	defer f.Close()
 	f.WriteString(want)
 	RemoveFile()
@@ -58,12 +69,20 @@ func TestSaveResponseToStorage(t *testing.T) {
 	SaveResponseToStorage(response, file_path)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
+	if err != nil {
+		panic(err.Error())
+	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 	rc, err := client.Bucket("jeifai").Object(file_path).NewReader(ctx)
+	if err != nil {
+		panic(err.Error())
+	}
 	defer rc.Close()
 	data, err := ioutil.ReadAll(rc)
-	_ = err
+	if err != nil {
+		panic(err.Error())
+	}
 	got := string(data)
 	assert.Equal(t, got, want, "The two string should be the same.")
 }
@@ -80,18 +99,28 @@ func TestDbConnect(t *testing.T) {
 	temp_result := TempResult{}
 	DbConnect()
 	err := Db.QueryRow(`SELECT MIN(s.id) FROM users s`).Scan(&temp_result.MinUser)
-	_ = err
+	if err != nil {
+		panic(err.Error())
+	}
 	assert.Equal(t, temp_result.MinUser, 1, "The two integer should be the same")
 }
 
 func TestScrape(t *testing.T) {
 	scrapers, err := GetScrapers()
-	_ = err
+	if err != nil {
+		panic(err.Error())
+	}
 	for _, elem := range scrapers {
 		scraping, err := LastScrapingByNameVersion(elem.Name, elem.Version)
+		if err != nil {
+			panic(err.Error())
+		}
 		file_path := GenerateFilePath(elem.Name, scraping)
 		fileResponse := GetResponseFromStorage(file_path)
 		got, err := ResultsByScraping(scraping)
+		if err != nil {
+			panic(err.Error())
+		}
 		SaveResponseToFile(fileResponse)
 		isLocal := true
 		httpResponse, want := Scrape(elem.Name, elem.Version, isLocal)
@@ -110,21 +139,27 @@ func TestScrape(t *testing.T) {
 
 func TestGetScrapers(t *testing.T) {
 	scrapers, err := GetScrapers()
-	_ = err
+	if err != nil {
+		panic(err.Error())
+	}
 	assert.Equal(
 		t, scrapers[0].Name, "IMusician", "The two string should be the same")
 }
 
 func TestLastScrapingByNameVersion(t *testing.T) {
 	last_scraping_version, err := LastScrapingByNameVersion("Mitte", 1)
-	_ = err
+	if err != nil {
+		panic(err.Error())
+	}
 	assert.Greater(
 		t, last_scraping_version, 1, "The last version should be bigger than 0")
 }
 
 func TestResultsByScraping(t *testing.T) {
 	results, err := ResultsByScraping(71)
-	_ = err
+	if err != nil {
+		panic(err.Error())
+	}
 	assert.Greater(
 		t, len(results), 1, "The last version should be bigger than 0")
 }

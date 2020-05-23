@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -33,11 +32,11 @@ func GenerateFilePath(
 func SaveResponseToFile(response string) {
 	dir, err := os.Getwd()
 	if err != nil {
-		fmt.Println(err)
+		panic(err.Error())
 	}
 	f, err := os.Create(dir + "/response.html")
 	if err != nil {
-		fmt.Println(err)
+		panic(err.Error())
 	}
 	defer f.Close()
 	f.WriteString(response)
@@ -46,10 +45,10 @@ func SaveResponseToFile(response string) {
 func RemoveFile() {
 	dir, err := os.Getwd()
 	if err != nil {
-		fmt.Println(err)
+		panic(err.Error())
 	}
-	err_2 := os.Remove(dir + "/response.html")
-	if err_2 != nil {
-		fmt.Println(err_2)
+	err = os.Remove(dir + "/response.html")
+	if err != nil {
+		panic(err.Error())
 	}
 }

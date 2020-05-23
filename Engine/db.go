@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"log"
 	"os"
 	"strconv"
 	"time"
@@ -29,11 +28,14 @@ func DbConnect() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		panic(err.Error())
 	}
 	dbhost := os.Getenv("DBHOST")
 	dbuser := os.Getenv("DBUSER")
 	dbport, err := strconv.ParseInt(os.Getenv("DBPORT"), 10, 64)
+	if err != nil {
+		panic(err.Error())
+	}
 	dbname := os.Getenv("DBNAME")
 	dbpassword := os.Getenv("DBPASSWORD")
 
@@ -41,10 +43,10 @@ func DbConnect() {
 		"password=%s dbname=%s sslmode=disable",
 		dbhost, dbport, dbuser, dbpassword, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
-	Db = db
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
+	Db = db
 
 	if err = Db.Ping(); err != nil {
 		Db.Close()
@@ -63,7 +65,7 @@ func GetScrapers() (scrapers []Scraper, err error) {
                            FROM scrapers s
                            GROUP BY 1;`)
 	if err != nil {
-		return
+		panic(err.Error())
 	}
 	for rows.Next() {
 		scraper := Scraper{}
@@ -86,11 +88,14 @@ func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
                   RETURNING id, scraper_id, created_at`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
-		return
+		panic(err.Error())
 	}
 	defer stmt.Close()
 	err = stmt.QueryRow(scraper.Id, time.Now()).Scan(
 		&scraping.Id, &scraping.ScraperId, &scraping.CreatedAt)
+	if err != nil {
+		panic(err.Error())
+	}
 	return
 }
 
@@ -105,7 +110,7 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 			statement, scraper.Id, scraping.Id, elem.Title,
 			elem.ResultUrl, elem.ScrapingUrl, time.Now())
 		if err != nil {
-			return
+			panic(err.Error())
 		}
 	}
 }
@@ -119,6 +124,9 @@ func LastScrapingByNameVersion(
                        LEFT JOIN targets t ON(ss.target_id = t.id)
                        WHERE t.name = $1 AND ss.version = $2;`,
 		scraper_name, scraper_version).Scan(&scraping)
+	if err != nil {
+		panic(err.Error())
+	}
 	return
 }
 
@@ -135,7 +143,7 @@ func ResultsByScraping(scraping int) (results []Result, err error) {
                            LEFT JOIN targets t ON(ss.target_id = t.id)
                            WHERE r.scraping_id = $1`, scraping)
 	if err != nil {
-		return
+		panic(err.Error())
 	}
 	for rows.Next() {
 		result := Result{}

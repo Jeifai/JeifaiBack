@@ -16,6 +16,9 @@ func SaveResponseToStorage(response Response, file_path string) {
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
+	if err != nil {
+		panic(err.Error())
+	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 
@@ -34,6 +37,9 @@ func GetResponseFromStorage(file_path string) (response string) {
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
+	if err != nil {
+		panic(err.Error())
+	}
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 
@@ -45,7 +51,7 @@ func GetResponseFromStorage(file_path string) (response string) {
 
 	data, err := ioutil.ReadAll(rc)
 	if err != nil {
-		fmt.Println(err)
+		panic(err.Error())
 	}
 	response = string(data)
 
