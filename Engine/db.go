@@ -79,14 +79,6 @@ func GetScrapers() (scrapers []Scraper, err error) {
 	return
 }
 
-func (scraper *Scraper) ScraperByName() (err error) {
-	fmt.Println("Starting ScraperByName...")
-	err = Db.QueryRow(`SELECT s.id
-                       FROM scrapers s
-                       WHERE s.name=$1`, scraper.Name).Scan(&scraper.Id)
-	return
-}
-
 func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
 	fmt.Println("Starting StartScrapingSession...")
 	statement := `INSERT INTO scraping (scraper_id, created_at)
