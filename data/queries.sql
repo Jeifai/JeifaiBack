@@ -26,3 +26,13 @@ ALTER TABLE jobs ADD COLUMN scraping_id integer references scraping(id);
 INSERT INTO targets (url, host, created_at, name) VALUES('https://www.babelforce.com/jobs/', 'https://www.babelforce.com', current_timestamp, 'Babelforce');
 SELECT id FROM targets WHERE name = 'Babelforce';
 INSERT INTO scrapers (name, version, target_id, created_at) VALUES('Babelforce', 1, 86, current_timestamp);
+
+/* Count results by scraping_id*/
+SELECT
+     s.id,
+     COUNT(r.id)
+FROM scraping s
+LEFT JOIN results r ON(s.id = r.scraping_id)
+GROUP BY 1 
+ORDER BY s.id 
+DESC LIMIT 5;

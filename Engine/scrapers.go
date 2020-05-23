@@ -270,3 +270,62 @@ func (runtime Runtime) Babelforce(
 	}
 	return
 }
+
+func (runtime Runtime) Zalando(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	var body []byte
+	url := "https://jobs.zalando.com/api/jobs/?limit=100&offset=0"
+	if isLocal {
+		dir, err := os.Getwd()
+		if err != nil {
+			panic(err.Error())
+		}
+		temp_body, err := ioutil.ReadFile(dir + "/response.html")
+		fmt.Println("Visiting", dir+"/response.html")
+		if err != nil {
+			panic(err.Error())
+		}
+		body = temp_body
+	} else {
+		res, err := http.Get(url)
+		fmt.Println("Visiting", url)
+		if err != nil {
+			panic(err.Error())
+		}
+		temp_body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			panic(err.Error())
+		}
+		body = temp_body
+	}
+	if version == 1 {
+		response = Response{body}
+		type Job struct {
+            Id      int     `json:"id"`
+            Title   string  `json:title`
+        }
+        type JsonJobs struct {
+            Data []Job `json:"data"`
+        }
+        var jsonJobs JsonJobs
+        err := json.Unmarshal(body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+        }
+        z_base_job_url := "https://jobs.zalando.com/de/jobs/"
+		for _, elem := range jsonJobs.Data {
+			result_title := elem.Title
+            result_url := z_base_job_url + strconv.Itoa(elem.Id)
+			_, err := netUrl.ParseRequestURI(result_url)
+			if err == nil {
+				results = append(results, Result{
+					runtime.Name,
+					url,
+					result_title,
+					result_url})
+			}
+		}
+	}
+	return
+}
