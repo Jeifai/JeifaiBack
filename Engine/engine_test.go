@@ -105,3 +105,10 @@ func TestScrape(t *testing.T) {
 	})
 	assert.ElementsMatch(t, got, want, "The two []Result should be the same.")
 }
+
+func TestGetScrapers(t *testing.T) {
+    scrapers, err := GetScrapers()
+    _ = err
+	assert.Equal(
+        t, scrapers[0].Name, "IMusician", "The two string should be the same")
+}
