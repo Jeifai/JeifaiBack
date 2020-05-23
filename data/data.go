@@ -35,6 +35,12 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+    // Send a ping to make sure the database connection is alive.
+    if err = Db.Ping(); err != nil {
+        Db.Close()
+	    fmt.Println("Unsuccessfully connected to the database")
+        return
+    }
 	fmt.Println("Successfully connected to the database")
 }
 
