@@ -85,30 +85,46 @@ func TestDbConnect(t *testing.T) {
 }
 
 func TestScrape(t *testing.T) {
-	scraper_name := "Kununu"
-	scraper_version := 1
-	scraping, err := LastScrapingByNameVersion(scraper_name, scraper_version)
-	file_path := GenerateFilePath(scraper_name, scraping)
-	fileResponse := GetResponseFromStorage(file_path)
-	got, err := ResultsByScraping(scraping)
-    SaveResponseToFile(fileResponse)
-    isLocal := true
-	httpResponse, want := Scrape(scraper_name, scraper_version, isLocal)
-	RemoveFile()
-	_ = httpResponse
+	scrapers, err := GetScrapers()
 	_ = err
-	sort.Slice(got, func(i, j int) bool {
-		return got[i].ResultUrl < got[j].ResultUrl
-	})
-	sort.Slice(want, func(i, j int) bool {
-		return want[i].ResultUrl < want[j].ResultUrl
-	})
-	assert.ElementsMatch(t, got, want, "The two []Result should be the same.")
+	for _, elem := range scrapers {
+		scraping, err := LastScrapingByNameVersion(elem.Name, elem.Version)
+		file_path := GenerateFilePath(elem.Name, scraping)
+		fileResponse := GetResponseFromStorage(file_path)
+		got, err := ResultsByScraping(scraping)
+		SaveResponseToFile(fileResponse)
+		isLocal := true
+		httpResponse, want := Scrape(elem.Name, elem.Version, isLocal)
+		RemoveFile()
+		_ = httpResponse
+		_ = err
+		sort.Slice(got, func(i, j int) bool {
+			return got[i].ResultUrl < got[j].ResultUrl
+		})
+		sort.Slice(want, func(i, j int) bool {
+			return want[i].ResultUrl < want[j].ResultUrl
+		})
+		assert.ElementsMatch(t, got, want, "The two []Result should be the same.")
+	}
 }
 
 func TestGetScrapers(t *testing.T) {
-    scrapers, err := GetScrapers()
-    _ = err
+	scrapers, err := GetScrapers()
+	_ = err
 	assert.Equal(
-        t, scrapers[0].Name, "IMusician", "The two string should be the same")
+		t, scrapers[0].Name, "IMusician", "The two string should be the same")
+}
+
+func TestLastScrapingByNameVersion(t *testing.T) {
+	last_scraping_version, err := LastScrapingByNameVersion("Mitte", 1)
+	_ = err
+	assert.Greater(
+		t, last_scraping_version, 1, "The last version should be bigger than 0")
+}
+
+func TestResultsByScraping(t *testing.T) {
+	results, err := ResultsByScraping(71)
+	_ = err
+	assert.Greater(
+		t, len(results), 1, "The last version should be bigger than 0")
 }

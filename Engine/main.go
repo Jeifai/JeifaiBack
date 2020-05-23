@@ -16,8 +16,8 @@ func main() {
 			scraping, err := elem.StartScrapingSession()
 			if err != nil {
 				return
-            }
-            isLocal := false
+			}
+			isLocal := false
 			response, results := Scrape(elem.Name, elem.Version, isLocal)
 			file_path := GenerateFilePath(elem.Name, scraping.Id)
 			SaveResponseToStorage(response, file_path)
