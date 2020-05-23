@@ -39,9 +39,9 @@ func Scrape(
 		reflect.ValueOf(isLocal)}
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
-	result = function_output[1].Interface().([]Result)
-	result = Unique(result)
-	fmt.Println("Number of results scraped: " + strconv.Itoa(len(result)))
+	results = function_output[1].Interface().([]Result)
+	results = Unique(result)
+	fmt.Println("Number of results scraped: " + strconv.Itoa(len(results)))
 	return
 }
 
