@@ -7,11 +7,11 @@ import (
 	"strconv"
 )
 
-func Unique(result []Result) []Result {
+func Unique(results []Result) []Result {
 	var unique []Result
 	type key struct{ CompanyName, ScrapingUrl, Title, ResultUrl string }
 	m := make(map[key]int)
-	for _, v := range result {
+	for _, v := range results {
 		k := key{v.CompanyName, v.ScrapingUrl, v.Title, v.ResultUrl}
 		if i, ok := m[k]; ok {
 			unique[i] = v

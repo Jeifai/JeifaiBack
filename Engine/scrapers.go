@@ -1,15 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/gocolly/colly"
+	"encoding/json"
 	"io/ioutil"
-	"net/http"
-	"os"
-	"reflect"
+    "net/http"
 	"strconv"
 	"strings"
+	"reflect"
+    netUrl "net/url"
+	"fmt"
+	"os"
 )
 
 type Runtime struct {
@@ -29,7 +30,7 @@ type Result struct {
 
 func Scrape(
 	scraper_name string, scraper_version int, isLocal bool) (
-	response Response, result []Result) {
+	response Response, results []Result) {
 	fmt.Println("Starting Scrape...")
 	runtime := Runtime{scraper_name}
 	strucReflected := reflect.ValueOf(runtime)
@@ -40,7 +41,7 @@ func Scrape(
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
 	results = function_output[1].Interface().([]Result)
-	results = Unique(result)
+	results = Unique(results)
 	fmt.Println("Number of results scraped: " + strconv.Itoa(len(results)))
 	return
 }
@@ -64,13 +65,16 @@ func (runtime Runtime) Kununu(
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
-				result_url := e.ChildAttr(tag_url, "href")
-				results = append(results, Result{
-					runtime.Name,
-					url,
-					result_title,
-					result_url})
-			}
+                result_url := e.ChildAttr(tag_url, "href")
+                _, err := netUrl.ParseRequestURI(result_url)
+                if err == nil {
+                    results = append(results, Result{
+                        runtime.Name,
+                        url,
+                        result_title,
+                        result_url})
+                }
+            }
 		})
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
@@ -142,12 +146,15 @@ func (runtime Runtime) Mitte(
 		}
 		for _, elem := range jsonJobs {
 			result_title := elem.Positions[0].Title
-			result_url := elem.Positions[0].Url
-			results = append(results, Result{
-				runtime.Name,
-				url,
-				result_title,
-				result_url})
+            result_url := elem.Positions[0].Url   
+            _, err := netUrl.ParseRequestURI(result_url)
+            if err == nil {
+                results = append(results, Result{
+                    runtime.Name,
+                    url,
+                    result_title,
+                    result_url})
+            }
 		}
 	}
 	return
@@ -173,12 +180,15 @@ func (runtime Runtime) IMusician(
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
 				result_url := e.Attr("href")
-				results = append(results, Result{
-					runtime.Name,
-					url,
-					result_title,
-					result_url})
-			}
+                _, err := netUrl.ParseRequestURI(result_url)
+                if err == nil {
+                    results = append(results, Result{
+                        runtime.Name,
+                        url,
+                        result_title,
+                        result_url})
+                }
+            }
 		})
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
@@ -226,12 +236,15 @@ func (runtime Runtime) Babelforce(
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
 				result_url := e.ChildAttr(tag_url, "href")
-				results = append(results, Result{
-					runtime.Name,
-					url,
-					result_title,
-					result_url})
-			}
+                _, err := netUrl.ParseRequestURI(result_url)
+                if err == nil {
+                    results = append(results, Result{
+                        runtime.Name,
+                        url,
+                        result_title,
+                        result_url})
+                }
+            }
 		})
 		c.OnResponse(func(r *colly.Response) {
 			response = Response{r.Body}
