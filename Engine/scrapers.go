@@ -271,61 +271,56 @@ func (runtime Runtime) Babelforce(
 	return
 }
 
-func (runtime Runtime) Zalando(
-	version int, isLocal bool) (
-	response Response, results []Result) {
-	var body []byte
-	url := "https://jobs.zalando.com/api/jobs/?limit=100&offset=0"
-	if isLocal {
-		dir, err := os.Getwd()
-		if err != nil {
-			panic(err.Error())
-		}
-		temp_body, err := ioutil.ReadFile(dir + "/response.html")
-		fmt.Println("Visiting", dir+"/response.html")
-		if err != nil {
-			panic(err.Error())
-		}
-		body = temp_body
-	} else {
-		res, err := http.Get(url)
-		fmt.Println("Visiting", url)
-		if err != nil {
-			panic(err.Error())
-		}
-		temp_body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			panic(err.Error())
-		}
-		body = temp_body
-	}
-	if version == 1 {
-		response = Response{body}
-		type Job struct {
-            Id      int     `json:"id"`
-            Title   string  `json:title`
+func (runtime Runtime) Zalando(version int, isLocal bool) (response Response, results []Result) {
+
+	var first_body []byte
+    z_base_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset="
+
+
+    res, err := http.Get(z_base_url + "0")
+    temp_body, err := ioutil.ReadAll(res.Body)
+    first_body = temp_body
+
+
+    type Job struct {
+        Id          int     `json:"id"`
+        Title       string  `json:title`
+    }
+    type JsonJobs struct {
+        Data    []Job   `json:"data"`
+        Last    string  `json:last`
+    }
+
+    var jsonJobs_1 JsonJobs
+    err = json.Unmarshal(first_body, &jsonJobs_1)
+    offset, err := strconv.Atoi(strings.Split(jsonJobs_1.Last, "offset=")[1])
+
+
+    for i := 1; i < (offset / 100) + 1; i++ {
+        temp_z_url := z_base_url + strconv.Itoa(i * 100)
+        res, err := http.Get(temp_z_url)
+        temp_body, err := ioutil.ReadAll(res.Body)
+        var tempJsonJobs_2 JsonJobs
+        err = json.Unmarshal(temp_body, &tempJsonJobs_2)
+        _ = err
+        jsonJobs_1.Data = append(jsonJobs_1.Data, tempJsonJobs_2.Data...)
+    }
+
+    response_json, err := json.Marshal(jsonJobs_1)
+    response = Response{[]byte(response_json)}
+    _ = err
+
+    for i, elem := range jsonJobs_1.Data {
+        result_title := elem.Title
+        result_url := "https://jobs.zalando.com/de/jobs/" + strconv.Itoa(elem.Id)
+        _, err := netUrl.ParseRequestURI(result_url)
+        if err == nil {
+            results = append(results, Result{
+                runtime.Name,
+                z_base_url + strconv.Itoa((i / 100) * 100),
+                result_title,
+                result_url})
         }
-        type JsonJobs struct {
-            Data []Job `json:"data"`
-        }
-        var jsonJobs JsonJobs
-        err := json.Unmarshal(body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-        }
-        z_base_job_url := "https://jobs.zalando.com/de/jobs/"
-		for _, elem := range jsonJobs.Data {
-			result_title := elem.Title
-            result_url := z_base_job_url + strconv.Itoa(elem.Id)
-			_, err := netUrl.ParseRequestURI(result_url)
-			if err == nil {
-				results = append(results, Result{
-					runtime.Name,
-					url,
-					result_title,
-					result_url})
-			}
-		}
-	}
+    }
 	return
 }
