@@ -85,27 +85,17 @@ func TestDbConnect(t *testing.T) {
 }
 
 func TestRunner(t *testing.T) {
-    scraper_name := "Mitte"
+    scraper_name := "Kununu"
     scraper_version := 1
-    /**
-    type Test struct {
-        Name     string
-        Version  int
-        FilePath string
-        Scraping int
-    }
-    */
-	test := Test{Name: scraper_name, Version: scraper_version}
-	err := test.LatestScrapingByNameAndVersion()
-	file_path := GenerateFilePath(scraper_name, test.Scraping)
+	scraping, err := LatestScrapingByNameAndVersion(scraper_name, scraper_version)
+    file_path := GenerateFilePath(scraper_name, scraping)
 	fileResponse := GetResponseFromStorage(file_path)
-	got, err := test.ResultsByScraping()
+	got, err := ResultsByScraping(scraping)
 	SaveResponseToFile(fileResponse)
 	httpResponse, want := Runner(scraper_name, scraper_version, true)
 	RemoveFile()
     _ = httpResponse
     _ = err
-
     sort.Slice(got, func(i, j int) bool { return got[i].ResultUrl < got[j].ResultUrl })
     sort.Slice(want, func(i, j int) bool { return want[i].ResultUrl < want[j].ResultUrl })
 	assert.ElementsMatch(t, got, want, "The two []Result should be the same.")

@@ -103,24 +103,24 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 }
 
 // Get the latest scraping session by scraper name and scraper version
-func (test *Test) LatestScrapingByNameAndVersion() (err error) {
-	fmt.Println("Starting LatestScrapingByNameAndVersion...")
+func LatestScrapingByNameAndVersion(scraper_name string, scraper_version int) (scraping int, err error) {
+    fmt.Println("Starting LatestScrapingByNameAndVersion...")
 	err = Db.QueryRow(`SELECT MAX(s.id) FROM scraping s 
                         LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
                         LEFT JOIN targets t ON(ss.target_id = t.id)
-                        WHERE t.name = $1 AND ss.version = $2;`, test.Name, test.Version).Scan(&test.Scraping)
+                        WHERE t.name = $1 AND ss.version = $2;`, scraper_name, scraper_version).Scan(&scraping)
 	return
 }
 
 // Get all the results belonging to a specific scraping session
-func (test *Test) ResultsByScraping() (results []Result, err error) {
+func ResultsByScraping(scraping int) (results []Result, err error) {
 	fmt.Println("Starting ResultsByScraping...")
 	rows, err := Db.Query(`SELECT t.name, r.scraping_url, r.title, r.url
                             FROM results r
                             LEFT JOIN scraping s ON(r.scraping_id = s.id)
                             LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
                             LEFT JOIN targets t ON(ss.target_id = t.id)
-                            WHERE r.scraping_id = $1`, test.Scraping)
+                            WHERE r.scraping_id = $1`, scraping)
 	if err != nil {
 		return
 	}
