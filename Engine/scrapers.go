@@ -290,7 +290,8 @@ func (runtime Runtime) Zalando(
 			if err != nil {
 				panic(err.Error())
 			}
-			body, err := ioutil.ReadFile(dir + "/response.html")
+            body, err := ioutil.ReadFile(dir + "/response.html")
+            fmt.Println("Visiting", dir+"/response.html")
 			if err != nil {
 				panic(err.Error())
 			}
@@ -300,7 +301,8 @@ func (runtime Runtime) Zalando(
 			}
 		} else {
 			var first_body []byte
-			res, err := http.Get(z_base_url + "0")
+            res, err := http.Get(z_base_url + "0")
+            fmt.Println("Visiting ", z_base_url + "0")
 			if err != nil {
 				panic(err.Error())
 			}
@@ -321,7 +323,8 @@ func (runtime Runtime) Zalando(
 
 			for i := 1; i < (offset/100)+1; i++ {
 				temp_z_url := z_base_url + strconv.Itoa(i*100)
-				res, err := http.Get(temp_z_url)
+                res, err := http.Get(temp_z_url)
+                fmt.Println("Visiting ", temp_z_url)
 				if err != nil {
 					panic(err.Error())
 				}
