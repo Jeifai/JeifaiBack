@@ -346,7 +346,7 @@ func (runtime Runtime) Zalando(
 		}
 		for i, elem := range jsonJobs_1.Data {
 			result_title := elem.Title
-			z_base_result_url = "https://jobs.zalando.com/de/jobs/"
+			z_base_result_url := "https://jobs.zalando.com/de/jobs/"
 			result_url := z_base_result_url + strconv.Itoa(elem.Id)
 			_, err := netUrl.ParseRequestURI(result_url)
 			if err == nil {
