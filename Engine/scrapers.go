@@ -273,54 +273,57 @@ func (runtime Runtime) Babelforce(
 
 func (runtime Runtime) Zalando(version int, isLocal bool) (response Response, results []Result) {
 
-	var first_body []byte
-    z_base_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset="
+    if version == 1 {
+        z_base_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset="
+        type Job struct {
+            Id          int     `json:"id"`
+            Title       string  `json:title`
+        }
+        type JsonJobs struct {
+            Data    []Job   `json:"data"`
+            Last    string  `json:last`
+        }
+        var jsonJobs_1 JsonJobs
+        if isLocal {
+            dir, err := os.Getwd()
+            body, err := ioutil.ReadFile(dir + "/response.html")
+            _ = err
+            err = json.Unmarshal(body, &jsonJobs_1)
+        } else {
+            var first_body []byte
+            res, err := http.Get(z_base_url + "0")
+            temp_body, err := ioutil.ReadAll(res.Body)
+            first_body = temp_body
+            err = json.Unmarshal(first_body, &jsonJobs_1)
+            offset, err := strconv.Atoi(strings.Split(jsonJobs_1.Last, "offset=")[1])
 
+            for i := 1; i < (offset / 100) + 1; i++ {
+                temp_z_url := z_base_url + strconv.Itoa(i * 100)
+                res, err := http.Get(temp_z_url)
+                temp_body, err := ioutil.ReadAll(res.Body)
+                var tempJsonJobs_2 JsonJobs
+                err = json.Unmarshal(temp_body, &tempJsonJobs_2)
+                _ = err
+                jsonJobs_1.Data = append(jsonJobs_1.Data, tempJsonJobs_2.Data...)
+            }
 
-    res, err := http.Get(z_base_url + "0")
-    temp_body, err := ioutil.ReadAll(res.Body)
-    first_body = temp_body
-
-
-    type Job struct {
-        Id          int     `json:"id"`
-        Title       string  `json:title`
-    }
-    type JsonJobs struct {
-        Data    []Job   `json:"data"`
-        Last    string  `json:last`
-    }
-
-    var jsonJobs_1 JsonJobs
-    err = json.Unmarshal(first_body, &jsonJobs_1)
-    offset, err := strconv.Atoi(strings.Split(jsonJobs_1.Last, "offset=")[1])
-
-
-    for i := 1; i < (offset / 100) + 1; i++ {
-        temp_z_url := z_base_url + strconv.Itoa(i * 100)
-        res, err := http.Get(temp_z_url)
-        temp_body, err := ioutil.ReadAll(res.Body)
-        var tempJsonJobs_2 JsonJobs
-        err = json.Unmarshal(temp_body, &tempJsonJobs_2)
-        _ = err
-        jsonJobs_1.Data = append(jsonJobs_1.Data, tempJsonJobs_2.Data...)
-    }
-
-    response_json, err := json.Marshal(jsonJobs_1)
-    response = Response{[]byte(response_json)}
-    _ = err
-
-    for i, elem := range jsonJobs_1.Data {
-        result_title := elem.Title
-        result_url := "https://jobs.zalando.com/de/jobs/" + strconv.Itoa(elem.Id)
-        _, err := netUrl.ParseRequestURI(result_url)
-        if err == nil {
-            results = append(results, Result{
-                runtime.Name,
-                z_base_url + strconv.Itoa((i / 100) * 100),
-                result_title,
-                result_url})
+            response_json, err := json.Marshal(jsonJobs_1)
+            response = Response{[]byte(response_json)}
+            _ = err
+        }
+        for i, elem := range jsonJobs_1.Data {
+            result_title := elem.Title
+            result_url := "https://jobs.zalando.com/de/jobs/" + strconv.Itoa(elem.Id)
+            _, err := netUrl.ParseRequestURI(result_url)
+            if err == nil {
+                results = append(results, Result{
+                    runtime.Name,
+                    z_base_url + strconv.Itoa((i / 100) * 100),
+                    result_title,
+                    result_url})
+            }
         }
     }
+
 	return
 }
