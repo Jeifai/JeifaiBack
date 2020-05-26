@@ -1,17 +1,17 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/gocolly/colly"
+	netUrl "net/url"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	netUrl "net/url"
-	"os"
+	"strings"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
+	"fmt"
+	"os"
 )
 
 type Runtime struct {
@@ -113,7 +113,7 @@ func (runtime Runtime) Mitte(
 			panic(err.Error())
 		}
 		temp_body, err := ioutil.ReadFile(dir + "/response.html")
-		fmt.Println("Visiting", dir+"/response.html")
+		fmt.Println("Visiting", dir + "/response.html")
 		if err != nil {
 			panic(err.Error())
 		}
@@ -292,7 +292,7 @@ func (runtime Runtime) Zalando(
 				panic(err.Error())
 			}
 			body, err := ioutil.ReadFile(dir + "/response.html")
-			fmt.Println("Visiting", dir+"/response.html")
+			fmt.Println("Visiting", dir + "/response.html")
 			if err != nil {
 				panic(err.Error())
 			}
@@ -303,7 +303,7 @@ func (runtime Runtime) Zalando(
 		} else {
 			var first_body []byte
 			res, err := http.Get(z_base_url + "0")
-			fmt.Println("Visiting ", z_base_url+"0")
+			fmt.Println("Visiting ", z_base_url + "0")
 			if err != nil {
 				panic(err.Error())
 			}
@@ -368,62 +368,93 @@ func (runtime Runtime) Zalando(
 }
 
 func (runtime Runtime) Google(version int, isLocal bool) (response Response, results []Result) {
-	// Initialise the scrape
-	g_base_url := "https://careers.google.com/api/jobs/jobs-v1/search/?page_size=100&page="
-	type Job struct {
-		Id    string `json:"job_id"`
-		Title string `json:"job_title"`
-	}
-	type JsonJobs struct {
-		Jobs  []Job  `json:"jobs"`
-		Count string `json:"count"`
-		Next  string `json:"next_page"`
-	}
-	var jsonJobs_1 JsonJobs
+    
+	if version == 1 {
+        g_base_url := "https://careers.google.com/api/jobs/jobs-v1/search/?page_size=100&page="
+        type Job struct {
+            Id    string `json:"job_id"`
+            Title string `json:"job_title"`
+        }
+        type JsonJobs struct {
+            Jobs  []Job  `json:"jobs"`
+            Count string `json:"count"`
+            Next  string `json:"next_page"`
+        }
+        var jsonJobs_1 JsonJobs
+		if isLocal {
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			body, err := ioutil.ReadFile(dir + "/response.html")
+			fmt.Println("Visiting", dir + "/response.html")
+			if err != nil {
+				panic(err.Error())
+			}
+			err = json.Unmarshal(body, &jsonJobs_1)
+			if err != nil {
+				panic(err.Error())
+			}
+		} else {
+            var first_body []byte
+            res, err := http.Get(g_base_url + "1")
+            if err != nil {
+				panic(err.Error())
+			}
+            fmt.Println("Visiting ", g_base_url + "1")
+            temp_body, err := ioutil.ReadAll(res.Body)
+            if err != nil {
+				panic(err.Error())
+			}
+            first_body = temp_body
+            err = json.Unmarshal(first_body, &jsonJobs_1)
+            if err != nil {
+				panic(err.Error())
+			}
 
-	// Scrape the first page
-	var first_body []byte
-	res, err := http.Get(g_base_url + "1")
-	fmt.Println("Visiting ", g_base_url+"1")
-	temp_body, err := ioutil.ReadAll(res.Body)
-	first_body = temp_body
-	err = json.Unmarshal(first_body, &jsonJobs_1)
+            in_count_results, err := strconv.Atoi(jsonJobs_1.Count)
+            for i := 2; i < in_count_results/100+2; i++ {
+                temp_g_url := g_base_url + strconv.Itoa(i)
+                res, err := http.Get(temp_g_url)
+                fmt.Println("Visiting", temp_g_url)
+                if err != nil {
+				    panic(err.Error())
+			    }
+                temp_body, err := ioutil.ReadAll(res.Body)
+                if err != nil {
+                    panic(err.Error())
+                }
+                var tempJsonJobs_2 JsonJobs
+                err = json.Unmarshal(temp_body, &tempJsonJobs_2)
+                if err != nil {
+				    panic(err.Error())
+			    }
+                jsonJobs_1.Jobs = append(jsonJobs_1.Jobs, tempJsonJobs_2.Jobs...)
+                time.Sleep(2 * time.Second)
+            }
 
-	_ = err
+        }
 
-	fmt.Println(jsonJobs_1)
+        response_json, err := json.Marshal(jsonJobs_1)
+        if err != nil {
+            panic(err.Error())
+        }
+        response = Response{[]byte(response_json)}
 
-	in_count_results, err := strconv.Atoi(jsonJobs_1.Count)
-	// Iterate through pages
-	for i := 2; i < in_count_results/100+2; i++ {
-		temp_g_url := g_base_url + strconv.Itoa(i)
-		res, err := http.Get(temp_g_url)
-		fmt.Println("Visiting ", temp_g_url)
-		temp_body, err := ioutil.ReadAll(res.Body)
-		var tempJsonJobs_2 JsonJobs
-		err = json.Unmarshal(temp_body, &tempJsonJobs_2)
-		jsonJobs_1.Jobs = append(jsonJobs_1.Jobs, tempJsonJobs_2.Jobs...)
-		time.Sleep(2 * time.Second)
-		_ = err
-	}
-
-	response_json, err := json.Marshal(jsonJobs_1)
-	response = Response{[]byte(response_json)}
-
-	// Save the data
-	for i, elem := range jsonJobs_1.Jobs {
-		result_title := elem.Title
-		g_base_result_url := "https://careers.google.com/jobs/results/"
-		result_url := g_base_result_url + strings.Split(elem.Id, "/")[1]
-		_, err := netUrl.ParseRequestURI(result_url)
-		if err == nil {
-			results = append(results, Result{
-				runtime.Name,
-				g_base_url + strconv.Itoa((i / 100)),
-				result_title,
-				result_url})
-		}
-	}
-
+        // Save the data
+        for i, elem := range jsonJobs_1.Jobs {
+            result_title := elem.Title
+            g_base_result_url := "https://careers.google.com/jobs/results/"
+            result_url := g_base_result_url + strings.Split(elem.Id, "/")[1]
+            _, err := netUrl.ParseRequestURI(result_url)
+            if err == nil {
+                results = append(results, Result{
+                    runtime.Name,
+                    g_base_url + strconv.Itoa((i / 100)),
+                    result_title,
+                    result_url})
+            }
+        }
+    }
 	return
 }

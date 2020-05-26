@@ -29,7 +29,7 @@ INSERT INTO targets (url, host, created_at, name) VALUES('https://www.babelforce
 SELECT id FROM targets WHERE name = 'Babelforce';
 INSERT INTO scrapers (name, version, target_id, created_at) VALUES('Babelforce', 1, 86, current_timestamp);
 
-/* Count results by scraping_id*/
+/* Count results by last scraping_id*/
 SELECT
      s.id,
      COUNT(r.id)
@@ -37,4 +37,15 @@ FROM scraping s
 LEFT JOIN results r ON(s.id = r.scraping_id)
 GROUP BY 1 
 ORDER BY s.id 
+DESC LIMIT 5;
+
+/* Count results by scrapers name*/
+SELECT
+     ss.name,
+     COUNT(r.id)
+FROM scraping s
+LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
+LEFT JOIN results r ON(s.id = r.scraping_id)
+GROUP BY 1 
+ORDER BY ss.name 
 DESC LIMIT 5;
