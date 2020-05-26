@@ -1,7 +1,7 @@
 package main
 
 import (
-    "fmt"
+// "fmt"
 )
 
 func main() {
@@ -18,8 +18,8 @@ func main() {
 				panic(err.Error())
 			}
 			isLocal := false
-            response, results := Scrape(elem.Name, elem.Version, isLocal)
-            file_path := GenerateFilePath(elem.Name, scraping.Id)
+			response, results := Scrape(elem.Name, elem.Version, isLocal)
+			file_path := GenerateFilePath(elem.Name, scraping.Id)
 			SaveResults(elem, scraping, results)
 			SaveResponseToStorage(response, file_path)
 		}
