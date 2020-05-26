@@ -1,12 +1,12 @@
 package main
 
 import (
-// "fmt"
+    "fmt"
 )
 
 func main() {
 	DbConnect()
-	scraper_name := "Mitte"
+	scraper_name := "Soundcloud"
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
@@ -18,7 +18,7 @@ func main() {
 				panic(err.Error())
 			}
 			isLocal := false
-			response, results := Scrape(elem.Name, elem.Version, isLocal)
+            response, results := Scrape(elem.Name, elem.Version, isLocal)
             file_path := GenerateFilePath(elem.Name, scraping.Id)
 			SaveResults(elem, scraping, results)
 			SaveResponseToStorage(response, file_path)

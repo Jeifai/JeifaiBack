@@ -12,7 +12,9 @@ import (
 
 func SaveResponseToStorage(response Response, file_path string) {
 
-	fmt.Println("Starting SaveResponseToStorage...")
+    fmt.Println("Starting SaveResponseToStorage...")
+    
+    fmt.Println(file_path)
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)

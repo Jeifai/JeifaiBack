@@ -367,7 +367,8 @@ func (runtime Runtime) Zalando(
 	return
 }
 
-func (runtime Runtime) Google(version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Google(
+    version int, isLocal bool) (response Response, results []Result) {
     
 	if version == 1 {
         g_base_url := "https://careers.google.com/api/jobs/jobs-v1/search/?page_size=100&page="
@@ -456,5 +457,61 @@ func (runtime Runtime) Google(version int, isLocal bool) (response Response, res
             }
         }
     }
+	return
+}
+
+func (runtime Runtime) Soundcloud(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	c := colly.NewCollector()
+	if isLocal {
+		t := &http.Transport{}
+		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+		c.WithTransport(t)
+	}
+	if version == 1 {
+		url := "https://boards.greenhouse.io/embed/job_board?for=soundcloud71"
+        main_tag := "div"
+        main_tag_attr := "class"
+        main_tag_value := "opening"
+        tag_title := "a"
+        tag_url := "a"
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+				result_title := e.ChildText(tag_title)
+                result_url := e.ChildAttr(tag_url, "href")
+				_, err := netUrl.ParseRequestURI(result_url)
+				if err == nil {
+					results = append(results, Result{
+						runtime.Name,
+						url,
+						result_title,
+						result_url})
+				}
+			}
+		})
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+		if isLocal {
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
 	return
 }
