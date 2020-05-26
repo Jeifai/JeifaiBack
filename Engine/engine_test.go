@@ -176,10 +176,10 @@ func TestLastScrapingByNameVersion(t *testing.T) {
 
 func TestResultsByScraping(t *testing.T) {
 	fmt.Println("\n\nTestResultsByScraping")
-	results, err := ResultsByScraping(71)
+	results, err := ResultsByScraping(105)
 	if err != nil {
 		panic(err.Error())
 	}
 	assert.Greater(
-		t, len(results), 1, "The last version should be bigger than 0")
+		t, len(results), 1, "The numbers of results should be bigger than 0")
 }

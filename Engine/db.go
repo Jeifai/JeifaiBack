@@ -106,7 +106,7 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
                         (scraper_id, scraping_id, title, url, scraping_url, created_at, updated_at)
                       VALUES ($1, $2, $3, $4, $5, $6, $7)
                       ON CONFLICT (url) DO UPDATE
-                      SET updated_at = $7`
+                      SET updated_at = $7, scraping_id = $2`
 		_, err := Db.Exec(
 			statement, scraper.Id, scraping.Id, elem.Title,
 			elem.ResultUrl, elem.ScrapingUrl, time.Now(), time.Now())
