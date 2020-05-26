@@ -24,10 +24,10 @@ func SaveResponseToStorage(response Response, file_path string) {
 
 	wc := client.Bucket("jeifai").Object(file_path).NewWriter(ctx)
 	if _, err = io.Copy(wc, bytes.NewReader(response.Html)); err != nil {
-		fmt.Println(err)
+		panic(err.Error())
 	}
 	if err := wc.Close(); err != nil {
-		fmt.Println(err)
+		panic(err.Error())
 	}
 }
 
@@ -45,7 +45,7 @@ func GetResponseFromStorage(file_path string) (response string) {
 
 	rc, err := client.Bucket("jeifai").Object(file_path).NewReader(ctx)
 	if err != nil {
-		fmt.Println(err)
+		panic(err.Error())
 	}
 	defer rc.Close()
 
