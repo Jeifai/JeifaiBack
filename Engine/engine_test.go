@@ -128,7 +128,7 @@ func TestScrape(t *testing.T) {
 	}
 	for _, elem := range scrapers {
 		fmt.Println("TESTING -> ", elem.Name)
-		scraping, err := LastScrapingByNameVersiontScrapingByNameVersion(elem.Name, elem.Version)
+		scraping, err := LastScrapingByNameVersion(elem.Name, elem.Version)
 		if err != nil {
 			panic(err.Error())
 		}
