@@ -3,15 +3,24 @@ package main
 import (
 	"cloud.google.com/go/storage"
 	"context"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
-	"os"
 	"sort"
 	"testing"
 	"time"
+	// "log"
+	"os"
 )
 
+/**
+func TestMain(m *testing.M) {
+	// log.SetOutput(ioutil.Discard)
+}
+*/
+
 func TestUnique(t *testing.T) {
+	fmt.Println("TestUnique")
 	result_1 := Result{"Test_1", "https://www.g_1.com", "Title_1", "Result_1"}
 	result_2 := Result{"Test_2", "https://www.g_2.com", "Title_2", "Result_2"}
 	result_3 := Result{"Test_1", "https://www.g_1.com", "Title_1", "Result_1"}
@@ -23,12 +32,14 @@ func TestUnique(t *testing.T) {
 }
 
 func TestGenerateFilePath(t *testing.T) {
+	fmt.Println("\n\nTestGenerateFilePath")
 	got := GenerateFilePath("scraper_name", 1)
 	want := "scraper_name/1/response.html"
 	assert.Equal(t, got, want, "The two path should be the same.")
 }
 
 func TestSaveResponseToFile(t *testing.T) {
+	fmt.Println("\n\nTestSaveResponseToFile")
 	want := "this is a test string"
 	SaveResponseToFile(want)
 	dir, err := os.Getwd()
@@ -43,6 +54,7 @@ func TestSaveResponseToFile(t *testing.T) {
 }
 
 func TestRemoveFile(t *testing.T) {
+	fmt.Println("\n\nTestRemoveFile")
 	want := "this is a test string"
 	dir, err := os.Getwd()
 	if err != nil {
@@ -63,6 +75,7 @@ func TestRemoveFile(t *testing.T) {
 }
 
 func TestSaveResponseToStorage(t *testing.T) {
+	fmt.Println("\n\nTestSaveResponseToStorage")
 	want := "this is a test to TestSaveResponseToStorage"
 	file_path := "test/TestSaveResponseToStorage.txt"
 	response := Response{[]byte(want)}
@@ -88,6 +101,7 @@ func TestSaveResponseToStorage(t *testing.T) {
 }
 
 func TestGetResponseFromStorage(t *testing.T) {
+	fmt.Println("\n\nTestGetResponseFromStorage")
 	want := "this is a test to TestGetResponseFromStorage"
 	file_path := "test/TestGetResponseFromStorage.txt"
 	got := GetResponseFromStorage(file_path)
@@ -95,6 +109,7 @@ func TestGetResponseFromStorage(t *testing.T) {
 }
 
 func TestDbConnect(t *testing.T) {
+	fmt.Println("\n\nTestDbConnect")
 	type TempResult struct{ MinUser int }
 	temp_result := TempResult{}
 	DbConnect()
@@ -106,11 +121,13 @@ func TestDbConnect(t *testing.T) {
 }
 
 func TestScrape(t *testing.T) {
+	fmt.Println("\n\nTestScrape")
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
 	}
 	for _, elem := range scrapers {
+		fmt.Println("TESTING -> ", elem.Name)
 		scraping, err := LastScrapingByNameVersion(elem.Name, elem.Version)
 		if err != nil {
 			panic(err.Error())
@@ -138,6 +155,7 @@ func TestScrape(t *testing.T) {
 }
 
 func TestGetScrapers(t *testing.T) {
+	fmt.Println("\n\nTestGetScrapers")
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
@@ -147,6 +165,7 @@ func TestGetScrapers(t *testing.T) {
 }
 
 func TestLastScrapingByNameVersion(t *testing.T) {
+	fmt.Println("\n\nTestLastScrapingByNameVersion")
 	last_scraping_version, err := LastScrapingByNameVersion("Mitte", 1)
 	if err != nil {
 		panic(err.Error())
@@ -156,6 +175,7 @@ func TestLastScrapingByNameVersion(t *testing.T) {
 }
 
 func TestResultsByScraping(t *testing.T) {
+	fmt.Println("\n\nTestResultsByScraping")
 	results, err := ResultsByScraping(71)
 	if err != nil {
 		panic(err.Error())
