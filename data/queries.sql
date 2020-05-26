@@ -7,6 +7,10 @@ DELETE FROM scrapers WHERE version = 2;
 /* Delete column from table */
 ALTER TABLE users_targets DROP COLUMN uuid;
 
+/* Add column to table */
+ALTER TABLE results ADD COLUMN updated_at timestamp NOT NULL DEFAULT current_timestamp;
+ALTER TABLE jobs ADD COLUMN scraping_id integer references scraping(id);
+
 /* Make a table empty and reset id */
 TRUNCATE scrapers RESTART IDENTITY;
 
@@ -19,8 +23,6 @@ LEFT JOIN targets t ON(ut.target_id = t.id)
 LEFT JOIN scrapers s ON(ut.target_id = s.target_id)
 LEFT JOIN jobs j ON(s.id = j.scraper_id)
 WHERE ut.user_id = 13;
-
-ALTER TABLE jobs ADD COLUMN scraping_id integer references scraping(id);
 
 /* New scraper process */
 INSERT INTO targets (url, host, created_at, name) VALUES('https://www.babelforce.com/jobs/', 'https://www.babelforce.com', current_timestamp, 'Babelforce');

@@ -42,18 +42,17 @@ create table scrapers (
 
 create table scraping (
   id         serial primary key,
-  uuid       varchar(64) not null unique,
   scraper_id integer references scrapers(id),
   created_at timestamp
 );
 
 create table results (
   id            serial primary key,
-  uuid          varchar(64) not null unique,
   scraper_id    integer references scrapers(id),
   scraping_id   integer references scraping(id),
   title         varchar(1000) not null,
   scraping_url  varchar(1000),
-  url           varchar(1000) not null,
-  created_at    timestamp
+  url           varchar(1000) not null unique,
+  created_at    timestamp,
+  updated_at    timestamp
 );

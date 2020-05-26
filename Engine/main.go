@@ -6,7 +6,7 @@ import (
 
 func main() {
 	DbConnect()
-	scraper_name := "Google"
+	scraper_name := "Mitte"
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
@@ -19,9 +19,9 @@ func main() {
 			}
 			isLocal := false
 			response, results := Scrape(elem.Name, elem.Version, isLocal)
-			file_path := GenerateFilePath(elem.Name, scraping.Id)
-			SaveResponseToStorage(response, file_path)
+            file_path := GenerateFilePath(elem.Name, scraping.Id)
 			SaveResults(elem, scraping, results)
+			SaveResponseToStorage(response, file_path)
 		}
 	}
 }
