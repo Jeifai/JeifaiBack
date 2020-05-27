@@ -49,3 +49,12 @@ LEFT JOIN results r ON(s.id = r.scraping_id)
 GROUP BY 1 
 ORDER BY ss.name 
 DESC LIMIT 5;
+
+
+
+/* Get the latest two extractions */
+SELECT s.id FROM scraping s LEFT JOIN scrapers ss ON(s.scraper_id = ss.id) WHERE name = 'Zalando' ORDER BY s.id DESC LIMIT 2;
+    /* OLD DATA */
+    SELECT id, created_at, updated_at, url, title FROM results WHERE scraping_id = 99;
+    /* NEW DATA */
+    SELECT id, created_at, updated_at, url, title FROM results WHERE scraping_id = 114 AND DATE(created_at) = DATE(updated_at);
