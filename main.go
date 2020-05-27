@@ -2,40 +2,40 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 	"time"
 )
 
 func main() {
 
-	mux := http.NewServeMux()
+	r := mux.NewRouter()
 	files := http.FileServer(http.Dir(config.Static))
-	mux.Handle("/static/", http.StripPrefix("/static/", files))
+	r.Handle("/static/", http.StripPrefix("/static/", files))
 
-	mux.HandleFunc("/", index)
+	r.HandleFunc("/", index)
 
-	mux.HandleFunc("/login", login)
-	mux.HandleFunc("/logout", logout)
-	mux.HandleFunc("/signup", signup)
-	mux.HandleFunc("/signup_account", signupAccount)
-	mux.HandleFunc("/authenticate", authenticate)
+	r.HandleFunc("/login", login)
+	r.HandleFunc("/logout", logout)
+	r.HandleFunc("/signup", signup)
+	r.HandleFunc("/signup_account", signupAccount)
+	r.HandleFunc("/authenticate", authenticate)
 
-	mux.HandleFunc("/targets", targets)
-	mux.HandleFunc("/target_add", target_add)
-	mux.HandleFunc("/target_add__run", target_add__run)
-	mux.HandleFunc("/target_delete", target_delete)
-	mux.HandleFunc("/target_delete__run", target_delete__run)
+	r.HandleFunc("/targets", targets).Methods("GET")
+	r.HandleFunc("/targets", putTarget).Methods("PUT")
+	r.HandleFunc("/targets/{url}", deleteTarget).Methods("DELETE")
+	r.HandleFunc("/targets/all", targetsAll).Methods("GET")
 
-	mux.HandleFunc("/results", results)
+	r.HandleFunc("/results", results)
 
 	fmt.Println("Application is running")
 
 	server := &http.Server{
 		Addr:           "0.0.0.0:9090",
-		Handler:        mux,
+		Handler:        r,
 		ReadTimeout:    time.Duration(10 * int64(time.Second)),
 		WriteTimeout:   time.Duration(600 * int64(time.Second)),
 		MaxHeaderBytes: 1 << 20,
 	}
-    server.ListenAndServe()
+	server.ListenAndServe()
 }

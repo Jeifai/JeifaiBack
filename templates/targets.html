@@ -1,13 +1,63 @@
 {{ define "content" }}
     <div class="content">
-        {{if .Message}} <h2>{{.Message}}</h2><br> {{else}}  {{end}}
-        <div>
-            YOUR TARGETS
+        <div id="app">
+            [[ message ]]
+            <ul class="list-group">
+                <li class="list-group-item" v-for="(target, index) in targets">
+                    [[ target.Url ]]
+                    <span class="pull-right">
+                        <button class="btn btn-xs btn-danger" v-on:click="deleteTarget(index)">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                        </button>
+                    </span>
+                </li>
+            </ul>
+            <div class="input-group">
+                <input type="text" 
+                    class="form-control" 
+                    placeholder="New Target" 
+                    v-on:keyup.enter="createTarget"
+                    v-model="newTarget.Url">
+                <span class="input-group-btn">
+                    <button class="btn btn-primary" type="button" v-on:click="createTarget">Create</button>
+                </span>
+            </div>
         </div>
-        {{ range .Targets }}
-        <div>
-            - {{ .Url }}
-        </div>
-        {{ end }}
     </div>
+    <script>
+        new Vue({
+            el: '#app',
+            delimiters: ["[[","]]"],
+            data: {
+                    message: '',
+                    targets: [],
+                    newTarget: {}
+                },
+            created: function() { // run whenever the page is loaded
+                this.$http.get('/targets/all').then(function(response) {
+                    this.targets = response.data ? response.data : []
+                })
+            },
+            methods: {
+                createTarget: function() {
+                    this.$http.put('/targets', this.newTarget).then(function(response) {
+                        this.message = response.data.Message
+                        if(response.data.Added){
+                            this.targets.push(this.newTarget)
+                        }
+                        this.newTarget = {}
+                    }).catch(function(error) {
+                        console.log(error)
+                    });
+                },
+                deleteTarget: function(index) {
+                    this.$http.delete('/targets/' + this.targets[index].Url).then(function(response) {
+                        this.targets.splice(index, 1)
+                    }).catch(function(error) {
+                        console.log(error)
+                    })
+                }
+            }
+        })
+    </script>
 {{ end }}
