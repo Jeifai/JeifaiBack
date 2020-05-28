@@ -28,6 +28,8 @@ type Result struct {
 	ResultUrl   string
 }
 
+const SecondsSleep = 2 // Seconds between pagination
+
 func Scrape(
 	scraper_name string, scraper_version int, isLocal bool) (
 	response Response, results []Result) {
@@ -362,7 +364,7 @@ func (runtime Runtime) Zalando(
 				}
 				jsonJobs_1.Data = append(
 					jsonJobs_1.Data, tempJsonJobs_2.Data...)
-				time.Sleep(2 * time.Second)
+				time.Sleep(SecondsSleep * time.Second)
 			}
 
 			response_json, err := json.Marshal(jsonJobs_1)
@@ -461,7 +463,7 @@ func (runtime Runtime) Google(
 					panic(err.Error())
 				}
 				jsonJobs_1.Jobs = append(jsonJobs_1.Jobs, tempJsonJobs_2.Jobs...)
-				time.Sleep(2 * time.Second)
+				time.Sleep(SecondsSleep * time.Second)
 			}
 
 		}
@@ -642,7 +644,7 @@ func (runtime Runtime) Microsoft(
 					panic(err.Error())
 				}
 				jsonJobs_1.Data.Jobs = append(jsonJobs_1.Data.Jobs, jsonJobs_2.Data.Jobs...)
-				time.Sleep(2 * time.Second)
+				time.Sleep(SecondsSleep * time.Second)
 			}
 		}
 
