@@ -24,7 +24,6 @@ type Response struct {
 
 type Result struct {
 	CompanyName string
-	ScrapingUrl string
 	Title       string
 	ResultUrl   string
 }
@@ -71,7 +70,6 @@ func (runtime Runtime) Kununu(
 				if err == nil {
 					results = append(results, Result{
 						runtime.Name,
-						url,
 						result_title,
 						result_url})
 				}
@@ -152,7 +150,6 @@ func (runtime Runtime) Mitte(
 			if err == nil {
 				results = append(results, Result{
 					runtime.Name,
-					url,
 					result_title,
 					result_url})
 			}
@@ -185,7 +182,6 @@ func (runtime Runtime) IMusician(
 				if err == nil {
 					results = append(results, Result{
 						runtime.Name,
-						url,
 						result_title,
 						result_url})
 				}
@@ -241,7 +237,6 @@ func (runtime Runtime) Babelforce(
 				if err == nil {
 					results = append(results, Result{
 						runtime.Name,
-						url,
 						result_title,
 						result_url})
 				}
@@ -349,7 +344,7 @@ func (runtime Runtime) Zalando(
 			}
 			response = Response{[]byte(response_json)}
 		}
-		for i, elem := range jsonJobs_1.Data {
+		for _, elem := range jsonJobs_1.Data {
 			result_title := elem.Title
 			z_base_result_url := "https://jobs.zalando.com/de/jobs/"
 			result_url := z_base_result_url + strconv.Itoa(elem.Id)
@@ -357,7 +352,6 @@ func (runtime Runtime) Zalando(
 			if err == nil {
 				results = append(results, Result{
 					runtime.Name,
-					z_base_url + strconv.Itoa((i/100)*100),
 					result_title,
 					result_url})
                 }
@@ -452,14 +446,13 @@ func (runtime Runtime) Google(
 		response = Response{[]byte(response_json)}
 
 		// Save the data
-		for i, elem := range jsonJobs_1.Jobs {
+		for _, elem := range jsonJobs_1.Jobs {
 			result_title := elem.Title
 			result_url := g_base_result_url + strings.Split(elem.Id, "/")[1]
 			_, err := netUrl.ParseRequestURI(result_url)
 			if err == nil {
 				results = append(results, Result{
 					runtime.Name,
-					g_base_url + strconv.Itoa((i / results_per_page)),
 					result_title,
 					result_url})
 			}
@@ -497,7 +490,6 @@ func (runtime Runtime) Soundcloud(
 				if err == nil {
 					results = append(results, Result{
 						runtime.Name,
-						url,
 						result_title,
 						result_url})
 				}
@@ -637,14 +629,13 @@ func (runtime Runtime) Microsoft(
 		}
 		response = Response{[]byte(response_json)}
 
-		for i, elem := range jsonJobs_1.Data.Jobs {
+		for _, elem := range jsonJobs_1.Data.Jobs {
 			result_title := elem.Title
 			result_url := m_base_result_url + elem.JobId
 			_, err := netUrl.ParseRequestURI(result_url)
 			if err == nil {
 				results = append(results, Result{
 					runtime.Name,
-					m_base_url + strconv.Itoa(i / results_per_page),
 					result_title,
 					result_url})
 			}

@@ -103,13 +103,13 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	fmt.Println("Starting SaveResults...")
 	for _, elem := range results {
 		statement := `INSERT INTO results 
-                        (scraper_id, scraping_id, title, url, scraping_url, created_at, updated_at)
+                        (scraper_id, scraping_id, title, url, created_at, updated_at)
                       VALUES ($1, $2, $3, $4, $5, $6, $7)
                       ON CONFLICT (url) DO UPDATE
-                      SET scraping_id = $2, title = $3, scraping_url = $5, updated_at = $7`
+                      SET scraping_id = $2, title = $3, updated_at = $6`
 		_, err := Db.Exec(
 			statement, scraper.Id, scraping.Id, elem.Title,
-			elem.ResultUrl, elem.ScrapingUrl, time.Now(), time.Now())
+			elem.ResultUrl, time.Now(), time.Now())
 		if err != nil {
 			panic(err.Error())
 		}
@@ -134,8 +134,7 @@ func LastScrapingByNameVersion(
 func ResultsByScraping(scraping int) (results []Result, err error) {
 	fmt.Println("Starting ResultsByScraping...")
 	rows, err := Db.Query(`SELECT
-                                t.name, 
-                                r.scraping_url, 
+                                t.name,
                                 r.title, 
                                 r.url
                            FROM results r
@@ -150,7 +149,6 @@ func ResultsByScraping(scraping int) (results []Result, err error) {
 		result := Result{}
 		if err = rows.Scan(
 			&result.CompanyName,
-			&result.ScrapingUrl,
 			&result.Title,
 			&result.ResultUrl); err != nil {
 			return
