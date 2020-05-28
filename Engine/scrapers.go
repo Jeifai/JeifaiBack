@@ -1,17 +1,17 @@
 package main
 
 import (
-    "github.com/gocolly/colly"
-	netUrl "net/url"
 	"encoding/json"
+	"fmt"
+	"github.com/gocolly/colly"
 	"io/ioutil"
 	"net/http"
+	netUrl "net/url"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
-	"os"
 )
 
 type Runtime struct {
@@ -116,13 +116,34 @@ func (runtime Runtime) Mitte(
 
 		url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
 
-		type Postings struct {
-			Title string `json:"text"`
-			Url   string `json:"hostedUrl"`
+		type Category struct {
+			Commitment string `json:"commitment"`
+			Location   string `json:"location"`
+			Team       string `json:"team"`
 		}
+
+		type List struct {
+			Text    string `json:"text"`
+			Content string `json:"content"`
+		}
+
+		type Postings struct {
+			Title            string   `json:"text"`
+			Url              string   `json:"hostedUrl"`
+			AdditionalPlain  string   `json:"additionalPlain"`
+			Additional       string   `json:"additional"`
+			Categories       Category `json:"categories"`
+			CreatedAt        int      `json:"createdAt"`
+			DescriptionPlain string   `json:"descriptionPlain"`
+			Description      string   `json:"description"`
+			Id               string   `json:"id"`
+			Lists            []List   `json:"lists"`
+		}
+
 		type JsonJob struct {
 			Positions []Postings `json:"postings"`
 		}
+
 		type JsonJobs []JsonJob
 
 		var body []byte
@@ -299,8 +320,12 @@ func (runtime Runtime) Zalando(
 		z_base_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset="
 
 		type Job struct {
-			Id    int    `json:"id"`
-			Title string `json:title`
+			Id            int      `json:"id"`
+			Title         string   `json:"title"`
+			JobCategories []string `json:"job_categories"`
+			UpdatedAt     string   `json:"updated_at"`
+			Officies      []string `json:"offices"`
+			Entity        string   `json:"entity"`
 		}
 
 		type JsonJobs struct {
@@ -340,6 +365,7 @@ func (runtime Runtime) Zalando(
 			if err != nil {
 				panic(err.Error())
 			}
+
 			offset, err := strconv.Atoi(
 				strings.Split(jsonJobs_1.Last, "offset=")[1])
 			if err != nil {
@@ -402,8 +428,15 @@ func (runtime Runtime) Google(
 		results_per_page := 100
 
 		type Job struct {
-			Id    string `json:"job_id"`
-			Title string `json:"job_title"`
+			Id            string   `json:"job_id"`
+			Title         string   `json:"job_title"`
+			Summary       string   `json:"summary"`
+			PublishDate   string   `json:"publish_date"`
+			LocationCount string   `json:"locations_count"`
+			Locations     []string `json:"locations"`
+			Description   string   `json:"description"`
+			CompanyName   string   `json:"company_name"`
+			CompanyId     string   `json:"company_name"`
 		}
 
 		type JsonJobs struct {
@@ -565,18 +598,18 @@ func (runtime Runtime) Microsoft(
 		results_per_page := 50
 
 		type Job struct {
-			Country           string `json:""country"`
-			SubCategory       string `json:""subCategory"`
-			Title             string `json:""title"`
-			Experience        string `json:""experience"`
-			JobSeqNo          string `json:""jobSeqNo"`
-			PostedDate        string `json:""postedDate"`
-			DescriptionTeaser string `json:""descriptionTeaser"`
-			DateCreated       string `json:""dateCreated"`
-			State             string `json:""state"`
-			JobId             string `json:""jobId"`
-			Location          string `json:""location"`
-			Category          string `json:""category"`
+			Country           string `json:"country"`
+			SubCategory       string `json:"subCategory"`
+			Title             string `json:"title"`
+			Experience        string `json:"experience"`
+			JobSeqNo          string `json:"jobSeqNo"`
+			PostedDate        string `json:"postedDate"`
+			DescriptionTeaser string `json:"descriptionTeaser"`
+			DateCreated       string `json:"dateCreated"`
+			State             string `json:"state"`
+			JobId             string `json:"jobId"`
+			Location          string `json:"location"`
+			Category          string `json:"category"`
 		}
 
 		type Data struct {
