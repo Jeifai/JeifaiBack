@@ -11,10 +11,10 @@ import (
 )
 
 func main() {
-    scraper_name := "TESTISSIMO_4"
+    scraper_name := "Microsoft"
     scraper_version := 1 
-    jobs_url := "https://www.fsdf.com/jobs/"
-    host_url := "https://www.asfda.com"
+    jobs_url := "https://careers.microsoft.com/us/en/search-results"
+    host_url := "https://www.microsoft.com"
     scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
     scraper.CreateScraper()
 }
