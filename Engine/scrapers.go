@@ -1,17 +1,17 @@
 package main
 
 import (
+    "github.com/gocolly/colly"
+	netUrl "net/url"
 	"encoding/json"
-	"fmt"
-	"github.com/gocolly/colly"
 	"io/ioutil"
 	"net/http"
-	netUrl "net/url"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
+	"os"
 )
 
 type Runtime struct {
