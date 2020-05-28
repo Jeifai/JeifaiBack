@@ -176,7 +176,7 @@ func TestLastScrapingByNameVersion(t *testing.T) {
 
 func TestResultsByScraping(t *testing.T) {
 	fmt.Println("\n\nTestResultsByScraping")
-	results, err := ResultsByScraping(134)
+	results, err := ResultsByScraping(136)
 	if err != nil {
 		panic(err.Error())
 	}
