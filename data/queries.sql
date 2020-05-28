@@ -58,3 +58,13 @@ SELECT s.id FROM scraping s LEFT JOIN scrapers ss ON(s.scraper_id = ss.id) WHERE
     SELECT id, created_at, updated_at, url, title FROM results WHERE scraping_id = 99;
     /* NEW DATA */
     SELECT id, created_at, updated_at, url, title FROM results WHERE scraping_id = 114 AND DATE(created_at) = DATE(updated_at);
+
+
+/* Count results based on scraper name */
+SELECT 
+    s.name, 
+    COUNT(r.id) 
+FROM results r 
+LEFT JOIN scrapers s ON(r.scraper_id = s.id) 
+GROUP BY 1 
+ORDER BY 2 DESC;
