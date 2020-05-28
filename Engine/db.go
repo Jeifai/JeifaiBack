@@ -104,7 +104,7 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	for _, elem := range results {
 		statement := `INSERT INTO results 
                         (scraper_id, scraping_id, title, url, created_at, updated_at)
-                      VALUES ($1, $2, $3, $4, $5, $6, $7)
+                      VALUES ($1, $2, $3, $4, $5, $6)
                       ON CONFLICT (url) DO UPDATE
                       SET scraping_id = $2, title = $3, updated_at = $6`
 		_, err := Db.Exec(
