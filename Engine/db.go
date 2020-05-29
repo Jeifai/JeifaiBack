@@ -101,6 +101,7 @@ func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
 }
 
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
+    fmt.Println("Starting SaveResults...")
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
 	for i, elem := range results {
