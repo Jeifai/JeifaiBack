@@ -17,7 +17,7 @@ create table sessions (
 
 create table targets (
   id         serial primary key,
-  url        varchar(64) not null unique,
+  url        varchar(500) not null unique,
   host       varchar(64) not null,             
   created_at timestamp not null,
   name       varchar(64)
