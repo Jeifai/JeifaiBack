@@ -6,7 +6,7 @@ import (
 
 func main() {
 	DbConnect()
-	scraper_name := "Twitter"
+	scraper_name := "Shopify"
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())

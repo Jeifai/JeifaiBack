@@ -947,3 +947,101 @@ func (runtime Runtime) Twitter(
 	}
 	return
 }
+
+func (runtime Runtime) Shopify(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+
+	if version == 1 {
+
+		url := "https://api.lever.co/v0/postings/shopify?group=team&mode=json"
+
+		type Category struct {
+			Commitment string `json:"commitment"`
+			Location   string `json:"location"`
+            Team       string `json:"team"`
+            Department  string  `json:"department"`
+		}
+
+		type List struct {
+			Text    string `json:"text"`
+			Content string `json:"content"`
+		}
+
+		type Job struct {
+			Title            string   `json:"text"`
+			Url              string   `json:"hostedUrl"`
+			AdditionalPlain  string   `json:"additionalPlain"`
+			Additional       string   `json:"additional"`
+			Categories       Category `json:"categories"`
+			CreatedAt        int      `json:"createdAt"`
+			DescriptionPlain string   `json:"descriptionPlain"`
+			Description      string   `json:"description"`
+			Id               string   `json:"id"`
+			Lists            []List   `json:"lists"`
+		}
+
+		type Postings struct {
+			Jobs []Job `json:"postings"`
+		}
+
+		type JsonJobs []Postings
+
+		var body []byte
+		if isLocal {
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			temp_body, err := ioutil.ReadFile(dir + "/response.html")
+			fmt.Println("Visiting", dir+"/response.html")
+			if err != nil {
+				panic(err.Error())
+			}
+			body = temp_body
+		} else {
+			res, err := http.Get(url)
+			fmt.Println("Visiting", url)
+			if err != nil {
+				panic(err.Error())
+			}
+			temp_body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				panic(err.Error())
+			}
+			body = temp_body
+		}
+
+		response = Response{body}
+
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		for _, elem := range jsonJobs {
+			for _, subElem := range elem.Jobs {
+
+				result_title := subElem.Title
+				result_url := subElem.Url
+
+				_, err := netUrl.ParseRequestURI(result_url)
+				if err == nil {
+
+					elem_json, err := json.Marshal(subElem)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json})
+				}
+			}
+		}
+	}
+	return
+}
