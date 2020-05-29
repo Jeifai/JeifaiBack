@@ -53,5 +53,6 @@ create table results (
   title         varchar(1000) not null,
   url           varchar(1000) not null unique,
   created_at    timestamp,
-  updated_at    timestamp
+  updated_at    timestamp,
+  data          json
 );

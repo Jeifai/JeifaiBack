@@ -26,6 +26,7 @@ type Result struct {
 	CompanyName string
 	Title       string
 	ResultUrl   string
+	Data        json.RawMessage
 }
 
 const SecondsSleep = 2 // Seconds between pagination
@@ -62,17 +63,38 @@ func (runtime Runtime) Kununu(
 		main_tag_value := "company-profile-job-item"
 		tag_title := "a"
 		tag_url := "a"
+		tag_location := ".item-location"
+
+		type Job struct {
+			Title    string
+			Url      string
+			Location string
+		}
 
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
 				result_url := e.ChildAttr(tag_url, "href")
+				result_location := e.ChildText(tag_location)
+
 				_, err := netUrl.ParseRequestURI(result_url)
 				if err == nil {
+
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_location}
+
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
 					results = append(results, Result{
 						runtime.Name,
 						result_title,
-						result_url})
+						result_url,
+						elem_json})
 				}
 			}
 		})
@@ -127,7 +149,7 @@ func (runtime Runtime) Mitte(
 			Content string `json:"content"`
 		}
 
-		type Postings struct {
+		type Job struct {
 			Title            string   `json:"text"`
 			Url              string   `json:"hostedUrl"`
 			AdditionalPlain  string   `json:"additionalPlain"`
@@ -140,11 +162,11 @@ func (runtime Runtime) Mitte(
 			Lists            []List   `json:"lists"`
 		}
 
-		type JsonJob struct {
-			Positions []Postings `json:"postings"`
+		type Postings struct {
+			Jobs []Job `json:"postings"`
 		}
 
-		type JsonJobs []JsonJob
+		type JsonJobs []Postings
 
 		var body []byte
 		if isLocal {
@@ -180,14 +202,25 @@ func (runtime Runtime) Mitte(
 		}
 
 		for _, elem := range jsonJobs {
-			result_title := elem.Positions[0].Title
-			result_url := elem.Positions[0].Url
-			_, err := netUrl.ParseRequestURI(result_url)
-			if err == nil {
-				results = append(results, Result{
-					runtime.Name,
-					result_title,
-					result_url})
+			for _, subElem := range elem.Jobs {
+
+				result_title := subElem.Title
+				result_url := subElem.Url
+
+				_, err := netUrl.ParseRequestURI(result_url)
+				if err == nil {
+
+					elem_json, err := json.Marshal(subElem)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json})
+				}
 			}
 		}
 	}
@@ -197,6 +230,7 @@ func (runtime Runtime) Mitte(
 func (runtime Runtime) IMusician(
 	version int, isLocal bool) (
 	response Response, results []Result) {
+
 	if version == 1 {
 
 		c := colly.NewCollector()
@@ -206,17 +240,42 @@ func (runtime Runtime) IMusician(
 		main_tag_attr := "class"
 		main_tag_value := "job-box-link"
 		tag_title := ".jb-title"
+		tag_description := "span"
+		tag_location := "span"
+
+		type Job struct {
+			Title       string
+			Url         string
+			Description string
+			Location    string
+		}
 
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
 				result_url := e.Attr("href")
+				result_description := e.ChildTexts(tag_description)[0]
+				result_location := e.ChildTexts(tag_location)[2]
+
 				_, err := netUrl.ParseRequestURI(result_url)
 				if err == nil {
+
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_description,
+						result_location}
+
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
 					results = append(results, Result{
 						runtime.Name,
 						result_title,
-						result_url})
+						result_url,
+						elem_json})
 				}
 			}
 		})
@@ -267,16 +326,33 @@ func (runtime Runtime) Babelforce(
 		tag_title := "h5"
 		tag_url := "a"
 
+		type Job struct {
+			Title string
+			Url   string
+		}
+
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+
 				result_title := e.ChildText(tag_title)
 				result_url := e.ChildAttr(tag_url, "href")
+
 				_, err := netUrl.ParseRequestURI(result_url)
 				if err == nil {
+
+					temp_elem_json := Job{
+						result_title,
+						result_url}
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
 					results = append(results, Result{
 						runtime.Name,
 						result_title,
-						result_url})
+						result_url,
+						elem_json})
 				}
 			}
 		})
@@ -401,15 +477,24 @@ func (runtime Runtime) Zalando(
 		}
 
 		for _, elem := range jsonJobs_1.Data {
+
 			result_title := elem.Title
 			z_base_result_url := "https://jobs.zalando.com/de/jobs/"
 			result_url := z_base_result_url + strconv.Itoa(elem.Id)
+
 			_, err := netUrl.ParseRequestURI(result_url)
 			if err == nil {
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
 				results = append(results, Result{
 					runtime.Name,
 					result_title,
-					result_url})
+					result_url,
+					elem_json})
 			}
 		}
 	}
@@ -498,7 +583,6 @@ func (runtime Runtime) Google(
 				jsonJobs_1.Jobs = append(jsonJobs_1.Jobs, tempJsonJobs_2.Jobs...)
 				time.Sleep(SecondsSleep * time.Second)
 			}
-
 		}
 
 		response_json, err := json.Marshal(jsonJobs_1)
@@ -508,14 +592,23 @@ func (runtime Runtime) Google(
 		response = Response{[]byte(response_json)}
 
 		for _, elem := range jsonJobs_1.Jobs {
+
 			result_title := elem.Title
 			result_url := g_base_result_url + strings.Split(elem.Id, "/")[1]
+
 			_, err := netUrl.ParseRequestURI(result_url)
 			if err == nil {
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
 				results = append(results, Result{
 					runtime.Name,
 					result_title,
-					result_url})
+					result_url,
+					elem_json})
 			}
 		}
 	}
@@ -531,22 +624,47 @@ func (runtime Runtime) Soundcloud(
 		c := colly.NewCollector()
 
 		url := "https://boards.greenhouse.io/embed/job_board?for=soundcloud71"
-		main_tag := "div"
+		main_tag := "section"
 		main_tag_attr := "class"
-		main_tag_value := "opening"
+		main_tag_value := "level-0"
 		tag_title := "a"
 		tag_url := "a"
+		tag_department := "h3"
+		tag_location := "span"
+
+		type Job struct {
+			Title      string
+			Url        string
+			Department string
+			Location   string
+		}
 
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				result_title := e.ChildText(tag_title)
 				result_url := e.ChildAttr(tag_url, "href")
+				result_department := e.ChildText(tag_department)
+				result_location := e.ChildText(tag_location)
+
 				_, err := netUrl.ParseRequestURI(result_url)
 				if err == nil {
+
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_department,
+						result_location}
+
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
 					results = append(results, Result{
 						runtime.Name,
 						result_title,
-						result_url})
+						result_url,
+						elem_json})
 				}
 			}
 		})
@@ -688,14 +806,23 @@ func (runtime Runtime) Microsoft(
 		response = Response{[]byte(response_json)}
 
 		for _, elem := range jsonJobs_1.Data.Jobs {
+
 			result_title := elem.Title
 			result_url := m_base_result_url + elem.JobId
+
 			_, err := netUrl.ParseRequestURI(result_url)
 			if err == nil {
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
 				results = append(results, Result{
 					runtime.Name,
 					result_title,
-					result_url})
+					result_url,
+					elem_json})
 			}
 		}
 	}

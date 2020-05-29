@@ -1,12 +1,12 @@
 package main
 
 import (
-    // "fmt"
+// "fmt"
 )
 
 func main() {
 	DbConnect()
-	scraper_name := "Soundcloud"
+	scraper_name := "Google"
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
@@ -23,5 +23,6 @@ func main() {
 			SaveResults(elem, scraping, results)
 			SaveResponseToStorage(response, file_path)
 		}
-	}
+    }
+    defer Db.Close()
 }

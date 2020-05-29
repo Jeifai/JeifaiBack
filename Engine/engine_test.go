@@ -5,7 +5,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+    "io/ioutil"
+	"encoding/json"
 	"sort"
 	"testing"
 	"time"
@@ -20,11 +21,13 @@ func TestMain(m *testing.M) {
 */
 
 func TestUnique(t *testing.T) {
-	fmt.Println("TestUnique")
-	result_1 := Result{"Test_1", "https://www.g_1.com", "Title_1"}
-	result_2 := Result{"Test_2", "https://www.g_2.com", "Title_2"}
-	result_3 := Result{"Test_1", "https://www.g_1.com", "Title_1"}
-	result_4 := Result{"Test_1", "https://www.g_1.com", "Title_1"}
+    fmt.Println("TestUnique")
+    testJson, err := json.Marshal("test")
+    _ = err
+	result_1 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
+	result_2 := Result{"Test_2", "https://www.g_2.com", "Title_2", testJson}
+	result_3 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
+	result_4 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
 	var results = []Result{result_1, result_2, result_3, result_4}
 	got := Unique(results)
 	want := []Result{result_1, result_2}

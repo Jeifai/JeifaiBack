@@ -73,3 +73,15 @@ LEFT JOIN scrapers s ON(r.scraper_id = s.id)
 GROUP BY 1 
 ORDER BY 2 DESC;
 
+
+/* Example of query with Microsoft JSON */
+SELECT
+    r.id,
+    r.title, 
+    r.data#>>'{category}' AS category,
+    r.data#>>'{country}' AS country
+FROM results r
+LEFT JOIN scrapers s ON(r.scraper_id = s.id)
+WHERE s.name = 'Microsoft'
+ORDER BY r.updated_at DESC
+LIMIT 10;
