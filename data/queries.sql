@@ -1,3 +1,7 @@
+/* Useful drop constraint and create index*/
+ALTER TABLE results DROP CONSTRAINT results_pkey;
+CREATE INDEX idx_results_url ON results(url);
+
 /* Delete a whole table */
 DROP TABLE author; -- 
 
@@ -36,7 +40,7 @@ SELECT
 FROM scraping s
 LEFT JOIN results r ON(s.id = r.scraping_id)
 GROUP BY 1 
-ORDER BY s.id 
+ORDER BY s.id
 DESC LIMIT 5;
 
 /* Count results by scrapers name*/
@@ -47,7 +51,7 @@ FROM scraping s
 LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
 LEFT JOIN results r ON(s.id = r.scraping_id)
 GROUP BY 1 
-ORDER BY ss.name 
+ORDER BY ss.name
 DESC LIMIT 5;
 
 
@@ -55,9 +59,9 @@ DESC LIMIT 5;
 /* Get the latest two extractions */
 SELECT s.id FROM scraping s LEFT JOIN scrapers ss ON(s.scraper_id = ss.id) WHERE name = 'Zalando' ORDER BY s.id DESC LIMIT 2;
     /* OLD DATA */
-    SELECT id, created_at, updated_at, url, title FROM results WHERE scraping_id = 99;
+SELECT id, created_at, updated_at, url, title FROM results WHERE scraping_id = 99;
     /* NEW DATA */
-    SELECT id, created_at, updated_at, url, title FROM results WHERE scraping_id = 114 AND DATE(created_at) = DATE(updated_at);
+SELECT id, created_at, updated_at, url, title FROM results WHERE scraping_id = 114 AND DATE(created_at) = DATE(updated_at);
 
 
 /* Count results based on scraper name */
@@ -68,3 +72,4 @@ FROM results r
 LEFT JOIN scrapers s ON(r.scraper_id = s.id) 
 GROUP BY 1 
 ORDER BY 2 DESC;
+

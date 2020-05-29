@@ -7,7 +7,8 @@ import (
 	_ "github.com/lib/pq"
 	"os"
 	"strconv"
-	"time"
+    "time"
+	"strings"
 )
 
 type Scraping struct {
@@ -100,21 +101,39 @@ func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
 }
 
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
-	fmt.Println("Starting SaveResults...")
-	for _, elem := range results {
-		statement := `INSERT INTO results 
-                        (scraper_id, scraping_id, title, url, created_at, updated_at)
-                      VALUES ($1, $2, $3, $4, $5, $6)
-                      ON CONFLICT (url) DO UPDATE
-                      SET scraping_id = $2, title = $3, updated_at = $6`
-		_, err := Db.Exec(
-			statement, scraper.Id, scraping.Id, elem.Title,
-			elem.ResultUrl, time.Now(), time.Now())
-		if err != nil {
-			panic(err.Error())
-		}
+	valueStrings := []string{}
+	valueArgs := []interface{}{}
+	for i, elem := range results {
+        str1 := "$" + strconv.Itoa(1+i*6) + ","
+        str2 := "$" + strconv.Itoa(2+i*6) + ","
+        str3 := "$" + strconv.Itoa(3+i*6) + ","
+        str4 := "$" + strconv.Itoa(4+i*6) + ","
+        str5 := "$" + strconv.Itoa(5+i*6) + ","
+        str6 := "$" + strconv.Itoa(6+i*6)
+        str_n := "(" + str1 + str2 + str3 + str4 + str5 + str6 + ")"
+        valueStrings = append(valueStrings, str_n)
+		valueArgs = append(valueArgs, scraper.Id)
+		valueArgs = append(valueArgs, scraping.Id)
+		valueArgs = append(valueArgs, elem.Title)
+		valueArgs = append(valueArgs, elem.ResultUrl)
+		valueArgs = append(valueArgs, time.Now())
+		valueArgs = append(valueArgs, time.Now())
+	}
+    smt := `INSERT INTO results (
+                scraper_id, scraping_id, title, url, created_at, updated_at)
+            VALUES %s ON CONFLICT (url) DO UPDATE
+            SET scraping_id = EXCLUDED.scraping_id,
+                title = EXCLUDED.title,
+                updated_at = EXCLUDED.updated_at`
+    smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
+    _, err := Db.Exec(smt, valueArgs...)
+	if err != nil {
+		panic(err.Error())
 	}
 }
+
+
+
 
 func LastScrapingByNameVersion(
 	scraper_name string, scraper_version int) (scraping int, err error) {
