@@ -828,3 +828,122 @@ func (runtime Runtime) Microsoft(
 	}
 	return
 }
+
+func (runtime Runtime) Twitter(
+	version int, isLocal bool) (response Response, results []Result) {
+
+	if version == 1 {
+
+		t_base_url := "https://careers.twitter.com/content/careers-twitter/en/jobs.careers.search.json?limit=100&offset="
+
+        results_per_page := 100
+        
+		type Location struct {
+			Id         string   `json:"id"`
+			Title       string   `json:"title"`
+		}
+
+        type Team struct {
+			Id         string   `json:"id"`
+			Title       string   `json:"title"`
+		}
+
+		type Job struct {
+			Title         string   `json:"title"`
+			Description       string   `json:"description"`
+			Modified   int   `json:"modified"`
+			InternalJob bool   `json:"internalJob"`
+			Url     string `json:"url"`
+            Team   Team   `json:"team"`
+            Locations []Location   `json:"locations"`
+		}
+
+		type JsonJobs struct {
+			Jobs  []Job  `json:"results"`
+			TotalCount int `json:"totalCount"`
+			PageCount  int `json:"pageCount"`
+		}
+
+		var jsonJobs_1 JsonJobs
+
+		if isLocal {
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			body, err := ioutil.ReadFile(dir + "/response.html")
+			fmt.Println("Visiting", dir+"/response.html")
+			if err != nil {
+				panic(err.Error())
+			}
+			err = json.Unmarshal(body, &jsonJobs_1)
+			if err != nil {
+				panic(err.Error())
+			}
+		} else {
+			var first_body []byte
+			res, err := http.Get(t_base_url + "0")
+			if err != nil {
+				panic(err.Error())
+			}
+			fmt.Println("Visiting ", t_base_url+"1")
+			temp_body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				panic(err.Error())
+			}
+			first_body = temp_body
+			err = json.Unmarshal(first_body, &jsonJobs_1)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for i := 1; i < jsonJobs_1.TotalCount/results_per_page+1; i++ {
+                temp_t_url := t_base_url + strconv.Itoa(i*100)
+				res, err := http.Get(temp_t_url)
+				fmt.Println("Visiting", temp_t_url)
+				if err != nil {
+					panic(err.Error())
+				}
+				temp_body, err := ioutil.ReadAll(res.Body)
+				if err != nil {
+					panic(err.Error())
+				}
+				var tempJsonJobs_2 JsonJobs
+				err = json.Unmarshal(temp_body, &tempJsonJobs_2)
+				if err != nil {
+					panic(err.Error())
+				}
+				jsonJobs_1.Jobs = append(jsonJobs_1.Jobs, tempJsonJobs_2.Jobs...)
+                time.Sleep(SecondsSleep * time.Second)
+			}
+		}
+
+		response_json, err := json.Marshal(jsonJobs_1)
+		if err != nil {
+			panic(err.Error())
+		}
+		response = Response{[]byte(response_json)}
+
+		for _, elem := range jsonJobs_1.Jobs {
+
+			result_title := elem.Title
+			result_url := elem.Url
+
+			_, err := netUrl.ParseRequestURI(result_url)
+			if err == nil {
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json})
+			}
+        }
+	}
+	return
+}
