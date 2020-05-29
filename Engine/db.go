@@ -127,8 +127,7 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
             VALUES %s ON CONFLICT (url) DO UPDATE
             SET scraping_id = EXCLUDED.scraping_id,
                 title = EXCLUDED.title,
-                updated_at = EXCLUDED.updated_at,
-                data = EXCLUDED.data`
+                updated_at = EXCLUDED.updated_at`
 	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
 
 	_, err := Db.Exec(smt, valueArgs...)
