@@ -6,26 +6,6 @@ import (
 	"strconv"
 )
 
-func Unique(results []Result) []Result {
-	var unique []Result
-	type key struct {
-		CompanyName string
-		Title       string
-		ResultUrl   string
-	}
-	m := make(map[key]int)
-	for _, v := range results {
-		k := key{v.CompanyName, v.Title, v.ResultUrl}
-		if i, ok := m[k]; ok {
-			unique[i] = v
-		} else {
-			m[k] = len(unique)
-			unique = append(unique, v)
-		}
-	}
-	return unique
-}
-
 func GenerateFilePath(
 	scraper_name string, scraper_version int) (file_path string) {
 	file_path = filepath.Join(

@@ -44,7 +44,6 @@ func Scrape(
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
 	results = function_output[1].Interface().([]Result)
-	results = Unique(results)
 	fmt.Println("Number of results scraped: " + strconv.Itoa(len(results)))
 	return
 }
@@ -716,8 +715,6 @@ func (runtime Runtime) Microsoft(
 		first_part_json := `"eagerLoadRefineSearch":`
 		second_part_json := `}; phApp.sessionParams`
 
-		results_per_page := 50
-
 		type Job struct {
 			Country           string `json:"country"`
 			SubCategory       string `json:"subCategory"`
@@ -759,7 +756,8 @@ func (runtime Runtime) Microsoft(
 				panic(err.Error())
 			}
 		} else {
-			res, err := http.Get(m_base_url)
+            res, err := http.Get(m_base_url)
+			fmt.Println("Visiting", m_base_url)
 			if err != nil {
 				panic(err.Error())
 			}
@@ -775,9 +773,11 @@ func (runtime Runtime) Microsoft(
 			err = json.Unmarshal([]byte(resultsJson), &jsonJobs_1)
 			if err != nil {
 				panic(err.Error())
-			}
+            }
+            
+		    results_per_page := len(jsonJobs_1.Data.Jobs)
 
-			number_pages := jsonJobs_1.TotalHits / results_per_page
+            number_pages := jsonJobs_1.TotalHits / results_per_page
 
 			for i := 1; i <= number_pages; i++ {
 				temp_m_url := m_base_url + strconv.Itoa(i*results_per_page)
@@ -892,7 +892,7 @@ func (runtime Runtime) Twitter(
 			if err != nil {
 				panic(err.Error())
 			}
-			fmt.Println("Visiting ", t_base_url+"1")
+			fmt.Println("Visiting ", t_base_url+"0")
 			temp_body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
 				panic(err.Error())
