@@ -89,13 +89,14 @@ func (user *User) UsersTargetsByUserAndUrl(url string) (target Target, err error
 }
 
 // Update users_targets in column deleted_at
-func (target *Target) SetDeletedAtInUserTargetsByUserAndTarget(
+func (target *Target) SetDeletedAtInUsersTargetsByUserAndTarget(
     user User) (err error) {
 	fmt.Println("Starting SetDeletedAtInUserTargetsByUserAndTarget...")
     statement := `UPDATE users_targets
                   SET deleted_at = current_timestamp
                   WHERE user_id = $1
                   AND target_id = $2;`
+
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		fmt.Println("Error on SetDeletedAtInUserTargetsByUserAndTarget")

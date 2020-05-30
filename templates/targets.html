@@ -51,7 +51,9 @@
                     });
                 },
                 deleteTarget: function(index) {
-                    this.$http.delete('/targets/' + this.targets[index].Url).then(function(response) {
+                    payload = {"Url": this.targets[index].Url}
+                    this.$http.put('/targets/remove', payload).then(function(response) {
+                        this.message = response.data.Message
                         this.targets.splice(index, 1)
                     }).catch(function(error) {
                         console.log(error)

@@ -20,6 +20,7 @@ TRUNCATE scrapers RESTART IDENTITY;
 
 /* Update value in column based on condition */
 UPDATE targets SET name = 'Kununu' WHERE id = 45;
+UPDATE targets SET url = replace(url, 'https://', '')
 
 /* Extract all the jobs by user */
 SELECT t.url, j.created_at, j.title, j.url FROM users_targets ut

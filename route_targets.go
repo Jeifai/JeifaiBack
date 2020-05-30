@@ -3,7 +3,6 @@ package main
 import (
 	"./data"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -18,7 +17,9 @@ func targets(w http.ResponseWriter, r *http.Request) {
 
 	sess, err := session(w, r)
 	user, err := data.UserByEmail(sess.Email)
-	_ = err
+	if err != nil {
+		panic(err.Error())
+    }
 	type TempStruct struct {
 		User data.User
 	}
@@ -30,8 +31,8 @@ func targetsAll(w http.ResponseWriter, r *http.Request) {
 	sess, err := session(w, r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
-		danger(err, "Cannot find user")
-	}
+		panic(err.Error())
+    }
 	targets, err := user.UsersTargetsByUser()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -45,8 +46,8 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 	sess, err := session(w, r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
-		danger(err, "Cannot find user")
-	}
+		panic(err.Error())
+    }
 
 	url_parsed, err := url.Parse(target.Url)
 	target.Host = url_parsed.Host
@@ -56,9 +57,9 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 		warning(err, "Cannot parse form")
 		// If already exists, get its url
 		err := target.TargetsByUrl()
-		if err != nil {
-			danger("Cannot retrive already existing Target")
-		}
+        if err != nil {
+            panic(err.Error())
+        }
 	}
 
 	// Before creating the relation user <-> target, check if it is not already present
@@ -66,7 +67,7 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 	if (data.Target{}) == targetsAlreadyExisting {
 		// If the relation does not exists create a new relation
 		if err := target.CreateUserTarget(user); err != nil {
-			danger(err, "Cannot create a new UsersTargets even if it doesn't exist")
+		    panic(err.Error())
 		}
 		type TempStruct struct {
 			Message string
@@ -88,21 +89,19 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func deleteTarget(w http.ResponseWriter, r *http.Request) {
+func removeTarget(w http.ResponseWriter, r *http.Request) {
 
-	info("Starting target_delete__run...")
+	var target data.Target
+	err := json.NewDecoder(r.Body).Decode(&target)
 
-	params := mux.Vars(r)
-
-	// Get useful information about user and session
 	sess, err := session(w, r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		panic(err.Error())
-	}
+    }
 
-	// Instantiate a struct Target with all the data available atm
-	target := data.Target{Url: params["url"]}
+	url_parsed, err := url.Parse(target.Url)
+    target.Host = url_parsed.Host
 
 	// Get the target to delete
     target, err = user.UsersTargetsByUserAndUrl(target.Url)
@@ -111,8 +110,14 @@ func deleteTarget(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fill Deleted_At
-	err = target.SetDeletedAtInUserTargetsByUserAndTarget(user)
+	err = target.SetDeletedAtInUsersTargetsByUserAndTarget(user)
 	if err != nil {
 		panic(err.Error())
-	}
+    }
+    
+    type TempStruct struct {Message string}
+    infos := TempStruct{"Target successfully removed"}
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(infos)
 }
