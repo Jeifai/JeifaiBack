@@ -16,7 +16,7 @@ func targets(w http.ResponseWriter, r *http.Request) {
 			"templates/private.navigation.html",
 			"templates/targets.html"))
 
-	sess, err := session(w, r)
+	sess, err := session(r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		panic(err.Error())
@@ -29,7 +29,7 @@ func targets(w http.ResponseWriter, r *http.Request) {
 }
 
 func targetsAll(w http.ResponseWriter, r *http.Request) {
-	sess, err := session(w, r)
+	sess, err := session(r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		panic(err.Error())
@@ -44,7 +44,7 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 	var target data.Target
 	err := json.NewDecoder(r.Body).Decode(&target)
 
-	sess, err := session(w, r)
+	sess, err := session(r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		panic(err.Error())
@@ -97,7 +97,7 @@ func removeTarget(w http.ResponseWriter, r *http.Request) {
 	var target data.Target
 	err := json.NewDecoder(r.Body).Decode(&target)
 
-	sess, err := session(w, r)
+	sess, err := session(r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		panic(err.Error())

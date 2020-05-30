@@ -9,7 +9,7 @@ import (
 
 func results(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Generating HTML for results...")
-	sess, err := session(w, r)
+	sess, err := session(r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		danger(err, "Cannot find user")

@@ -9,7 +9,7 @@ import (
 
 func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting index...")
-	sess, err := session(w, r)
+	sess, err := session(r)
 	if err != nil {
 		fmt.Println("Generating HTML for index, user not logged in...")
 		templates := template.Must(
