@@ -751,13 +751,13 @@ func (runtime Runtime) Microsoft(
 			fmt.Println("Visiting", dir+"/response.html")
 			if err != nil {
 				panic(err.Error())
-            }
+			}
 			err = json.Unmarshal(body, &jsonJobs_1)
 			if err != nil {
 				panic(err.Error())
-            }
+			}
 		} else {
-            res, err := http.Get(m_base_url)
+			res, err := http.Get(m_base_url)
 			fmt.Println("Visiting", m_base_url)
 			if err != nil {
 				panic(err.Error())
@@ -774,13 +774,11 @@ func (runtime Runtime) Microsoft(
 			err = json.Unmarshal([]byte(resultsJson), &jsonJobs_1)
 			if err != nil {
 				panic(err.Error())
-            }
-            
-		    results_per_page := len(jsonJobs_1.Data.Jobs)
+			}
 
-            number_pages := jsonJobs_1.TotalHits / results_per_page
+			results_per_page := len(jsonJobs_1.Data.Jobs)
 
-            number_pages = 2
+			number_pages := jsonJobs_1.TotalHits / results_per_page
 
 			for i := 1; i <= number_pages; i++ {
 				temp_m_url := m_base_url + strconv.Itoa(i*results_per_page)

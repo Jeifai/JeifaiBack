@@ -1,7 +1,7 @@
 package main
 
 import (
-    "os"
+	"os"
 	"path/filepath"
 	"strconv"
 )
@@ -11,10 +11,10 @@ func Unique(results []Result) []Result {
 	type key struct {
 		CompanyName string
 		Title       string
-        ResultUrl   string
-        Data        string
+		ResultUrl   string
+		Data        string
 	}
-    m := make(map[key]int)
+	m := make(map[key]int)
 	for _, v := range results {
 		k := key{v.CompanyName, v.Title, v.ResultUrl, string(v.Data)}
 		if i, ok := m[k]; ok {

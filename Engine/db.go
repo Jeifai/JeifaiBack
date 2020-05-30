@@ -172,8 +172,8 @@ func ResultsByScraping(scraping int) (results []Result, err error) {
 		if err = rows.Scan(
 			&result.CompanyName,
 			&result.Title,
-            &result.ResultUrl,
-            &result.Data); err != nil {
+			&result.ResultUrl,
+			&result.Data); err != nil {
 			return
 		}
 		results = append(results, result)

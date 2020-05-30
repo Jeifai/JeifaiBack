@@ -23,6 +23,6 @@ func main() {
 			SaveResults(elem, scraping, results)
 			SaveResponseToStorage(response, file_path)
 		}
-    }
-    defer Db.Close()
+	}
+	defer Db.Close()
 }
