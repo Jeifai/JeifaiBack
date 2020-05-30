@@ -9,7 +9,7 @@ body {
 
 /* topnav */
 .topnav {
-  background-color: darkkhaki;
+  background-color: rgb(45, 49, 253);
   overflow: hidden;
 }
 
@@ -17,6 +17,6 @@ body {
 .sidenav {
     height: 100%;
     width: 15%;
-    background-color: gray;
+    background-color: rgb(144, 197, 247);
     position: fixed;
 }
