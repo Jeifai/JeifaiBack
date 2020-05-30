@@ -641,31 +641,34 @@ func (runtime Runtime) Soundcloud(
 
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
-				result_title := e.ChildText(tag_title)
-				result_url := e.ChildAttr(tag_url, "href")
-				result_department := e.ChildText(tag_department)
-				result_location := e.ChildText(tag_location)
+                result_department := e.ChildText(tag_department)
+                
+                e.ForEach("div", func(_ int, el *colly.HTMLElement) {
+                    result_title := el.ChildText(tag_title)
+                    result_url := el.ChildAttr(tag_url, "href")
+                    result_location := el.ChildText(tag_location)
 
-				_, err := netUrl.ParseRequestURI(result_url)
-				if err == nil {
+                    _, err := netUrl.ParseRequestURI(result_url)
+                    if err == nil {
 
-					temp_elem_json := Job{
-						result_title,
-						result_url,
-						result_department,
-						result_location}
+                        temp_elem_json := Job{
+                            result_title,
+                            result_url,
+                            result_department,
+                            result_location}
 
-					elem_json, err := json.Marshal(temp_elem_json)
-					if err != nil {
-						panic(err.Error())
-					}
+                        elem_json, err := json.Marshal(temp_elem_json)
+                        if err != nil {
+                            panic(err.Error())
+                        }
 
-					results = append(results, Result{
-						runtime.Name,
-						result_title,
-						result_url,
-						elem_json})
-				}
+                        results = append(results, Result{
+                            runtime.Name,
+                            result_title,
+                            result_url,
+                            elem_json})
+                    }
+                })
 			}
 		})
 
