@@ -3,17 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"net/http"
-    "time"
 	"html/template"
+	"net/http"
+	"time"
 )
 
 func main() {
 
 	r := mux.NewRouter()
 	files := http.FileServer(http.Dir(config.Static))
-    s := http.StripPrefix("/static/", files)
-    r.PathPrefix("/static/").Handler(s)
+	s := http.StripPrefix("/static/", files)
+	r.PathPrefix("/static/").Handler(s)
 
 	r.HandleFunc("/", index)
 
@@ -28,9 +28,9 @@ func main() {
 	r.HandleFunc("/targets/remove", removeTarget).Methods("PUT")
 	r.HandleFunc("/targets/all", targetsAll).Methods("GET")
 
-    r.HandleFunc("/results", results)
-    
-    r.HandleFunc("/test", test)
+	r.HandleFunc("/results", results)
+
+	r.HandleFunc("/test", test)
 	r.HandleFunc("/test_side", test_side)
 
 	fmt.Println("Application is running")
@@ -51,7 +51,6 @@ func test(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Closing test...")
 	test_template.ExecuteTemplate(w, "test.html", nil)
 }
-
 
 func test_side(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting test_side...")
