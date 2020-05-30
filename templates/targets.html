@@ -2,12 +2,12 @@
     <div class="content">
         <div id="app">
             [[ message ]]
-            <ul class="list-group">
-                <li class="list-group-item" v-for="(target, index) in targets">
+            <ul>
+                <li v-for="(target, index) in targets">
                     [[ target.Url ]]
-                    <span class="pull-right">
-                        <button class="btn btn-xs btn-danger" v-on:click="deleteTarget(index)">
-                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    <span>
+                        <button v-on:click="deleteTarget(index)">
+                            <i></i>
                         </button>
                     </span>
                 </li>
@@ -18,8 +18,8 @@
                     placeholder="New Target" 
                     v-on:keyup.enter="createTarget"
                     v-model="newTarget.Url">
-                <span class="input-group-btn">
-                    <button class="btn btn-primary" type="button" v-on:click="createTarget">Create</button>
+                <span>
+                    <button v-on:click="createTarget">Create</button>
                 </span>
             </div>
         </div>
