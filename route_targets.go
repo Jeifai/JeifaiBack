@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
-	// "fmt"
 	"./data"
 )
 
@@ -20,11 +19,16 @@ func targets(w http.ResponseWriter, r *http.Request) {
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
 		panic(err.Error())
-	}
-	type TempStruct struct {
-		User data.User
-	}
-	infos := TempStruct{user}
+    }
+
+    type TempStruct struct {
+        User    data.User
+        Data    []data.Target
+    }
+
+    targets, err := user.UsersTargetsByUser()
+
+	infos := TempStruct{user, targets}
 	templates.ExecuteTemplate(w, "layout", infos)
 }
 
