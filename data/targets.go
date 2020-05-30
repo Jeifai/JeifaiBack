@@ -50,7 +50,8 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
                            FROM users u
                            INNER JOIN users_targets ut ON(u.id = ut.user_id) 
                            INNER JOIN targets t ON(ut.target_id = t.id)
-                           WHERE u.id=$1`, user.Id)
+                           WHERE ut.deleted_at IS NULL
+                           AND u.id=$1`, user.Id)
 	if err != nil {
 		fmt.Println("Error on UsersTargetsByUser")
 	}
@@ -87,18 +88,19 @@ func (user *User) UsersTargetsByUserAndUrl(url string) (target Target, err error
 	return
 }
 
-// Delete a relation user <--> target
-func (target *Target) DeleteUserTargetByUserAndTarget(user User) (err error) {
-	fmt.Println("Starting DeleteUserTargetByUserAndTarget...")
-	statement := `DELETE FROM users_targets 
+// Update users_targets in column deleted_at
+func (target *Target) SetDeletedAtInUserTargetsByUserAndTarget(
+    user User) (err error) {
+	fmt.Println("Starting SetDeletedAtInUserTargetsByUserAndTarget...")
+    statement := `UPDATE users_targets
+                  SET deleted_at = current_timestamp
                   WHERE user_id = $1
                   AND target_id = $2;`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
-		fmt.Println("Error on DeleteUserTargetByUserAndTarget")
+		fmt.Println("Error on SetDeletedAtInUserTargetsByUserAndTarget")
 	}
 	defer stmt.Close()
 	_, err = stmt.Exec(user.Id, target.Id)
-	fmt.Println("Closing DeleteUserTargetByUserAndTarget...")
 	return
 }

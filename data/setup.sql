@@ -29,7 +29,8 @@ create table users_targets (
   uuid       varchar(64) not null unique;
   user_id	 integer references users(id),
   target_id  integer references targets(id),
-  created_at timestamp not null       
+  created_at timestamp not null
+  deleted_at timestamp   
 );
 
 create table scrapers (

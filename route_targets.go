@@ -98,16 +98,21 @@ func deleteTarget(w http.ResponseWriter, r *http.Request) {
 	sess, err := session(w, r)
 	user, err := data.UserByEmail(sess.Email)
 	if err != nil {
-		danger(err, "Cannot find user")
+		panic(err.Error())
 	}
 
 	// Instantiate a struct Target with all the data available atm
 	target := data.Target{Url: params["url"]}
 
-	// Based on the url provided by the user, understand if there is a target to delete
-	targetToBeDeleted, err := user.UsersTargetsByUserAndUrl(target.Url)
+	// Get the target to delete
+    target, err = user.UsersTargetsByUserAndUrl(target.Url)
+	if err != nil {
+		panic(err.Error())
+	}
 
-	// If the target inserted by the user exists
-	err = targetToBeDeleted.DeleteUserTargetByUserAndTarget(user)
-	_ = err
+	// Fill Deleted_At
+	err = target.SetDeletedAtInUserTargetsByUserAndTarget(user)
+	if err != nil {
+		panic(err.Error())
+	}
 }
