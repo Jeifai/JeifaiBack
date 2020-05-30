@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
-
 	r := mux.NewRouter()
 	files := http.FileServer(http.Dir(config.Static))
 	s := http.StripPrefix("/static/", files)

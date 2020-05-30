@@ -1,12 +1,13 @@
 package main
 
 import (
-	"./data"
 	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"os"
+
+	"./data"
 )
 
 type Configuration struct {
@@ -16,12 +17,14 @@ type Configuration struct {
 	Static       string
 }
 
-var config Configuration
-var logger *log.Logger
+var (
+	config Configuration
+	logger *log.Logger
+)
 
 func init() {
 	loadConfig()
-	file, err := os.OpenFile("jeifai.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile("jeifai.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o666)
 	if err != nil {
 		log.Fatalln("Failed to open log file", err)
 	}

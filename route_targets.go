@@ -1,12 +1,12 @@
 package main
 
 import (
-	// "fmt"
-	"./data"
 	"encoding/json"
 	"html/template"
 	"net/http"
 	"net/url"
+	// "fmt"
+	"./data"
 )
 
 func targets(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +93,6 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 }
 
 func removeTarget(w http.ResponseWriter, r *http.Request) {
-
 	var target data.Target
 	err := json.NewDecoder(r.Body).Decode(&target)
 

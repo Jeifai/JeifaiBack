@@ -1,10 +1,11 @@
 package main
 
 import (
-	"./data"
 	"fmt"
 	"html/template"
 	"net/http"
+
+	"./data"
 )
 
 func login(w http.ResponseWriter, r *http.Request) {
