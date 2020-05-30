@@ -8,7 +8,11 @@ import (
 
 func Unique(results []Result) []Result {
 	var unique []Result
-	type key struct{ CompanyName, Title, ResultUrl string }
+	type key struct {
+		CompanyName string
+		Title       string
+		ResultUrl   string
+	}
 	m := make(map[key]int)
 	for _, v := range results {
 		k := key{v.CompanyName, v.Title, v.ResultUrl}
