@@ -3,10 +3,10 @@ package main
 import (
 	"cloud.google.com/go/storage"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-    "io/ioutil"
-	"encoding/json"
+	"io/ioutil"
 	"sort"
 	"testing"
 	"time"
@@ -21,9 +21,9 @@ func TestMain(m *testing.M) {
 */
 
 func TestUnique(t *testing.T) {
-    fmt.Println("TestUnique")
-    testJson, err := json.Marshal("test")
-    _ = err
+	fmt.Println("TestUnique")
+	testJson, err := json.Marshal("test")
+	_ = err
 	result_1 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
 	result_2 := Result{"Test_2", "https://www.g_2.com", "Title_2", testJson}
 	result_3 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
