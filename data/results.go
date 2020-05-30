@@ -31,6 +31,7 @@ func (user *User) ResultsByUser() (results []Result, err error) {
                             LEFT JOIN results r ON(s.id = r.scraper_id)
                             LEFT JOIN latest_scraping_per_target ls ON(ut.target_id = ls.target_id)
                             WHERE ut.user_id = $1
+                            AND ut.deleted_at IS NULL
                             AND r.scraping_id = ls.latest_scraping`, user.Id)
 	if err != nil {
 		return
