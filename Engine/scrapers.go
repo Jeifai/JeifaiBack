@@ -641,34 +641,34 @@ func (runtime Runtime) Soundcloud(
 
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
-                result_department := e.ChildText(tag_department)
-                
-                e.ForEach("div", func(_ int, el *colly.HTMLElement) {
-                    result_title := el.ChildText(tag_title)
-                    result_url := el.ChildAttr(tag_url, "href")
-                    result_location := el.ChildText(tag_location)
+				result_department := e.ChildText(tag_department)
 
-                    _, err := netUrl.ParseRequestURI(result_url)
-                    if err == nil {
+				e.ForEach("div", func(_ int, el *colly.HTMLElement) {
+					result_title := el.ChildText(tag_title)
+					result_url := el.ChildAttr(tag_url, "href")
+					result_location := el.ChildText(tag_location)
 
-                        temp_elem_json := Job{
-                            result_title,
-                            result_url,
-                            result_department,
-                            result_location}
+					_, err := netUrl.ParseRequestURI(result_url)
+					if err == nil {
 
-                        elem_json, err := json.Marshal(temp_elem_json)
-                        if err != nil {
-                            panic(err.Error())
-                        }
+						temp_elem_json := Job{
+							result_title,
+							result_url,
+							result_department,
+							result_location}
 
-                        results = append(results, Result{
-                            runtime.Name,
-                            result_title,
-                            result_url,
-                            elem_json})
-                    }
-                })
+						elem_json, err := json.Marshal(temp_elem_json)
+						if err != nil {
+							panic(err.Error())
+						}
+
+						results = append(results, Result{
+							runtime.Name,
+							result_title,
+							result_url,
+							elem_json})
+					}
+				})
 			}
 		})
 
@@ -814,6 +814,9 @@ func (runtime Runtime) Microsoft(
 			result_url := m_base_result_url + elem.JobId
 
 			_, err := netUrl.ParseRequestURI(result_url)
+			if err != nil {
+				fmt.Println("HERE WE HAVE")
+			}
 			if err == nil {
 
 				elem_json, err := json.Marshal(elem)
@@ -839,32 +842,32 @@ func (runtime Runtime) Twitter(
 
 		t_base_url := "https://careers.twitter.com/content/careers-twitter/en/jobs.careers.search.json?limit=100&offset="
 
-        results_per_page := 100
-        
+		results_per_page := 100
+
 		type Location struct {
-			Id         string   `json:"id"`
-			Title       string   `json:"title"`
+			Id    string `json:"id"`
+			Title string `json:"title"`
 		}
 
-        type Team struct {
-			Id         string   `json:"id"`
-			Title       string   `json:"title"`
+		type Team struct {
+			Id    string `json:"id"`
+			Title string `json:"title"`
 		}
 
 		type Job struct {
-			Title         string   `json:"title"`
-			Description       string   `json:"description"`
-			Modified   int   `json:"modified"`
-			InternalJob bool   `json:"internalJob"`
-			Url     string `json:"url"`
-            Team   Team   `json:"team"`
-            Locations []Location   `json:"locations"`
+			Title       string     `json:"title"`
+			Description string     `json:"description"`
+			Modified    int        `json:"modified"`
+			InternalJob bool       `json:"internalJob"`
+			Url         string     `json:"url"`
+			Team        Team       `json:"team"`
+			Locations   []Location `json:"locations"`
 		}
 
 		type JsonJobs struct {
-			Jobs  []Job  `json:"results"`
-			TotalCount int `json:"totalCount"`
-			PageCount  int `json:"pageCount"`
+			Jobs       []Job `json:"results"`
+			TotalCount int   `json:"totalCount"`
+			PageCount  int   `json:"pageCount"`
 		}
 
 		var jsonJobs_1 JsonJobs
@@ -901,7 +904,7 @@ func (runtime Runtime) Twitter(
 			}
 
 			for i := 1; i < jsonJobs_1.TotalCount/results_per_page+1; i++ {
-                temp_t_url := t_base_url + strconv.Itoa(i*100)
+				temp_t_url := t_base_url + strconv.Itoa(i*100)
 				res, err := http.Get(temp_t_url)
 				fmt.Println("Visiting", temp_t_url)
 				if err != nil {
@@ -917,7 +920,7 @@ func (runtime Runtime) Twitter(
 					panic(err.Error())
 				}
 				jsonJobs_1.Jobs = append(jsonJobs_1.Jobs, tempJsonJobs_2.Jobs...)
-                time.Sleep(SecondsSleep * time.Second)
+				time.Sleep(SecondsSleep * time.Second)
 			}
 		}
 
@@ -946,7 +949,7 @@ func (runtime Runtime) Twitter(
 					result_url,
 					elem_json})
 			}
-        }
+		}
 	}
 	return
 }
@@ -962,8 +965,8 @@ func (runtime Runtime) Shopify(
 		type Category struct {
 			Commitment string `json:"commitment"`
 			Location   string `json:"location"`
-            Team       string `json:"team"`
-            Department  string  `json:"department"`
+			Team       string `json:"team"`
+			Department string `json:"department"`
 		}
 
 		type List struct {
