@@ -24,6 +24,8 @@ func main() {
 
 	r.HandleFunc("/profile", profile)
 
+	r.HandleFunc("/results", results)
+
 	r.HandleFunc("/targets", targets).Methods("GET")
 	r.HandleFunc("/targets", putTarget).Methods("PUT")
 	r.HandleFunc("/targets/remove", removeTarget).Methods("PUT")
