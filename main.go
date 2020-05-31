@@ -20,9 +20,9 @@ func main() {
 	r.HandleFunc("/logout", logout)
 	r.HandleFunc("/signup", signup)
 	r.HandleFunc("/signup_account", signupAccount)
-    r.HandleFunc("/authenticate", authenticate)
+	r.HandleFunc("/authenticate", authenticate)
 
-    r.HandleFunc("/profile", profile)
+	r.HandleFunc("/profile", profile)
 
 	r.HandleFunc("/targets", targets).Methods("GET")
 	r.HandleFunc("/targets", putTarget).Methods("PUT")

@@ -1,17 +1,19 @@
 package main
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"os"
 	"sort"
 	"testing"
 	"time"
+
+	"cloud.google.com/go/storage"
+
+	"github.com/stretchr/testify/assert"
 	// "log"
-	"os"
 )
 
 /**
@@ -28,7 +30,7 @@ func TestUnique(t *testing.T) {
 	result_2 := Result{"Test_2", "https://www.g_2.com", "Title_2", testJson}
 	result_3 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
 	result_4 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
-	var results = []Result{result_1, result_2, result_3, result_4}
+	results := []Result{result_1, result_2, result_3, result_4}
 	got := Unique(results)
 	want := []Result{result_1, result_2}
 	assert.Equal(t, got, want, "The two []Result should be the same.")

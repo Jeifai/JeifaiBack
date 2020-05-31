@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gocolly/colly"
 	"io/ioutil"
 	"net/http"
 	netUrl "net/url"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gocolly/colly"
 )
 
 type Runtime struct {
@@ -40,7 +41,8 @@ func Scrape(
 	method := strucReflected.MethodByName(scraper_name)
 	params := []reflect.Value{
 		reflect.ValueOf(scraper_version),
-		reflect.ValueOf(isLocal)}
+		reflect.ValueOf(isLocal),
+	}
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
 	results = function_output[1].Interface().([]Result)
@@ -52,7 +54,6 @@ func Scrape(
 func (runtime Runtime) Kununu(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-
 	if version == 1 {
 
 		c := colly.NewCollector()
@@ -83,7 +84,8 @@ func (runtime Runtime) Kununu(
 					temp_elem_json := Job{
 						result_title,
 						result_url,
-						result_location}
+						result_location,
+					}
 
 					elem_json, err := json.Marshal(temp_elem_json)
 					if err != nil {
@@ -94,7 +96,8 @@ func (runtime Runtime) Kununu(
 						runtime.Name,
 						result_title,
 						result_url,
-						elem_json})
+						elem_json,
+					})
 				}
 			}
 		})
@@ -133,7 +136,6 @@ func (runtime Runtime) Kununu(
 func (runtime Runtime) Mitte(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-
 	if version == 1 {
 
 		url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
@@ -219,7 +221,8 @@ func (runtime Runtime) Mitte(
 						runtime.Name,
 						result_title,
 						result_url,
-						elem_json})
+						elem_json,
+					})
 				}
 			}
 		}
@@ -230,7 +233,6 @@ func (runtime Runtime) Mitte(
 func (runtime Runtime) IMusician(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-
 	if version == 1 {
 
 		c := colly.NewCollector()
@@ -264,7 +266,8 @@ func (runtime Runtime) IMusician(
 						result_title,
 						result_url,
 						result_description,
-						result_location}
+						result_location,
+					}
 
 					elem_json, err := json.Marshal(temp_elem_json)
 					if err != nil {
@@ -275,7 +278,8 @@ func (runtime Runtime) IMusician(
 						runtime.Name,
 						result_title,
 						result_url,
-						elem_json})
+						elem_json,
+					})
 				}
 			}
 		})
@@ -314,7 +318,6 @@ func (runtime Runtime) IMusician(
 func (runtime Runtime) Babelforce(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-
 	if version == 1 {
 
 		c := colly.NewCollector()
@@ -342,7 +345,8 @@ func (runtime Runtime) Babelforce(
 
 					temp_elem_json := Job{
 						result_title,
-						result_url}
+						result_url,
+					}
 					elem_json, err := json.Marshal(temp_elem_json)
 					if err != nil {
 						panic(err.Error())
@@ -352,7 +356,8 @@ func (runtime Runtime) Babelforce(
 						runtime.Name,
 						result_title,
 						result_url,
-						elem_json})
+						elem_json,
+					})
 				}
 			}
 		})
@@ -390,7 +395,6 @@ func (runtime Runtime) Babelforce(
 
 func (runtime Runtime) Zalando(
 	version int, isLocal bool) (response Response, results []Result) {
-
 	if version == 1 {
 
 		z_base_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset="
@@ -494,7 +498,8 @@ func (runtime Runtime) Zalando(
 					runtime.Name,
 					result_title,
 					result_url,
-					elem_json})
+					elem_json,
+				})
 			}
 		}
 	}
@@ -503,7 +508,6 @@ func (runtime Runtime) Zalando(
 
 func (runtime Runtime) Google(
 	version int, isLocal bool) (response Response, results []Result) {
-
 	if version == 1 {
 
 		g_base_url := "https://careers.google.com/api/jobs/jobs-v1/search/?page_size=100&page="
@@ -608,7 +612,8 @@ func (runtime Runtime) Google(
 					runtime.Name,
 					result_title,
 					result_url,
-					elem_json})
+					elem_json,
+				})
 			}
 		}
 	}
@@ -618,7 +623,6 @@ func (runtime Runtime) Google(
 func (runtime Runtime) Soundcloud(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-
 	if version == 1 {
 
 		c := colly.NewCollector()
@@ -655,7 +659,8 @@ func (runtime Runtime) Soundcloud(
 							result_title,
 							result_url,
 							result_department,
-							result_location}
+							result_location,
+						}
 
 						elem_json, err := json.Marshal(temp_elem_json)
 						if err != nil {
@@ -666,7 +671,8 @@ func (runtime Runtime) Soundcloud(
 							runtime.Name,
 							result_title,
 							result_url,
-							elem_json})
+							elem_json,
+						})
 					}
 				})
 			}
@@ -706,7 +712,6 @@ func (runtime Runtime) Soundcloud(
 func (runtime Runtime) Microsoft(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-
 	if version == 1 {
 
 		m_base_url := "https://careers.microsoft.com/us/en/search-results?s=1&from="
@@ -829,7 +834,8 @@ func (runtime Runtime) Microsoft(
 					runtime.Name,
 					result_title,
 					result_url,
-					elem_json})
+					elem_json,
+				})
 			}
 		}
 	}
@@ -838,7 +844,6 @@ func (runtime Runtime) Microsoft(
 
 func (runtime Runtime) Twitter(
 	version int, isLocal bool) (response Response, results []Result) {
-
 	if version == 1 {
 
 		t_base_url := "https://careers.twitter.com/content/careers-twitter/en/jobs.careers.search.json?limit=100&offset="
@@ -948,7 +953,8 @@ func (runtime Runtime) Twitter(
 					runtime.Name,
 					result_title,
 					result_url,
-					elem_json})
+					elem_json,
+				})
 			}
 		}
 	}
@@ -958,7 +964,6 @@ func (runtime Runtime) Twitter(
 func (runtime Runtime) Shopify(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-
 	if version == 1 {
 
 		url := "https://api.lever.co/v0/postings/shopify?group=team&mode=json"
@@ -1045,7 +1050,8 @@ func (runtime Runtime) Shopify(
 						runtime.Name,
 						result_title,
 						result_url,
-						elem_json})
+						elem_json,
+					})
 				}
 			}
 		}

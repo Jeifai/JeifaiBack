@@ -3,12 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type Scraping struct {
@@ -26,7 +27,6 @@ type Scraper struct {
 var Db *sql.DB
 
 func DbConnect() {
-
 	err := godotenv.Load()
 	if err != nil {
 		panic(err.Error())

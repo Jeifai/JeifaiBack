@@ -1,13 +1,13 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
 	"html/template"
+	"net/http"
 )
 
 func profile(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("Generating HTML for profile...")
+	fmt.Println("Generating HTML for profile...")
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",

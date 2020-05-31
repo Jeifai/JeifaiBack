@@ -2,16 +2,16 @@ package main
 
 import (
 	"bytes"
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"time"
+
+	"cloud.google.com/go/storage"
 )
 
 func SaveResponseToStorage(response Response, file_path string) {
-
 	fmt.Println("Starting SaveResponseToStorage...")
 
 	ctx := context.Background()
@@ -32,7 +32,6 @@ func SaveResponseToStorage(response Response, file_path string) {
 }
 
 func GetResponseFromStorage(file_path string) (response string) {
-
 	fmt.Println("Starting GetResponseFromStorage...")
 
 	ctx := context.Background()
