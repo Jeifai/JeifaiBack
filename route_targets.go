@@ -32,18 +32,6 @@ func targets(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "layout", infos)
 }
 
-func targetsAll(w http.ResponseWriter, r *http.Request) {
-	sess, err := session(r)
-	user, err := data.UserByEmail(sess.Email)
-	if err != nil {
-		panic(err.Error())
-	}
-	targets, err := user.UsersTargetsByUser()
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(targets)
-}
-
 func putTarget(w http.ResponseWriter, r *http.Request) {
 	var target data.Target
 	err := json.NewDecoder(r.Body).Decode(&target)

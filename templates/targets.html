@@ -33,11 +33,6 @@
                     targets: {{.Data}},
                     newTarget: {}
                 },
-            created: function() { // run whenever the page is loaded
-                this.$http.get('/targets/all').then(function(response) {
-                    this.targets = response.data ? response.data : []
-                })
-            },
             methods: {
                 createTarget: function() {
                     this.$http.put('/targets', this.newTarget).then(function(response) {
