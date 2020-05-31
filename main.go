@@ -23,14 +23,11 @@ func main() {
 	r.HandleFunc("/signup_account", signupAccount)
     r.HandleFunc("/authenticate", authenticate)
 
+    r.HandleFunc("/profile", profile)
+
 	r.HandleFunc("/targets", targets).Methods("GET")
 	r.HandleFunc("/targets", putTarget).Methods("PUT")
 	r.HandleFunc("/targets/remove", removeTarget).Methods("PUT")
-
-	r.HandleFunc("/results", results)
-
-	r.HandleFunc("/test", test)
-	r.HandleFunc("/test_side", test_side)
 
 	fmt.Println("Application is running")
 
@@ -42,18 +39,4 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	server.ListenAndServe()
-}
-
-func test(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Starting test...")
-	test_template := template.Must(template.ParseFiles("templates/test.html"))
-	fmt.Println("Closing test...")
-	test_template.ExecuteTemplate(w, "test.html", nil)
-}
-
-func test_side(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Starting test_side...")
-	test_side_template := template.Must(template.ParseFiles("templates/test_side.html"))
-	fmt.Println("Closing test_side...")
-	test_side_template.ExecuteTemplate(w, "test_side.html", nil)
 }
