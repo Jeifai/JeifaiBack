@@ -781,7 +781,7 @@ func (runtime Runtime) Microsoft(
 				panic(err.Error())
 			}
 
-			results_per_page := len(jsonJobs_1.Data.Jobs)
+			results_per_page := 10 //len(jsonJobs_1.Data.Jobs)
 
 			number_pages := jsonJobs_1.TotalHits / results_per_page
 
