@@ -22,7 +22,8 @@ func main() {
 	r.HandleFunc("/signup_account", signupAccount)
 	r.HandleFunc("/authenticate", authenticate)
 
-	r.HandleFunc("/profile", profile)
+	r.HandleFunc("/profile", profile).Methods("GET")
+	r.HandleFunc("/profile", updateProfile).Methods("PUT")
 
 	r.HandleFunc("/results", results)
 

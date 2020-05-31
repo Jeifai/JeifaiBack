@@ -71,7 +71,7 @@ func signupAccount(w http.ResponseWriter, r *http.Request) {
 		danger(err, "Cannot parse form")
 	}
 	user := data.User{
-		UserName:     r.PostFormValue("user_name"),
+		UserName: r.PostFormValue("user_name"),
 		Email:    r.PostFormValue("email"),
 		Password: r.PostFormValue("password"),
 	}

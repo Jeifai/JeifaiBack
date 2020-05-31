@@ -5,12 +5,19 @@ import (
 )
 
 type User struct {
-	Id              int
-	Uuid          string
-	UserName      string
-	Email     string
-	Password  string
-	CreatedAt time.Time
+	Id          int
+	Uuid        string
+	UserName    string
+	Email       string
+	Password    string
+	CreatedAt   time.Time
+	DeletedAt   time.Time
+	FirstName   string
+	LastName    string
+	DateOfBirth time.Time
+	Country     string
+	City        string
+	Gender      bool
 }
 
 type Session struct {

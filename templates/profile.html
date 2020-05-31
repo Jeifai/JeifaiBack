@@ -59,7 +59,7 @@
             el: '#app',
             delimiters: ["[[","]]"],
             data: {
-                user_name: '{{.User.Name}}',
+                user_name: '{{.User.UserName}}',
                 first_name: '',
                 last_name: '',
                 email: '',
@@ -69,11 +69,15 @@
                 gender: '',
                 new_password: '',
                 repeat_new_password: '',
-                current_password: '',
+                current_password: ''
             },
             methods: {
                 updateProfile: function() {
-                    alert("I AM GOING TO UPDATE THE PROFILE");
+                    this.$http.put('/profile', {"country": this.country}).then(function(response) {
+                        console.log(response)
+                    }).catch(function(error) {
+                        console.log(error)
+                    });
                 }
             }
         })
