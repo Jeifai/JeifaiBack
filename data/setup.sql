@@ -1,10 +1,17 @@
 create table users (
-  id         serial primary key,
-  uuid       varchar(64) not null unique,
-  name       varchar(255),
-  email      varchar(255) not null unique,
-  password   varchar(255) not null,
-  created_at timestamp not null   
+  id            serial primary key,
+  uuid          varchar(64) not null unique,
+  user_name     varchar(255),
+  email         varchar(255) not null unique,
+  password      varchar(255) not null,
+  created_at    timestamp not null,
+  deleted_at    timestamp,
+  first_name    varchar(64), 
+  last_name     varchar(64),
+  date_of_birth date,
+  country       varchar(64),
+  city          varchar(64),
+  gender        boolean
 );
 
 create table sessions (
