@@ -35,7 +35,7 @@ func (target *Target) CreateUserTarget(user User) {
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		panic(err.Error())
-    }
+	}
 	defer stmt.Close()
 	stmt.QueryRow(user.Id, target.Id, time.Now())
 }
@@ -51,11 +51,11 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
                            AND u.id=$1`, user.Id)
 	if err != nil {
 		panic(err.Error())
-    }
+	}
 	for rows.Next() {
 		target := Target{}
 		if err = rows.Scan(&target.Id, &target.Url, &target.CreatedAt); err != nil {
-		    panic(err.Error())
+			panic(err.Error())
 		}
 		targets = append(targets, target)
 	}
@@ -85,9 +85,9 @@ func (user *User) UsersTargetsByUserAndUrl(url string) (target Target, err error
 
 // Update users_targets in column deleted_at
 func (target *Target) SetDeletedAtInUsersTargetsByUserAndTarget(
-    user User) (err error) {
+	user User) (err error) {
 	fmt.Println("Starting SetDeletedAtInUserTargetsByUserAndTarget...")
-    statement := `UPDATE users_targets
+	statement := `UPDATE users_targets
                   SET deleted_at = current_timestamp
                   WHERE user_id = $1
                   AND target_id = $2;`
@@ -95,7 +95,7 @@ func (target *Target) SetDeletedAtInUsersTargetsByUserAndTarget(
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		panic(err.Error())
-    }
+	}
 	defer stmt.Close()
 	_, err = stmt.Exec(user.Id, target.Id)
 	return
