@@ -50,7 +50,7 @@
                 <input v-model="current_password" placeholder="Current Password">
             </div>
             <div>
-                <button name="submit" type="submit">Update My Profile</button>
+                <button v-on:click="updateProfile">Update My Profile</button>
             </div>
         </div>
     </div>
@@ -66,11 +66,16 @@
                 date_birth: '',
                 country: '',
                 city: '',
+                gender: '',
                 new_password: '',
                 repeat_new_password: '',
                 current_password: '',
-                gender: '',
+            },
+            methods: {
+                updateProfile: function() {
+                    alert("I AM GOING TO UPDATE THE PROFILE");
                 }
-            })
+            }
+        })
     </script>
 {{ end }}
