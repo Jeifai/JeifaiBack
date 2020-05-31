@@ -1,5 +1,76 @@
 {{ define "content" }}
     <div class="content">
-        THIS PAGE WILL CONTAIN PROFILE
+        <div id="app">
+            <div>
+                <label for="user_name">User Name</label> 
+                <input v-model="user_name" placeholder="User Name">
+            </div>
+            <div>
+                <label for="first_name">First Name</label> 
+                <input v-model="first_name" placeholder="First Name">
+            </div>
+            <div>
+                <label for="last_name">Last Name</label> 
+                <input v-model="last_name" placeholder="Last Name">
+            </div>
+            <div>
+                <label for="email">Email</label> 
+                <input v-model="email" placeholder="Email">
+            </div>
+            <div>
+                <label for="date_birth">Date of Birth</label> 
+                <input type="date" v-model="date_birth" placeholder="Date of Birth">
+            </div>
+            <div>
+                <label for="country">Country</label> 
+                <input v-model="country" placeholder="Country">
+            </div>
+            <div>
+                <label for="city">City</label> 
+                <input v-model="city" placeholder="City">
+            </div>
+            <div>
+                <label for="gender">Gender</label> 
+                <select v-model="gender">
+                    <option disabled value="">Please select one</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                </select>
+            </div>
+            <div>
+                <label for="new_password">New Password</label> 
+                <input v-model="new_password" placeholder="New Password">
+            </div>
+            <div>
+                <label for="repeat_new_password">Repeat New Password</label> 
+                <input v-model="repeat_new_password" placeholder="Repeat New Password">
+            </div>
+            <div>
+                <label for="current_password">Current Password</label> 
+                <input v-model="current_password" placeholder="Current Password">
+            </div>
+            <div>
+                <button name="submit" type="submit">Update My Profile</button>
+            </div>
+        </div>
     </div>
+    <script>
+        new Vue({
+            el: '#app',
+            delimiters: ["[[","]]"],
+            data: {
+                user_name: '{{.User.Name}}',
+                first_name: '',
+                last_name: '',
+                email: '',
+                date_birth: '',
+                country: '',
+                city: '',
+                new_password: '',
+                repeat_new_password: '',
+                current_password: '',
+                gender: '',
+                }
+            })
+    </script>
 {{ end }}

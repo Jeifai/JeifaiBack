@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+
+	"./data"
 )
 
 func profile(w http.ResponseWriter, r *http.Request) {
@@ -13,5 +15,17 @@ func profile(w http.ResponseWriter, r *http.Request) {
 			"templates/layout.html",
 			"templates/private.navigation.html",
 			"templates/profile.html"))
-	templates.ExecuteTemplate(w, "layout", nil)
+
+	sess, err := session(r)
+	user, err := data.UserByEmail(sess.Email)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	type TempStruct struct {
+		User data.User
+	}
+
+	infos := TempStruct{user}
+	templates.ExecuteTemplate(w, "layout", infos)
 }
