@@ -20,7 +20,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 			"templates/profile.html"))
 
 	sess, err := session(r)
-	user, err := data.UserByEmail(sess.Email)
+	user, err := data.UserById(sess.UserId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -40,8 +40,6 @@ func profile(w http.ResponseWriter, r *http.Request) {
 		User PublicUser
 	}
 
-	fmt.Println(user.DateOfBirth)
-
 	var publicUser PublicUser
 	publicUser.UserName = user.UserName
 	publicUser.Email = user.Email
@@ -58,36 +56,18 @@ func profile(w http.ResponseWriter, r *http.Request) {
 
 func updateProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting updateProfile...")
+
 	sess, err := session(r)
 	user, err := data.UserByEmail(sess.Email)
 
-	type TempUser struct {
-		UserName          string
-		Email             string `validate:"email"`
-		Password          string
-		FirstName         string
-		LastName          string
-		DateOfBirth       string
-		Country           string
-		City              string
-		Gender            string
-		CurrentPassword   string `validate:"required,eqfield=Password"`
-		NewPassword       string `validate:"eqfield=RepeatNewPassword"`
-		RepeatNewPassword string `validate:"eqfield=NewPassword"`
+	err = json.NewDecoder(r.Body).Decode(&user)
+
+	if user.CurrentPassword != "" {
+		user.CurrentPassword = data.Encrypt(user.CurrentPassword)
 	}
-
-	var temp_user TempUser
-
-	err = json.NewDecoder(r.Body).Decode(&temp_user)
-
-	if temp_user.CurrentPassword != "" {
-		temp_user.CurrentPassword = data.Encrypt(temp_user.CurrentPassword)
-	}
-
-	temp_user.Password = user.Password
 
 	validate := validator.New()
-	err = validate.Struct(temp_user)
+	err = validate.Struct(user)
 
 	var messages []string
 
@@ -117,9 +97,9 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 
 	if len(messages) == 0 {
 		temp_message := `<p style="color:green">Changes saved</p>`
-		messages = append(messages, temp_message)
-
-		// SAVE temp_user IN DB
+        messages = append(messages, temp_message)
+        fmt.Println("Updating user infos...")
+		user.UpdateUser()
 	}
 
 	type TempStruct struct {

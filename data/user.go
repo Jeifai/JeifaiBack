@@ -1,24 +1,29 @@
 package data
 
 import (
-    "fmt"
+	"fmt"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type User struct {
-	Id          int
-	Uuid        string
-	UserName    string
-	Email       string
-	Password    string
-	CreatedAt   time.Time
-	DeletedAt   time.Time
-	FirstName   string
-	LastName    string
-	DateOfBirth string
-	Country     string
-	City        string
-	Gender      string
+	Id                int       `db:"id"`
+	Uuid              string    `db:"uuid"`
+	UserName          string    `db:"username"`
+	Email             string    `db:"email"       validate:"email"`
+	Password          string    `db:"password"`
+	CreatedAt         time.Time `db:"createdat"`
+	DeletedAt         time.Time `db:"deletedat"`
+	FirstName         string    `db:"firstname"`
+	LastName          string    `db:"lastname"`
+	DateOfBirth       string    `db:"dateofbirth"`
+	Country           string    `db:"country"`
+	City              string    `db:"city"`
+	Gender            string    `db:"gender"`
+	CurrentPassword   string    `validate:"required,eqfield=Password"`
+	NewPassword       string    `validate:"eqfield=RepeatNewPassword"`
+	RepeatNewPassword string    `validate:"eqfield=NewPassword"`
 }
 
 type Session struct {
@@ -126,7 +131,8 @@ func (user *User) Create() (err error) {
 	// Postgres does not automatically return the last insert id, because it would be wrong to assume
 	// you're always using a sequence.You need to use the RETURNING keyword in your insert to get this
 	// information from postgres.
-	statement := `INSERT INTO users (uuid, username, email, password, createdat)
+	statement := `INSERT INTO users
+                  (uuid, username, email, password, createdat)
                   VALUES ($1, $2, $3, $4, $5)
                   RETURNING id, uuid, createdat`
 	stmt, err := Db.Prepare(statement)
@@ -152,7 +158,6 @@ func (user *User) Create() (err error) {
 
 // Get a single user given the email
 func UserByEmail(email string) (user User, err error) {
-    fmt.Println(email)
 	user = User{}
 	err = Db.QueryRow(`SELECT
                         id,
@@ -161,7 +166,6 @@ func UserByEmail(email string) (user User, err error) {
                         email,
                         password,
                         createdat,
-                        deletedat,
                         firstname,
                         lastname,
                         TO_CHAR(dateofbirth, 'YYYY-MM-DD'),
@@ -178,14 +182,75 @@ func UserByEmail(email string) (user User, err error) {
 			&user.UserName,
 			&user.Email,
 			&user.Password,
-            &user.CreatedAt,
-			&user.DeletedAt,
+			&user.CreatedAt,
 			&user.FirstName,
 			&user.LastName,
-            &user.DateOfBirth,
+			&user.DateOfBirth,
 			&user.Country,
-            &user.City,
+			&user.City,
 			&user.Gender,
 		)
 	return
+}
+
+// Get a single user given the email
+func UserById(id int) (user User, err error) {
+	user = User{}
+	err = Db.QueryRow(`SELECT
+                        id,
+                        uuid,
+                        username,
+                        email,
+                        password,
+                        createdat,
+                        firstname,
+                        lastname,
+                        TO_CHAR(dateofbirth, 'YYYY-MM-DD'),
+                        country,
+                        city,
+                        gender
+                      FROM users
+                      WHERE id = $1`,
+		id,
+	).
+		Scan(
+			&user.Id,
+			&user.Uuid,
+			&user.UserName,
+			&user.Email,
+			&user.Password,
+			&user.CreatedAt,
+			&user.FirstName,
+			&user.LastName,
+			&user.DateOfBirth,
+			&user.Country,
+			&user.City,
+			&user.Gender,
+		)
+	return
+}
+
+func (user User) UpdateUser() {
+	fmt.Println("Starting UpdateUser...")
+
+	var db *sqlx.DB
+	db = sqlx.NewDb(Db, "postgres")
+
+	query := `UPDATE users SET
+                username=:username,
+                email=:email,
+                password=:password,
+                createdat=:createdat,
+                firstname=:firstname,
+                lastname=:lastname,
+                dateofbirth=:dateofbirth,
+                country=:country,
+                city=:city,
+                gender=:gender
+              WHERE id=:id`
+
+	_, err := db.NamedExec(query, user)
+	if err != nil {
+		panic(err.Error())
+	}
 }
