@@ -11,7 +11,7 @@ import (
 func results(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Generating HTML for results...")
 	sess, err := session(r)
-	user, err := data.UserByEmail(sess.Email)
+	user, err := data.UserById(sess.UserId)
 	if err != nil {
 		danger(err, "Cannot find user")
 	}

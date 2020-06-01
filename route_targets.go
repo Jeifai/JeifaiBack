@@ -17,7 +17,7 @@ func targets(w http.ResponseWriter, r *http.Request) {
 			"templates/targets.html"))
 
 	sess, err := session(r)
-	user, err := data.UserByEmail(sess.Email)
+	user, err := data.UserById(sess.UserId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -38,7 +38,7 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&target)
 
 	sess, err := session(r)
-	user, err := data.UserByEmail(sess.Email)
+	user, err := data.UserById(sess.UserId)
 	if err != nil {
 		panic(err.Error())
 	}

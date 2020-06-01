@@ -58,7 +58,7 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting updateProfile...")
 
 	sess, err := session(r)
-	user, err := data.UserByEmail(sess.Email)
+	user, err := data.UserById(sess.UserId)
 
 	err = json.NewDecoder(r.Body).Decode(&user)
 

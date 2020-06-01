@@ -20,7 +20,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 				"templates/index.html"))
 		templates.ExecuteTemplate(w, "layout", nil)
 	} else {
-		user, err := data.UserByEmail(sess.Email)
+		user, err := data.UserById(sess.UserId)
 		if err != nil {
 			danger(err, "Cannot find user")
 		}
