@@ -5,17 +5,17 @@ import (
 	"crypto/sha1"
 	"database/sql"
 	"fmt"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 var Db *sql.DB
 
 func init() {
-
 	// Load Environmental Variables
 	err := godotenv.Load()
 	if err != nil {

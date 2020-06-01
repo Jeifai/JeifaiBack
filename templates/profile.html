@@ -1,6 +1,9 @@
 {{ define "content" }}
     <div class="content">
         <div id="app">
+            <p v-for="(error, index) in errors">
+                <span v-html="error"></span>
+            </p>
             <div>
                 <label for="UserName">User Name</label> 
                 <input v-model="fields.UserName" placeholder="User Name">
@@ -59,12 +62,15 @@
             el: '#app',
             delimiters: ["[[","]]"],
             data: {
+                message: '',
+                errors: '',
                 fields: {}
             },
             methods: {
                 updateProfile: function() {
                     this.$http.put('/profile', this.fields).then(function(response) {
-                        console.log(response)
+                        this.errors = response.data.Errors
+                        this.message = response.data.Message
                     }).catch(function(error) {
                         console.log(error)
                     });
