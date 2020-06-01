@@ -55,8 +55,7 @@ FROM scraping s
 LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
 LEFT JOIN results r ON(s.id = r.scraping_id)
 GROUP BY 1 
-ORDER BY ss.name
-DESC LIMIT 5;
+ORDER BY 2 DESC;
 
 
 
