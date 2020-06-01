@@ -11,7 +11,7 @@ create table users (
   date_of_birth date,
   country       varchar(64),
   city          varchar(64),
-  gender        boolean
+  gender        varchar(10)
 );
 
 create table sessions (

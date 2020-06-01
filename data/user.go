@@ -135,17 +135,34 @@ func (user *User) Create() (err error) {
 // Get a single user given the email
 func UserByEmail(email string) (user User, err error) {
 	user = User{}
-	err = Db.QueryRow(
-		"SELECT id, uuid, user_name, email, password, created_at FROM users WHERE email = $1",
-		email,
-	).
-		Scan(
-			&user.Id,
-			&user.Uuid,
-			&user.UserName,
-			&user.Email,
-			&user.Password,
-			&user.CreatedAt,
-		)
+    err = Db.QueryRow(`SELECT
+                        id,
+                        uuid,
+                        user_name,
+                        first_name,
+                        last_name,
+                        email,
+                        country,
+                        city,
+                        gender,
+                        password,
+                      created_at
+                      FROM users
+                      WHERE email = $1`,
+                        email,
+                    ).
+                        Scan(
+                            &user.Id,
+                            &user.Uuid,
+                            &user.UserName,
+                            &user.FirstName,
+                            &user.LastName,
+                            &user.Email,
+                            &user.Country,
+                            &user.City,
+                            &user.Gender,
+                            &user.Password,
+                            &user.CreatedAt,
+                        )
 	return
 }
