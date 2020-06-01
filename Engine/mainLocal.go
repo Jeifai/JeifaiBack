@@ -1,6 +1,6 @@
 package main
 
-func main() {
+func mainTemp() {
 	DbConnect()
 	scraper_name := "Microsoft"
 	scraper_version := 1
