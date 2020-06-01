@@ -40,7 +40,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 		User PublicUser
 	}
 
-    fmt.Println(user.DateOfBirth)
+	fmt.Println(user.DateOfBirth)
 
 	var publicUser PublicUser
 	publicUser.UserName = user.UserName
@@ -48,7 +48,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 	publicUser.FirstName = user.FirstName
 	publicUser.LastName = user.LastName
 	publicUser.Country = user.Country
-    publicUser.City = user.City
+	publicUser.City = user.City
 	publicUser.DateOfBirth = user.DateOfBirth
 	publicUser.Gender = user.Gender
 
@@ -78,7 +78,7 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 
 	var temp_user TempUser
 
-    err = json.NewDecoder(r.Body).Decode(&temp_user)
+	err = json.NewDecoder(r.Body).Decode(&temp_user)
 
 	if temp_user.CurrentPassword != "" {
 		temp_user.CurrentPassword = data.Encrypt(temp_user.CurrentPassword)
@@ -117,10 +117,10 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 
 	if len(messages) == 0 {
 		temp_message := `<p style="color:green">Changes saved</p>`
-        messages = append(messages, temp_message)
+		messages = append(messages, temp_message)
 
-        // SAVE temp_user IN DB
-    }
+		// SAVE temp_user IN DB
+	}
 
 	type TempStruct struct {
 		Messages []string

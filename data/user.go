@@ -1,6 +1,7 @@
 package data
 
 import (
+    "fmt"
 	"time"
 )
 
@@ -125,9 +126,9 @@ func (user *User) Create() (err error) {
 	// Postgres does not automatically return the last insert id, because it would be wrong to assume
 	// you're always using a sequence.You need to use the RETURNING keyword in your insert to get this
 	// information from postgres.
-	statement := `INSERT INTO users (uuid, user_name, email, password, created_at)
+	statement := `INSERT INTO users (uuid, username, email, password, createdat)
                   VALUES ($1, $2, $3, $4, $5)
-                  RETURNING id, uuid, created_at`
+                  RETURNING id, uuid, createdat`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
@@ -151,20 +152,22 @@ func (user *User) Create() (err error) {
 
 // Get a single user given the email
 func UserByEmail(email string) (user User, err error) {
+    fmt.Println(email)
 	user = User{}
 	err = Db.QueryRow(`SELECT
                         id,
                         uuid,
-                        user_name,
-                        first_name,
-                        last_name,
+                        username,
                         email,
+                        password,
+                        createdat,
+                        deletedat,
+                        firstname,
+                        lastname,
+                        TO_CHAR(dateofbirth, 'YYYY-MM-DD'),
                         country,
                         city,
-                        TO_CHAR(date_of_birth, 'YYYY-MM-DD'),
-                        gender,
-                        password,
-                      created_at
+                        gender
                       FROM users
                       WHERE email = $1`,
 		email,
@@ -173,15 +176,16 @@ func UserByEmail(email string) (user User, err error) {
 			&user.Id,
 			&user.Uuid,
 			&user.UserName,
+			&user.Email,
+			&user.Password,
+            &user.CreatedAt,
+			&user.DeletedAt,
 			&user.FirstName,
 			&user.LastName,
-			&user.Email,
+            &user.DateOfBirth,
 			&user.Country,
             &user.City,
-            &user.DateOfBirth,
 			&user.Gender,
-			&user.Password,
-			&user.CreatedAt,
 		)
 	return
 }

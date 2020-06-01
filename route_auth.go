@@ -22,6 +22,7 @@ func authenticate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		danger(err, "Cannot find user")
 	}
+
 	if user.Password == data.Encrypt(r.PostFormValue("password")) {
 		session, err := user.CreateSession()
 		if err != nil {
@@ -71,10 +72,11 @@ func signupAccount(w http.ResponseWriter, r *http.Request) {
 		danger(err, "Cannot parse form")
 	}
 	user := data.User{
-		UserName: r.PostFormValue("user_name"),
+		UserName: r.PostFormValue("username"),
 		Email:    r.PostFormValue("email"),
 		Password: r.PostFormValue("password"),
 	}
+	fmt.Println(user)
 	if err := user.Create(); err != nil {
 		danger(err, "Cannot create user")
 	}
