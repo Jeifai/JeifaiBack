@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"time"
 
 	"github.com/go-playground/validator"
 
@@ -31,7 +30,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 		Email       string
 		FirstName   string
 		LastName    string
-		DateOfBirth time.Time
+		DateOfBirth string
 		Country     string
 		City        string
 		Gender      string
@@ -41,13 +40,16 @@ func profile(w http.ResponseWriter, r *http.Request) {
 		User PublicUser
 	}
 
+    fmt.Println(user.DateOfBirth)
+
 	var publicUser PublicUser
 	publicUser.UserName = user.UserName
 	publicUser.Email = user.Email
 	publicUser.FirstName = user.FirstName
 	publicUser.LastName = user.LastName
 	publicUser.Country = user.Country
-	publicUser.City = user.City
+    publicUser.City = user.City
+	publicUser.DateOfBirth = user.DateOfBirth
 	publicUser.Gender = user.Gender
 
 	infos := TempStruct{publicUser}
@@ -55,6 +57,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateProfile(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Starting updateProfile...")
 	sess, err := session(r)
 	user, err := data.UserByEmail(sess.Email)
 
@@ -64,7 +67,7 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 		Password          string
 		FirstName         string
 		LastName          string
-		DateOfBirth       time.Time
+		DateOfBirth       string
 		Country           string
 		City              string
 		Gender            string
@@ -75,7 +78,7 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 
 	var temp_user TempUser
 
-	err = json.NewDecoder(r.Body).Decode(&temp_user)
+    err = json.NewDecoder(r.Body).Decode(&temp_user)
 
 	if temp_user.CurrentPassword != "" {
 		temp_user.CurrentPassword = data.Encrypt(temp_user.CurrentPassword)
@@ -114,8 +117,10 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 
 	if len(messages) == 0 {
 		temp_message := `<p style="color:green">Changes saved</p>`
-		messages = append(messages, temp_message)
-	}
+        messages = append(messages, temp_message)
+
+        // SAVE temp_user IN DB
+    }
 
 	type TempStruct struct {
 		Messages []string

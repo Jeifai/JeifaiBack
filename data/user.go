@@ -14,7 +14,7 @@ type User struct {
 	DeletedAt   time.Time
 	FirstName   string
 	LastName    string
-	DateOfBirth time.Time
+	DateOfBirth string
 	Country     string
 	City        string
 	Gender      string
@@ -161,6 +161,7 @@ func UserByEmail(email string) (user User, err error) {
                         email,
                         country,
                         city,
+                        TO_CHAR(date_of_birth, 'YYYY-MM-DD'),
                         gender,
                         password,
                       created_at
@@ -176,7 +177,8 @@ func UserByEmail(email string) (user User, err error) {
 			&user.LastName,
 			&user.Email,
 			&user.Country,
-			&user.City,
+            &user.City,
+            &user.DateOfBirth,
 			&user.Gender,
 			&user.Password,
 			&user.CreatedAt,
