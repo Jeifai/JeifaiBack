@@ -14,10 +14,10 @@ type User struct {
 	DeletedAt   time.Time
 	FirstName   string
 	LastName    string
-	DateOfBirth time.Time
+	DateOfBirth time.Time 
 	Country     string
 	City        string
-	Gender      bool
+	Gender      string
 }
 
 type Session struct {

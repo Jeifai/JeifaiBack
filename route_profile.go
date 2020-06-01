@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"net/http"
+    "net/http"
 
 	"./data"
 )
@@ -32,16 +32,14 @@ func profile(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateProfile(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("OKOKOKOKOKOK")
-
+    
 	sess, err := session(r)
-	user, err := data.UserByEmail(sess.Email)
+    user, err := data.UserByEmail(sess.Email)
 
-	err = json.NewDecoder(r.Body).Decode(&user)
+    err = json.NewDecoder(r.Body).Decode(&user)
+    
+    fmt.Println(user)
+    
+    _ = err
 
-	if err != nil {
-		panic(err.Error())
-	}
-
-	fmt.Println(user)
 }
