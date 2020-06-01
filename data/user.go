@@ -18,9 +18,6 @@ type User struct {
 	Country           string
 	City              string
 	Gender            string
-	CurrentPassword   string `validate:"eqfield=Password"`
-	NewPassword       string `validate:"eqfield=RepeatNewPassword"`
-	RepeatNewPassword string `validate:"eqfield=NewPassword"`
 }
 
 type Session struct {
