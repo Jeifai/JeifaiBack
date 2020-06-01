@@ -5,19 +5,22 @@ import (
 )
 
 type User struct {
-	Id          int
-	Uuid        string
-	UserName    string
-	Email       string
-	Password    string
-	CreatedAt   time.Time
-	DeletedAt   time.Time
-	FirstName   string
-	LastName    string
-	DateOfBirth time.Time 
-	Country     string
-	City        string
-	Gender      string
+	Id                int
+	Uuid              string
+	UserName          string
+	Email             string
+	Password          string
+	CreatedAt         time.Time
+	DeletedAt         time.Time
+	FirstName         string
+	LastName          string
+	DateOfBirth       time.Time
+	Country           string
+	City              string
+	Gender            string
+	CurrentPassword   string `validate:"eqfield=Password"`
+	NewPassword       string `validate:"eqfield=RepeatNewPassword"`
+	RepeatNewPassword string `validate:"eqfield=NewPassword"`
 }
 
 type Session struct {
@@ -37,22 +40,51 @@ func (user *User) CreateSession() (session Session, err error) {
 	}
 	defer stmt.Close()
 	// use QueryRow to return a row and scan the returned id into the Session struct
-	err = stmt.QueryRow(createUUID(), user.Email, user.Id, time.Now()).Scan(&session.Id, &session.Uuid, &session.Email, &session.UserId, &session.CreatedAt)
+	err = stmt.QueryRow(
+		createUUID(),
+		user.Email,
+		user.Id,
+		time.Now(),
+	).Scan(
+		&session.Id,
+		&session.Uuid,
+		&session.Email,
+		&session.UserId,
+		&session.CreatedAt,
+	)
 	return
 }
 
 // Get the session for an existing user
 func (user *User) Session() (session Session, err error) {
 	session = Session{}
-	err = Db.QueryRow("SELECT id, uuid, email, user_id, created_at FROM sessions WHERE user_id = $1", user.Id).
-		Scan(&session.Id, &session.Uuid, &session.Email, &session.UserId, &session.CreatedAt)
+	err = Db.QueryRow(
+		"SELECT id, uuid, email, user_id, created_at FROM sessions WHERE user_id = $1",
+		user.Id,
+	).
+		Scan(
+			&session.Id,
+			&session.Uuid,
+			&session.Email,
+			&session.UserId,
+			&session.CreatedAt,
+		)
 	return
 }
 
 // Check if session is valid in the database
 func (session *Session) Check() (valid bool, err error) {
-	err = Db.QueryRow("SELECT id, uuid, email, user_id, created_at FROM sessions WHERE uuid = $1", session.Uuid).
-		Scan(&session.Id, &session.Uuid, &session.Email, &session.UserId, &session.CreatedAt)
+	err = Db.QueryRow(
+		"SELECT id, uuid, email, user_id, created_at FROM sessions WHERE uuid = $1",
+		session.Uuid,
+	).
+		Scan(
+			&session.Id,
+			&session.Uuid,
+			&session.Email,
+			&session.UserId,
+			&session.CreatedAt,
+		)
 	if err != nil {
 		valid = false
 		return
@@ -89,14 +121,34 @@ func (user *User) Create() (err error) {
 	defer stmt.Close()
 
 	// use QueryRow to return a row and scan the returned id into the User struct
-	err = stmt.QueryRow(createUUID(), user.UserName, user.Email, Encrypt(user.Password), time.Now()).Scan(&user.Id, &user.Uuid, &user.CreatedAt)
+	err = stmt.QueryRow(
+		createUUID(),
+		user.UserName,
+		user.Email,
+		Encrypt(user.Password),
+		time.Now(),
+	).Scan(
+		&user.Id,
+		&user.Uuid,
+		&user.CreatedAt,
+	)
 	return
 }
 
 // Get a single user given the email
 func UserByEmail(email string) (user User, err error) {
 	user = User{}
-	err = Db.QueryRow("SELECT id, uuid, user_name, email, password, created_at FROM users WHERE email = $1", email).
-		Scan(&user.Id, &user.Uuid, &user.UserName, &user.Email, &user.Password, &user.CreatedAt)
+	err = Db.QueryRow(
+		"SELECT id, uuid, user_name, email, password, created_at FROM users WHERE email = $1",
+		email,
+	).
+		Scan(
+			&user.Id,
+			&user.Uuid,
+			&user.UserName,
+			&user.Email,
+			&user.Password,
+			&user.CreatedAt,
+		)
 	return
 }

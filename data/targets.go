@@ -23,7 +23,16 @@ func (target *Target) CreateTarget() (err error) {
 		return
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(target.Url, target.Host, time.Now()).Scan(&target.Id, &target.Url, &target.Host, &target.CreatedAt)
+	err = stmt.QueryRow(
+		target.Url,
+		target.Host,
+		time.Now(),
+	).Scan(
+		&target.Id,
+		&target.Url,
+		&target.Host,
+		&target.CreatedAt,
+	)
 	return err
 }
 
