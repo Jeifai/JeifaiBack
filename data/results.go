@@ -24,7 +24,11 @@ func (user *User) ResultsByUser() (results []Result, err error) {
                                 FROM scrapers s
                                 LEFT JOIN scraping ss ON(s.id = ss.scraper_id)
                                 GROUP BY 1)
-                            SELECT t.url, r.created_at, r.title, r.url
+                            SELECT
+                                t.url,
+                                r.created_at,
+                                r.title,
+                                r.url
                             FROM users_targets ut
                             LEFT JOIN targets t ON(ut.target_id = t.id)
                             LEFT JOIN scrapers s ON(ut.target_id = s.target_id)

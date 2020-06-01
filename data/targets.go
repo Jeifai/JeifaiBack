@@ -16,7 +16,8 @@ type Target struct {
 func (target *Target) CreateTarget() (err error) {
 	fmt.Println("Starting CreateTarget...")
 	statement := `INSERT INTO targets (url, host, created_at)
-                  VALUES ($1, $2, $3) RETURNING id, url, host, created_at`
+                  VALUES ($1, $2, $3)
+                  RETURNING id, url, host, created_at`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		fmt.Println("Error on CreateTarget")
@@ -52,7 +53,10 @@ func (target *Target) CreateUserTarget(user User) {
 // Get all the targets for a specific user
 func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 	fmt.Println("Starting UsersTargetsByUser...")
-	rows, err := Db.Query(`SELECT t.id, t.url, t.created_at 
+	rows, err := Db.Query(`SELECT
+                            t.id,
+                            t.url,
+                            t.created_at 
                            FROM users u
                            INNER JOIN users_targets ut ON(u.id = ut.user_id) 
                            INNER JOIN targets t ON(ut.target_id = t.id)
@@ -75,14 +79,20 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 // Get all the targets for a specific url
 func (target *Target) TargetsByUrl() (err error) {
 	fmt.Println("Starting TargetsByUrl...")
-	err = Db.QueryRow(`SELECT t.id FROM targets t WHERE t.url=$1`, target.Url).Scan(&target.Id)
+	err = Db.QueryRow(`SELECT
+                         t.id
+                       FROM targets t
+                       WHERE t.url=$1`, target.Url).Scan(&target.Id)
 	return
 }
 
 // Get the target for a specific user and url, must return a unique value
 func (user *User) UsersTargetsByUserAndUrl(url string) (target Target, err error) {
 	fmt.Println("Starting UsersTargetsByUserAndUrl...")
-	err = Db.QueryRow(`SELECT t.id, t.url, t.created_at 
+	err = Db.QueryRow(`SELECT
+                         t.id, 
+                         t.url, 
+                         t.created_at 
                        FROM users u
                        INNER JOIN users_targets ut ON(u.id = ut.user_id) 
                        INNER JOIN targets t ON(ut.target_id = t.id)
