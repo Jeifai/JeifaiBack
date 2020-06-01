@@ -102,7 +102,7 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 				messages = append(messages, red_1+temp_message+red_2)
 			}
 			if err.Field() == "NewPassword" {
-				temp_message = `The new passwords do not match`
+				temp_message = `New passwords do not match`
 				messages = append(messages, red_1+temp_message+red_2)
 			}
 			if err.Field() == "Email" {
