@@ -76,7 +76,6 @@ func signupAccount(w http.ResponseWriter, r *http.Request) {
 		Email:    r.PostFormValue("email"),
 		Password: r.PostFormValue("password"),
 	}
-	fmt.Println(user)
 	if err := user.Create(); err != nil {
 		danger(err, "Cannot create user")
 	}

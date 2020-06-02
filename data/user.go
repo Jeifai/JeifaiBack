@@ -1,29 +1,28 @@
 package data
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type User struct {
-	Id                int       `db:"id"`
-	Uuid              string    `db:"uuid"`
-	UserName          string    `db:"username"`
-	Email             string    `db:"email"       validate:"email"`
-	Password          string    `db:"password"`
-	CreatedAt         time.Time `db:"createdat"`
-	DeletedAt         time.Time `db:"deletedat"`
-	FirstName         string    `db:"firstname"`
-	LastName          string    `db:"lastname"`
-	DateOfBirth       string    `db:"dateofbirth"`
-	Country           string    `db:"country"`
-	City              string    `db:"city"`
-	Gender            string    `db:"gender"`
-	CurrentPassword   string    `validate:"required,eqfield=Password"`
-	NewPassword       string    `validate:"eqfield=RepeatNewPassword"`
-	RepeatNewPassword string    `validate:"eqfield=NewPassword"`
+	Id                int            `db:"id"`
+	Uuid              string         `db:"uuid"`
+	UserName          string         `db:"username"`
+	Email             string         `db:"email"       validate:"email"`
+	Password          string         `db:"password"`
+	CreatedAt         time.Time      `db:"createdat"`
+	DeletedAt         time.Time      `db:"deletedat"`
+	FirstName         sql.NullString `db:"firstname"`
+	LastName          sql.NullString `db:"lastname"`
+	DateOfBirth       sql.NullString `db:"dateofbirth"`
+	Country           sql.NullString `db:"country"`
+	City              sql.NullString `db:"city"`
+	Gender            sql.NullString `db:"gender"`
+	CurrentPassword   string         `validate:"required,eqfield=Password"`
+	NewPassword       string         `db:"newpassword" validate:"eqfield=RepeatNewPassword"`
+	RepeatNewPassword string         `validate:"eqfield=NewPassword"`
 }
 
 type Session struct {
@@ -232,25 +231,30 @@ func UserById(id int) (user User, err error) {
 
 func (user User) UpdateUser() {
 	fmt.Println("Starting UpdateUser...")
-
-	var db *sqlx.DB
-	db = sqlx.NewDb(Db, "postgres")
-
-	query := `UPDATE users SET
-                username=:username,
-                email=:email,
-                password=:password,
-                createdat=:createdat,
-                firstname=:firstname,
-                lastname=:lastname,
-                dateofbirth=:dateofbirth,
-                country=:country,
-                city=:city,
-                gender=:gender
-              WHERE id=:id`
-
-	_, err := db.NamedExec(query, user)
+	statement := `UPDATE users SET 
+                    email=$2,
+                    password=$3,
+                    firstname=$4,
+                    lastname=$5,
+                    country=$6,
+                    city=$7,
+                    gender=$8,
+                    dateofbirth=$9
+                  WHERE id=$1`
+	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		panic(err.Error())
 	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		user.Id,
+		user.Email,
+		user.NewPassword,
+		user.FirstName.String,
+		user.LastName.String,
+		user.Country.String,
+		user.City.String,
+		user.Gender.String,
+		user.DateOfBirth.String)
 }

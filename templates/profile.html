@@ -10,11 +10,11 @@
             </div>
             <div>
                 <label for="FirstName">First Name</label> 
-                <input v-model="fields.FirstName" placeholder="First Name">
+                <input v-model="fields.FirstName.String" placeholder="First Name">
             </div>
             <div>
                 <label for="LastName">Last Name</label> 
-                <input v-model="fields.LastName" placeholder="Last Name">
+                <input v-model="fields.LastName.String" placeholder="Last Name">
             </div>
             <div>
                 <label for="Email">Email</label> 
@@ -22,19 +22,19 @@
             </div>
             <div>
                 <label for="DateOfBirth">Date of Birth</label> 
-                <input type="date" v-model="fields.DateOfBirth" placeholder="DateOfBirth">
+                <input type="date" v-model="fields.DateOfBirth.String" placeholder="DateOfBirth">
             </div>
             <div>
                 <label for="Country">Country</label> 
-                <input v-model="fields.Country" placeholder="Country">
+                <input v-model="fields.Country.String" placeholder="Country">
             </div>
             <div>
                 <label for="City">City</label> 
-                <input v-model="fields.City" placeholder="City">
+                <input v-model="fields.City.String" placeholder="City">
             </div>
             <div>
                 <label for="Gender">Gender</label> 
-                <select v-model="fields.Gender">
+                <select v-model="fields.Gender.String">
                     <option disabled value="">Please select one</option>
                     <option>Male</option>
                     <option>Female</option>

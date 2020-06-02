@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -28,12 +29,12 @@ func profile(w http.ResponseWriter, r *http.Request) {
 	type PublicUser struct {
 		UserName    string
 		Email       string
-		FirstName   string
-		LastName    string
-		DateOfBirth string
-		Country     string
-		City        string
-		Gender      string
+		FirstName   sql.NullString
+		LastName    sql.NullString
+		DateOfBirth sql.NullString
+		Country     sql.NullString
+		City        sql.NullString
+		Gender      sql.NullString
 	}
 
 	type TempStruct struct {
@@ -43,12 +44,12 @@ func profile(w http.ResponseWriter, r *http.Request) {
 	var publicUser PublicUser
 	publicUser.UserName = user.UserName
 	publicUser.Email = user.Email
-	publicUser.FirstName = user.FirstName
-	publicUser.LastName = user.LastName
-	publicUser.Country = user.Country
-	publicUser.City = user.City
-	publicUser.DateOfBirth = user.DateOfBirth
-	publicUser.Gender = user.Gender
+	publicUser.FirstName.String = user.FirstName.String
+	publicUser.LastName.String = user.LastName.String
+	publicUser.Country.String = user.Country.String
+	publicUser.City.String = user.City.String
+	publicUser.DateOfBirth.String = user.DateOfBirth.String
+	publicUser.Gender.String = user.Gender.String
 
 	infos := TempStruct{publicUser}
 	templates.ExecuteTemplate(w, "layout", infos)
@@ -96,10 +97,18 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(messages) == 0 {
-		temp_message := `<p style="color:green">Changes saved</p>`
-        messages = append(messages, temp_message)
-        fmt.Println("Updating user infos...")
+		// Query will always update the password
+		if user.NewPassword != "" { // User wants to change password
+			user.NewPassword = data.Encrypt(user.NewPassword)
+		} else { // User does not want to change the password
+			user.NewPassword = user.CurrentPassword
+        }
+
+		fmt.Println("Updating user infos...")
 		user.UpdateUser()
+
+		temp_message := `<p style="color:green">Changes saved</p>`
+		messages = append(messages, temp_message)
 	}
 
 	type TempStruct struct {
