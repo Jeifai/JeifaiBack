@@ -10,7 +10,7 @@ type User struct {
 	Id                int            `db:"id"`
 	Uuid              string         `db:"uuid"`
 	UserName          string         `db:"username"`
-	Email             string         `db:"email"       validate:"email"`
+	Email             string         `db:"email" validate:"email"`
 	Password          string         `db:"password"`
 	CreatedAt         time.Time      `db:"createdat"`
 	DeletedAt         time.Time      `db:"deletedat"`
@@ -232,14 +232,15 @@ func UserById(id int) (user User, err error) {
 func (user User) UpdateUser() {
 	fmt.Println("Starting UpdateUser...")
 	statement := `UPDATE users SET 
-                    email=$2,
-                    password=$3,
-                    firstname=$4,
-                    lastname=$5,
-                    country=$6,
-                    city=$7,
-                    gender=$8,
-                    dateofbirth=$9
+                    username=$2,
+                    email=$3,
+                    password=$4,
+                    firstname=$5,
+                    lastname=$6,
+                    country=$7,
+                    city=$8,
+                    gender=$9,
+                    dateofbirth=$10
                   WHERE id=$1`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
@@ -249,7 +250,8 @@ func (user User) UpdateUser() {
 
 	_, err = stmt.Exec(
 		user.Id,
-		user.Email,
+		user.UserName,
+        user.Email,
 		user.NewPassword,
 		user.FirstName.String,
 		user.LastName.String,
