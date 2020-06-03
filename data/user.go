@@ -8,7 +8,6 @@ import (
 
 type User struct {
 	Id                int            `db:"id"`
-	Uuid              string         `db:"uuid"`
 	UserName          string         `db:"username" validate:"min=1"`
 	Email             string         `db:"email" validate:"email"`
 	Password          string         `db:"password"`
@@ -131,9 +130,9 @@ func (user *User) Create() (err error) {
 	// you're always using a sequence.You need to use the RETURNING keyword in your insert to get this
 	// information from postgres.
 	statement := `INSERT INTO users
-                  (uuid, username, email, password, createdat)
-                  VALUES ($1, $2, $3, $4, $5)
-                  RETURNING id, uuid, createdat`
+                  (username, email, password, createdat)
+                  VALUES ($1, $2, $3, $4)
+                  RETURNING id, createdat`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
@@ -142,14 +141,12 @@ func (user *User) Create() (err error) {
 
 	// use QueryRow to return a row and scan the returned id into the User struct
 	err = stmt.QueryRow(
-		createUUID(),
 		user.UserName,
 		user.Email,
 		Encrypt(user.Password),
 		time.Now(),
 	).Scan(
 		&user.Id,
-		&user.Uuid,
 		&user.CreatedAt,
 	)
 	return
@@ -160,7 +157,6 @@ func UserByEmail(email string) (user User, err error) {
 	user = User{}
 	err = Db.QueryRow(`SELECT
                         id,
-                        uuid,
                         username,
                         email,
                         password,
@@ -177,7 +173,6 @@ func UserByEmail(email string) (user User, err error) {
 	).
 		Scan(
 			&user.Id,
-			&user.Uuid,
 			&user.UserName,
 			&user.Email,
 			&user.Password,
@@ -197,7 +192,6 @@ func UserById(id int) (user User, err error) {
 	user = User{}
 	err = Db.QueryRow(`SELECT
                         id,
-                        uuid,
                         username,
                         email,
                         password,
@@ -214,7 +208,6 @@ func UserById(id int) (user User, err error) {
 	).
 		Scan(
 			&user.Id,
-			&user.Uuid,
 			&user.UserName,
 			&user.Email,
 			&user.Password,
