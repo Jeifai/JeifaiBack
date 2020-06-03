@@ -9,7 +9,7 @@ import (
 type User struct {
 	Id                int            `db:"id"`
 	Uuid              string         `db:"uuid"`
-	UserName          string         `db:"username"`
+	UserName          string         `db:"username" validate:"min=1"`
 	Email             string         `db:"email" validate:"email"`
 	Password          string         `db:"password"`
 	CreatedAt         time.Time      `db:"createdat"`
