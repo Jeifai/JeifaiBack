@@ -139,37 +139,29 @@ func (runtime Runtime) Mitte(
 	response Response, results []Result) {
 	if version == 1 {
 
-		url := "https://api.lever.co/v0/postings/mitte?group=team&mode=json"
+		url := "https://api.lever.co/v0/postings/mitte?&mode=json"
 
-		type Category struct {
-			Commitment string `json:"commitment"`
-			Location   string `json:"location"`
-			Team       string `json:"team"`
+		type Jobs []struct {
+			AdditionalPlain string `json:"additionalPlain"`
+			Additional      string `json:"additional"`
+			Categories      struct {
+				Commitment string `json:"commitment"`
+				Department string `json:"department"`
+				Location   string `json:"location"`
+				Team       string `json:"team"`
+			} `json:"categories"`
+			CreatedAt        int64  `json:"createdAt"`
+			DescriptionPlain string `json:"descriptionPlain"`
+			Description      string `json:"description"`
+			ID               string `json:"id"`
+			Lists            []struct {
+				Text    string `json:"text"`
+				Content string `json:"content"`
+			} `json:"lists"`
+			Text      string `json:"text"`
+			HostedURL string `json:"hostedUrl"`
+			ApplyURL  string `json:"applyUrl"`
 		}
-
-		type List struct {
-			Text    string `json:"text"`
-			Content string `json:"content"`
-		}
-
-		type Job struct {
-			Title            string   `json:"text"`
-			Url              string   `json:"hostedUrl"`
-			AdditionalPlain  string   `json:"additionalPlain"`
-			Additional       string   `json:"additional"`
-			Categories       Category `json:"categories"`
-			CreatedAt        int      `json:"createdAt"`
-			DescriptionPlain string   `json:"descriptionPlain"`
-			Description      string   `json:"description"`
-			Id               string   `json:"id"`
-			Lists            []List   `json:"lists"`
-		}
-
-		type Postings struct {
-			Jobs []Job `json:"postings"`
-		}
-
-		type JsonJobs []Postings
 
 		var body []byte
 		if isLocal {
@@ -198,34 +190,27 @@ func (runtime Runtime) Mitte(
 
 		response = Response{body}
 
-		var jsonJobs JsonJobs
+		var jsonJobs Jobs
 		err := json.Unmarshal(body, &jsonJobs)
 		if err != nil {
 			panic(err.Error())
 		}
 
 		for _, elem := range jsonJobs {
-			for _, subElem := range elem.Jobs {
+			result_title := elem.Text
+			result_url := elem.HostedURL
 
-				result_title := subElem.Title
-				result_url := subElem.Url
-
-				_, err := netUrl.ParseRequestURI(result_url)
-				if err == nil {
-
-					elem_json, err := json.Marshal(subElem)
-					if err != nil {
-						panic(err.Error())
-					}
-
-					results = append(results, Result{
-						runtime.Name,
-						result_title,
-						result_url,
-						elem_json,
-					})
-				}
+			elem_json, err := json.Marshal(elem)
+			if err != nil {
+				panic(err.Error())
 			}
+
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
 		}
 	}
 	return
@@ -967,38 +952,29 @@ func (runtime Runtime) Shopify(
 	response Response, results []Result) {
 	if version == 1 {
 
-		url := "https://api.lever.co/v0/postings/shopify?group=team&mode=json"
+		url := "https://api.lever.co/v0/postings/shopify?mode=json"
 
-		type Category struct {
-			Commitment string `json:"commitment"`
-			Location   string `json:"location"`
-			Team       string `json:"team"`
-			Department string `json:"department"`
+		type Jobs []struct {
+			AdditionalPlain string `json:"additionalPlain"`
+			Additional      string `json:"additional"`
+			Categories      struct {
+				Commitment string `json:"commitment"`
+				Department string `json:"department"`
+				Location   string `json:"location"`
+				Team       string `json:"team"`
+			} `json:"categories"`
+			CreatedAt        int64  `json:"createdAt"`
+			DescriptionPlain string `json:"descriptionPlain"`
+			Description      string `json:"description"`
+			ID               string `json:"id"`
+			Lists            []struct {
+				Text    string `json:"text"`
+				Content string `json:"content"`
+			} `json:"lists"`
+			Text      string `json:"text"`
+			HostedURL string `json:"hostedUrl"`
+			ApplyURL  string `json:"applyUrl"`
 		}
-
-		type List struct {
-			Text    string `json:"text"`
-			Content string `json:"content"`
-		}
-
-		type Job struct {
-			Title            string   `json:"text"`
-			Url              string   `json:"hostedUrl"`
-			AdditionalPlain  string   `json:"additionalPlain"`
-			Additional       string   `json:"additional"`
-			Categories       Category `json:"categories"`
-			CreatedAt        int      `json:"createdAt"`
-			DescriptionPlain string   `json:"descriptionPlain"`
-			Description      string   `json:"description"`
-			Id               string   `json:"id"`
-			Lists            []List   `json:"lists"`
-		}
-
-		type Postings struct {
-			Jobs []Job `json:"postings"`
-		}
-
-		type JsonJobs []Postings
 
 		var body []byte
 		if isLocal {
@@ -1025,36 +1001,27 @@ func (runtime Runtime) Shopify(
 			body = temp_body
 		}
 
-		response = Response{body}
-
-		var jsonJobs JsonJobs
+		var jsonJobs Jobs
 		err := json.Unmarshal(body, &jsonJobs)
 		if err != nil {
 			panic(err.Error())
 		}
 
 		for _, elem := range jsonJobs {
-			for _, subElem := range elem.Jobs {
+			result_title := elem.Text
+			result_url := elem.HostedURL
 
-				result_title := subElem.Title
-				result_url := subElem.Url
-
-				_, err := netUrl.ParseRequestURI(result_url)
-				if err == nil {
-
-					elem_json, err := json.Marshal(subElem)
-					if err != nil {
-						panic(err.Error())
-					}
-
-					results = append(results, Result{
-						runtime.Name,
-						result_title,
-						result_url,
-						elem_json,
-					})
-				}
+			elem_json, err := json.Marshal(elem)
+			if err != nil {
+				panic(err.Error())
 			}
+
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
 		}
 	}
 	return
@@ -1270,6 +1237,88 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Blinkist(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	if version == 1 {
+
+		url := "https://api.lever.co/v0/postings/blinkist?mode=json"
+
+		type Jobs []struct {
+			AdditionalPlain string `json:"additionalPlain"`
+			Additional      string `json:"additional"`
+			Categories      struct {
+				Commitment string `json:"commitment"`
+				Department string `json:"department"`
+				Location   string `json:"location"`
+				Team       string `json:"team"`
+			} `json:"categories"`
+			CreatedAt        int64  `json:"createdAt"`
+			DescriptionPlain string `json:"descriptionPlain"`
+			Description      string `json:"description"`
+			ID               string `json:"id"`
+			Lists            []struct {
+				Text    string `json:"text"`
+				Content string `json:"content"`
+			} `json:"lists"`
+			Text      string `json:"text"`
+			HostedURL string `json:"hostedUrl"`
+			ApplyURL  string `json:"applyUrl"`
+		}
+
+		var body []byte
+		if isLocal {
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			temp_body, err := ioutil.ReadFile(dir + "/response.html")
+			fmt.Println("Visiting", dir+"/response.html")
+			if err != nil {
+				panic(err.Error())
+			}
+			body = temp_body
+		} else {
+			res, err := http.Get(url)
+			fmt.Println("Visiting", url)
+			if err != nil {
+				panic(err.Error())
+			}
+			temp_body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				panic(err.Error())
+			}
+			body = temp_body
+		}
+
+		response = Response{body}
+
+		var jsonJobs Jobs
+		err := json.Unmarshal(body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		for _, elem := range jsonJobs {
+			result_title := elem.Text
+			result_url := elem.HostedURL
+
+			elem_json, err := json.Marshal(elem)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
 		}
 	}
 	return
