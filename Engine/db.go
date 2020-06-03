@@ -84,9 +84,9 @@ func GetScrapers() (scrapers []Scraper, err error) {
 
 func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
 	fmt.Println("Starting StartScrapingSession...")
-	statement := `INSERT INTO scraping (scraper_id, created_at)
+	statement := `INSERT INTO scrapings (scraperid, createdat)
                   VALUES ($1, $2) 
-                  RETURNING id, scraper_id, created_at`
+                  RETURNING id, scraperid, createdat`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		panic(err.Error())
@@ -123,11 +123,11 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 		valueArgs = append(valueArgs, time.Now())
 	}
 	smt := `INSERT INTO results (
-                scraper_id, scraping_id, title, url, data, created_at, updated_at)
+                scraperid, scrapingid, title, url, data, createdat, updatedat)
             VALUES %s ON CONFLICT (url) DO UPDATE
-            SET scraping_id = EXCLUDED.scraping_id,
+            SET scrapingid = EXCLUDED.scrapingid,
                 title = EXCLUDED.title,
-                updated_at = EXCLUDED.updated_at,
+                updatedat = EXCLUDED.updatedat,
                 data = EXCLUDED.data`
 	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
 
@@ -141,9 +141,9 @@ func LastScrapingByNameVersion(
 	scraper_name string, scraper_version int) (scraping int, err error) {
 	fmt.Println("Starting LastScrapingByNameVersion...")
 	err = Db.QueryRow(`SELECT MAX(s.id)
-                       FROM scraping s 
-                       LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
-                       LEFT JOIN targets t ON(ss.target_id = t.id)
+                       FROM scrapings s 
+                       LEFT JOIN scrapers ss ON(s.scraperid = ss.id)
+                       LEFT JOIN targets t ON(ss.targetid = t.id)
                        WHERE t.name = $1 AND ss.version = $2;`,
 		scraper_name, scraper_version).Scan(&scraping)
 	if err != nil {
@@ -160,10 +160,10 @@ func ResultsByScraping(scraping int) (results []Result, err error) {
                                 r.url,
                                 r.data
                            FROM results r
-                           LEFT JOIN scraping s ON(r.scraping_id = s.id)
-                           LEFT JOIN scrapers ss ON(s.scraper_id = ss.id)
-                           LEFT JOIN targets t ON(ss.target_id = t.id)
-                           WHERE r.scraping_id = $1`, scraping)
+                           LEFT JOIN scrapings s ON(r.scrapingid = s.id)
+                           LEFT JOIN scrapers ss ON(s.scraperid = ss.id)
+                           LEFT JOIN targets t ON(ss.targetid = t.id)
+                           WHERE r.scrapingid = $1`, scraping)
 	if err != nil {
 		panic(err.Error())
 	}

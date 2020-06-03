@@ -35,9 +35,9 @@ type Session struct {
 
 // Create a new session for an existing user
 func (user *User) CreateSession() (session Session, err error) {
-	statement := `INSERT INTO sessions (uuid, email, user_id, created_at)
+	statement := `INSERT INTO sessions (uuid, email, userid, createdat)
                   VALUES ($1, $2, $3, $4)
-                  RETURNING id, uuid, email, user_id, created_at`
+                  RETURNING id, uuid, email, userid, createdat`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
@@ -66,10 +66,10 @@ func (user *User) Session() (session Session, err error) {
                         id, 
                         uuid, 
                         email, 
-                        user_id, 
-                        created_at
+                        userid, 
+                        createdat
                       FROM sessions
-                      WHERE user_id = $1`,
+                      WHERE userid = $1`,
 		user.Id,
 	).
 		Scan(
@@ -88,8 +88,8 @@ func (session *Session) Check() (valid bool, err error) {
                         id,
                         uuid,
                         email,
-                        user_id,
-                        created_at
+                        userid,
+                        createdat
                       FROM sessions
                       WHERE uuid = $1`,
 		session.Uuid,

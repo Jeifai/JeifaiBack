@@ -15,52 +15,52 @@ create table users (
 );
 
 create table sessions (
-  id         serial primary key,
-  uuid       varchar(64) not null unique,
-  email      varchar(255),
-  user_id    integer references users(id),
-  created_at timestamp not null   
+  id            serial primary key,
+  uuid          varchar(64) not null unique,
+  email         varchar(255),
+  userid        integer references users(id),
+  createdat     timestamp not null   
 );
 
 create table targets (
-  id         serial primary key,
-  url        varchar(500) not null unique,
-  host       varchar(64) not null,             
-  created_at timestamp not null,
-  name       varchar(64)
+  id            serial primary key,
+  url           varchar(500) not null unique,
+  host          varchar(64) not null,             
+  createdat     timestamp not null,
+  name          varchar(64)
 );
 
 
-create table users_targets (
-  id         serial primary key,
-  uuid       varchar(64) not null unique;
-  user_id	 integer references users(id),
-  target_id  integer references targets(id),
-  created_at timestamp not null
-  deleted_at timestamp   
+create table userstargets (
+  id            serial primary key,
+  uuid          varchar(64) not null unique;
+  userid	    integer references users(id),
+  targetid      integer references targets(id),
+  createdat     timestamp not null
+  deletedat     timestamp   
 );
 
 create table scrapers (
-  id         serial primary key,
-  name       varchar(64) not null,
-  version    integer not null,
-  target_id  integer references targets(id),
-  created_at timestamp not null  
+  id            serial primary key,
+  name          varchar(64) not null,
+  version       integer not null,
+  targetid      integer references targets(id),
+  createdat     timestamp not null  
 );
 
-create table scraping (
-  id         serial primary key,
-  scraper_id integer references scrapers(id),
-  created_at timestamp
+create table scrapings (
+  id            serial primary key,
+  scraperid     integer references scrapers(id),
+  createdat     timestamp
 );
 
 create table results (
   id            serial primary key,
-  scraper_id    integer references scrapers(id),
-  scraping_id   integer references scraping(id),
+  scraperid     integer references scrapers(id),
+  scrapingid    integer references scraping(id),
   title         varchar(1000) not null,
   url           varchar(1000) not null unique,
-  created_at    timestamp,
-  updated_at    timestamp,
+  createdat     timestamp,
+  updatedat     timestamp,
   data          json
 );

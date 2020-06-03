@@ -2,6 +2,9 @@
 ALTER TABLE results DROP CONSTRAINT results_pkey;
 CREATE INDEX idx_results_url ON results(url);
 
+/* Rename table's name */
+ALTER TABLE users_targets RENAME TO userstargets;
+
 /* Rename column's */
 ALTER TABLE users RENAME COLUMN name TO user_name;
 
