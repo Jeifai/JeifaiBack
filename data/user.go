@@ -1,7 +1,8 @@
 package data
 
 import (
-	"database/sql"
+    "database/sql"
+    "encoding/json"
 	"fmt"
 	"time"
 )
@@ -260,5 +261,27 @@ func (user User) UpdateUser() {
 		user.City.String,
 		user.Gender.String,
         user.DateOfBirth.String,
+        time.Now())
+}
+
+func (user User) UpdateUserUpdates() {
+	fmt.Println("Starting UpdateUserUpdates...")
+    statement := `INSERT INTO usersupdates (userid, data, createdat) 
+                    VALUES ($1, $2, $3)`
+
+	stmt, err := Db.Prepare(statement)
+	if err != nil {
+		panic(err.Error())
+	}
+    defer stmt.Close()
+    
+    user_json, err := json.Marshal(user)
+    if err != nil {
+        panic(err.Error())
+    }
+
+	_, err = stmt.Exec(
+		user.Id,
+		user_json,
         time.Now())
 }

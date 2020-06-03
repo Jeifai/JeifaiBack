@@ -70,7 +70,7 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err = validate.Struct(user)
 
-    var messages []string
+	var messages []string
 
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -92,7 +92,7 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 			if err.Field() == "Email" {
 				temp_message = `Email inserted is not valid`
 				messages = append(messages, red_1+temp_message+red_2)
-            }
+			}
 			if err.Field() == "UserName" {
 				temp_message = `UserName cannot be empty`
 				messages = append(messages, red_1+temp_message+red_2)
@@ -106,10 +106,11 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 			user.NewPassword = data.Encrypt(user.NewPassword)
 		} else { // User does not want to change the password
 			user.NewPassword = user.CurrentPassword
-        }
+		}
 
 		fmt.Println("Updating user infos...")
 		user.UpdateUser()
+		user.UpdateUserUpdates()
 
 		temp_message := `<p style="color:green">Changes saved</p>`
 		messages = append(messages, temp_message)

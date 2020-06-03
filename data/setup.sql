@@ -1,3 +1,11 @@
+create table sessions (
+  id            serial primary key,
+  uuid          varchar(64) not null unique,
+  email         varchar(255),
+  userid        integer references users(id),
+  createdat     timestamp not null   
+);
+
 create table users (
   id            serial primary key,
   username      varchar(255),
@@ -14,13 +22,13 @@ create table users (
   gender        varchar(10)
 );
 
-create table sessions (
+create table usersupdates (
   id            serial primary key,
-  uuid          varchar(64) not null unique,
-  email         varchar(255),
-  userid        integer references users(id),
-  createdat     timestamp not null   
+  userid	    integer references users(id),
+  data          json,
+  createdat     timestamp not null
 );
+
 
 create table targets (
   id            serial primary key,
