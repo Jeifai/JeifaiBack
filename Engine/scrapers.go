@@ -385,27 +385,27 @@ func (runtime Runtime) Zalando(
 
 		z_base_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset="
 
-    type Jobs struct {
-        Data []struct {
-            JobCategories []string  `json:"job_categories"`
-            UpdatedAt     time.Time `json:"updated_at"`
-            Offices       []string  `json:"offices"`
-            ID            int       `json:"id"`
-            Title         string    `json:"title"`
-            Entity        string    `json:"entity"`
-        } `json:"data"`
-        Facets struct {
-            Offices       []string `json:"offices"`
-            JobCategories []string `json:"job_categories"`
-            ContractTypes []string `json:"contract_types"`
-            EntryLevels   []string `json:"entry_levels"`
-            Entity        []string `json:"entity"`
-        } `json:"facets"`
-        Total int    `json:"total"`
-        First string `json:"first"`
-        Last  string `json:"last"`
-        Next  string `json:"next"`
-    }
+		type Jobs struct {
+			Data []struct {
+				JobCategories []string  `json:"job_categories"`
+				UpdatedAt     time.Time `json:"updated_at"`
+				Offices       []string  `json:"offices"`
+				ID            int       `json:"id"`
+				Title         string    `json:"title"`
+				Entity        string    `json:"entity"`
+			} `json:"data"`
+			Facets struct {
+				Offices       []string `json:"offices"`
+				JobCategories []string `json:"job_categories"`
+				ContractTypes []string `json:"contract_types"`
+				EntryLevels   []string `json:"entry_levels"`
+				Entity        []string `json:"entity"`
+			} `json:"facets"`
+			Total int    `json:"total"`
+			First string `json:"first"`
+			Last  string `json:"last"`
+			Next  string `json:"next"`
+		}
 
 		var jsonJobs_1 Jobs
 
@@ -480,17 +480,17 @@ func (runtime Runtime) Zalando(
 			z_base_result_url := "https://jobs.zalando.com/de/jobs/"
 			result_url := z_base_result_url + strconv.Itoa(elem.ID)
 
-            elem_json, err := json.Marshal(elem)
-            if err != nil {
-                panic(err.Error())
-            }
+			elem_json, err := json.Marshal(elem)
+			if err != nil {
+				panic(err.Error())
+			}
 
-            results = append(results, Result{
-                runtime.Name,
-                result_title,
-                result_url,
-                elem_json,
-            })
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
 		}
 	}
 	return
@@ -507,21 +507,21 @@ func (runtime Runtime) Google(
 		results_per_page := 100
 
 		type JsonJobs struct {
-            Count string `json:"count"`
-            Jobs  []struct {
-                CompanyID      string    `json:"company_id"`
-                CompanyName    string    `json:"company_name"`
-                Description    string    `json:"description"`
-                JobID          string    `json:"job_id"`
-                JobTitle       string    `json:"job_title"`
-                Locations      []string  `json:"locations"`
-                LocationsCount string    `json:"locations_count"`
-                PublishDate    time.Time `json:"publish_date"`
-                Summary        string    `json:"summary"`
-            } `json:"jobs"`
-            NextPage string `json:"next_page"`
-            PageSize string `json:"page_size"`
-        }
+			Count string `json:"count"`
+			Jobs  []struct {
+				CompanyID      string    `json:"company_id"`
+				CompanyName    string    `json:"company_name"`
+				Description    string    `json:"description"`
+				JobID          string    `json:"job_id"`
+				JobTitle       string    `json:"job_title"`
+				Locations      []string  `json:"locations"`
+				LocationsCount string    `json:"locations_count"`
+				PublishDate    time.Time `json:"publish_date"`
+				Summary        string    `json:"summary"`
+			} `json:"jobs"`
+			NextPage string `json:"next_page"`
+			PageSize string `json:"page_size"`
+		}
 
 		var jsonJobs_1 JsonJobs
 
@@ -589,17 +589,17 @@ func (runtime Runtime) Google(
 			result_title := elem.JobTitle
 			result_url := g_base_result_url + strings.Split(elem.JobID, "/")[1]
 
-            elem_json, err := json.Marshal(elem)
-            if err != nil {
-                panic(err.Error())
-            }
+			elem_json, err := json.Marshal(elem)
+			if err != nil {
+				panic(err.Error())
+			}
 
-            results = append(results, Result{
-                runtime.Name,
-                result_title,
-                result_url,
-                elem_json,
-            })
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
 		}
 	}
 	return
@@ -706,45 +706,45 @@ func (runtime Runtime) Microsoft(
 		first_part_json := `"eagerLoadRefineSearch":`
 		second_part_json := `}; phApp.sessionParams`
 
-        type JsonJobs struct {
-            Status    int `json:"status"`
-            Hits      int `json:"hits"`
-            TotalHits int `json:"totalHits"`
-            Data      struct {
-                Jobs []struct {
-                    Country            string      `json:"country"`
-                    SubCategory        string      `json:"subCategory"`
-                    Industry           interface{} `json:"industry"`
-                    Title              string      `json:"title"`
-                    MultiLocation      []string    `json:"multi_location"`
-                    Type               interface{} `json:"type"`
-                    OrgFunction        interface{} `json:"orgFunction"`
-                    Experience         string      `json:"experience"`
-                    Locale             string      `json:"locale"`
-                    MultiLocationArray []struct {
-                        Location string `json:"location"`
-                    } `json:"multi_location_array"`
-                    JobSeqNo             string      `json:"jobSeqNo"`
-                    PostedDate           string      `json:"postedDate"`
-                    SearchresultsDisplay interface{} `json:"searchresults_display"`
-                    DescriptionTeaser    string      `json:"descriptionTeaser"`
-                    DateCreated          string      `json:"dateCreated"`
-                    State                string      `json:"state"`
-                    TargetLevel          string      `json:"targetLevel"`
-                    JdDisplay            interface{} `json:"jd_display"`
-                    ReqID                interface{} `json:"reqId"`
-                    Badge                string      `json:"badge"`
-                    JobID                string      `json:"jobId"`
-                    IsMultiLocation      bool        `json:"isMultiLocation"`
-                    JobVisibility        []string    `json:"jobVisibility"`
-                    Mostpopular          float64     `json:"mostpopular"`
-                    Location             string      `json:"location"`
-                    Category             string      `json:"category"`
-                    LocationLatlong      interface{} `json:"locationLatlong"`
-                }
-            } `json:"data"`
-            Eid string `json:"eid"`
-        }
+		type JsonJobs struct {
+			Status    int `json:"status"`
+			Hits      int `json:"hits"`
+			TotalHits int `json:"totalHits"`
+			Data      struct {
+				Jobs []struct {
+					Country            string      `json:"country"`
+					SubCategory        string      `json:"subCategory"`
+					Industry           interface{} `json:"industry"`
+					Title              string      `json:"title"`
+					MultiLocation      []string    `json:"multi_location"`
+					Type               interface{} `json:"type"`
+					OrgFunction        interface{} `json:"orgFunction"`
+					Experience         string      `json:"experience"`
+					Locale             string      `json:"locale"`
+					MultiLocationArray []struct {
+						Location string `json:"location"`
+					} `json:"multi_location_array"`
+					JobSeqNo             string      `json:"jobSeqNo"`
+					PostedDate           string      `json:"postedDate"`
+					SearchresultsDisplay interface{} `json:"searchresults_display"`
+					DescriptionTeaser    string      `json:"descriptionTeaser"`
+					DateCreated          string      `json:"dateCreated"`
+					State                string      `json:"state"`
+					TargetLevel          string      `json:"targetLevel"`
+					JdDisplay            interface{} `json:"jd_display"`
+					ReqID                interface{} `json:"reqId"`
+					Badge                string      `json:"badge"`
+					JobID                string      `json:"jobId"`
+					IsMultiLocation      bool        `json:"isMultiLocation"`
+					JobVisibility        []string    `json:"jobVisibility"`
+					Mostpopular          float64     `json:"mostpopular"`
+					Location             string      `json:"location"`
+					Category             string      `json:"category"`
+					LocationLatlong      interface{} `json:"locationLatlong"`
+				}
+			} `json:"data"`
+			Eid string `json:"eid"`
+		}
 
 		var jsonJobs_1 JsonJobs
 
@@ -784,7 +784,7 @@ func (runtime Runtime) Microsoft(
 
 			results_per_page := 10 // len(jsonJobs_1.Data.Jobs)
 
-            number_pages := jsonJobs_1.TotalHits / results_per_page
+			number_pages := jsonJobs_1.TotalHits / results_per_page
 
 			for i := 1; i <= number_pages; i++ {
 				temp_m_url := m_base_url + strconv.Itoa(i*results_per_page)
@@ -820,17 +820,17 @@ func (runtime Runtime) Microsoft(
 			result_title := elem.Title
 			result_url := m_base_result_url + elem.JobID
 
-            elem_json, err := json.Marshal(elem)
-            if err != nil {
-                panic(err.Error())
-            }
+			elem_json, err := json.Marshal(elem)
+			if err != nil {
+				panic(err.Error())
+			}
 
-            results = append(results, Result{
-                runtime.Name,
-                result_title,
-                result_url,
-                elem_json,
-            })
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
 		}
 	}
 	return
@@ -844,25 +844,25 @@ func (runtime Runtime) Twitter(
 
 		results_per_page := 100
 
-        type Jobs struct {
-            Results []struct {
-                Title       string `json:"title"`
-                Description string `json:"description"`
-                Modified    int64  `json:"modified"`
-                InternalJob bool   `json:"internalJob"`
-                URL         string `json:"url"`
-                Locations   []struct {
-                    ID    string `json:"id"`
-                    Title string `json:"title"`
-                } `json:"locations"`
-                Team struct {
-                    ID    string `json:"id"`
-                    Title string `json:"title"`
-                } `json:"team"`
-            } `json:"results"`
-            PageCount  int `json:"pageCount"`
-            TotalCount int `json:"totalCount"`
-        }
+		type Jobs struct {
+			Results []struct {
+				Title       string `json:"title"`
+				Description string `json:"description"`
+				Modified    int64  `json:"modified"`
+				InternalJob bool   `json:"internalJob"`
+				URL         string `json:"url"`
+				Locations   []struct {
+					ID    string `json:"id"`
+					Title string `json:"title"`
+				} `json:"locations"`
+				Team struct {
+					ID    string `json:"id"`
+					Title string `json:"title"`
+				} `json:"team"`
+			} `json:"results"`
+			PageCount  int `json:"pageCount"`
+			TotalCount int `json:"totalCount"`
+		}
 
 		var jsonJobs_1 Jobs
 
@@ -914,7 +914,7 @@ func (runtime Runtime) Twitter(
 					panic(err.Error())
 				}
 				jsonJobs_1.Results = append(
-                    jsonJobs_1.Results, tempJsonJobs_2.Results...)
+					jsonJobs_1.Results, tempJsonJobs_2.Results...)
 				time.Sleep(SecondsSleep * time.Second)
 			}
 		}
@@ -930,17 +930,17 @@ func (runtime Runtime) Twitter(
 			result_title := elem.Title
 			result_url := elem.URL
 
-            elem_json, err := json.Marshal(elem)
-            if err != nil {
-                panic(err.Error())
-            }
+			elem_json, err := json.Marshal(elem)
+			if err != nil {
+				panic(err.Error())
+			}
 
-            results = append(results, Result{
-                runtime.Name,
-                result_title,
-                result_url,
-                elem_json,
-            })
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
 		}
 	}
 	return
