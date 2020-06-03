@@ -4,6 +4,7 @@ create table users (
   email         varchar(255) not null unique,
   password      varchar(255) not null,
   createdat     timestamp not null,
+  updatedat     timestamp not null,
   deletedat     timestamp,
   firstname     varchar(64), 
   lastname      varchar(64),

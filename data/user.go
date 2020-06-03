@@ -11,7 +11,8 @@ type User struct {
 	UserName          string         `db:"username" validate:"min=1"`
 	Email             string         `db:"email" validate:"email"`
 	Password          string         `db:"password"`
-	CreatedAt         time.Time      `db:"createdat"`
+    CreatedAt         time.Time      `db:"createdat"`
+	UpdatedAt         time.Time      `db:"updatedat"`
 	DeletedAt         time.Time      `db:"deletedat"`
 	FirstName         sql.NullString `db:"firstname"`
 	LastName          sql.NullString `db:"lastname"`
@@ -130,9 +131,9 @@ func (user *User) Create() (err error) {
 	// you're always using a sequence.You need to use the RETURNING keyword in your insert to get this
 	// information from postgres.
 	statement := `INSERT INTO users
-                  (username, email, password, createdat)
-                  VALUES ($1, $2, $3, $4)
-                  RETURNING id, createdat`
+                  (username, email, password, createdat, updatedat)
+                  VALUES ($1, $2, $3, $4, $5)
+                  RETURNING id, createdat, updatedat`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
@@ -144,10 +145,12 @@ func (user *User) Create() (err error) {
 		user.UserName,
 		user.Email,
 		Encrypt(user.Password),
+        time.Now(),
 		time.Now(),
 	).Scan(
 		&user.Id,
-		&user.CreatedAt,
+        &user.CreatedAt,
+		&user.UpdatedAt,
 	)
 	return
 }
@@ -161,6 +164,7 @@ func UserByEmail(email string) (user User, err error) {
                         email,
                         password,
                         createdat,
+                        updatedat,
                         firstname,
                         lastname,
                         TO_CHAR(dateofbirth, 'YYYY-MM-DD'),
@@ -176,7 +180,8 @@ func UserByEmail(email string) (user User, err error) {
 			&user.UserName,
 			&user.Email,
 			&user.Password,
-			&user.CreatedAt,
+            &user.CreatedAt,
+			&user.UpdatedAt,
 			&user.FirstName,
 			&user.LastName,
 			&user.DateOfBirth,
@@ -196,6 +201,7 @@ func UserById(id int) (user User, err error) {
                         email,
                         password,
                         createdat,
+                        updatedat,
                         firstname,
                         lastname,
                         TO_CHAR(dateofbirth, 'YYYY-MM-DD'),
@@ -211,7 +217,8 @@ func UserById(id int) (user User, err error) {
 			&user.UserName,
 			&user.Email,
 			&user.Password,
-			&user.CreatedAt,
+            &user.CreatedAt,
+			&user.UpdatedAt,
 			&user.FirstName,
 			&user.LastName,
 			&user.DateOfBirth,
@@ -233,7 +240,8 @@ func (user User) UpdateUser() {
                     country=$7,
                     city=$8,
                     gender=$9,
-                    dateofbirth=$10
+                    dateofbirth=$10,
+                    updatedat=$11
                   WHERE id=$1`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
@@ -251,5 +259,6 @@ func (user User) UpdateUser() {
 		user.Country.String,
 		user.City.String,
 		user.Gender.String,
-		user.DateOfBirth.String)
+        user.DateOfBirth.String,
+        time.Now())
 }
