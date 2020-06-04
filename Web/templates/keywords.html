@@ -1,0 +1,75 @@
+{{ define "content" }}
+    <div class="content">
+        <div id="app">
+            <span v-html="message"></span>
+            <ul>
+                <li v-for="(keyword, index) in keywords">
+                    [[ keyword.Text ]]
+                    <span>
+                        <button v-on:click="deleteKeyword(index)">
+                            <i></i>
+                        </button>
+                    </span>
+                </li>
+            </ul>
+            <div>
+                <input type="text" 
+                    placeholder="New Keyword" 
+                    v-on:keyup.enter="createKeyword"
+                    v-model="newKeyword.Text">
+                <button v-on:click="createKeyword">Create</button>
+            </div>
+        </div>
+        <div id="app2">
+            <lable>Assign it to as many targets as you wish</lable>
+            <vue-multi-select
+                v-model="fruit"
+                :options="fruits"
+            ></vue-multi-select>
+        </div>
+    </div>
+    <script src="https://unpkg.com/vue@latest"></script>
+    <script src="https://unpkg.com/vue-simple-multi-select@latest"></script>
+    <script>
+    new Vue({
+        el:"#app2",
+        data: {
+            fruit: null,
+            fruits: ['peach','pear','apple','orange']
+        }
+    });
+    </script>
+    <script>
+        new Vue({
+            el: '#app',
+            delimiters: ["[[","]]"],
+            data: {
+                    message: '',
+                    keywords: {{.Data}},
+                    newKeyword: {}
+                },
+            methods: {
+                createKeyword: function() {
+                    this.$http.put('/keywords', this.newKeyword).then(function(response) {
+                        this.message = response.data.Message
+                        if(response.data.Added){
+                            this.keywords.push(this.newKeyword)
+                        }
+                        this.newKeyword = {}
+                    }).catch(function(error) {
+                        console.log(error)
+                    });
+                },
+                deleteKeyword: function(index) {
+                    payload = {"Url": this.keywords[index].Url}
+                    this.$http.put('/keywords/remove', payload).then(function(response) {
+                        this.message = response.data.Message
+                        this.keywords.splice(index, 1)
+                    }).catch(function(error) {
+                        console.log(error)
+                    });
+                }
+            }
+        })
+    </script>
+{{ end }}
