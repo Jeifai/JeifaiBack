@@ -30,6 +30,11 @@ type Result struct {
 	Data        json.RawMessage
 }
 
+type Keyword struct {
+    Id          int
+    Text        string   
+}
+
 var Db *sql.DB
 
 func DbConnect() {
@@ -115,3 +120,9 @@ func GetNewResultsByScrapingId(scraping Scraping) (results []Result, err error) 
 	rows.Close()
 	return
 }
+
+/**
+func GetKeywordsByScraperId(scraper Scraper) (keywords []Keyword, err error) {
+	fmt.Println("Starting GetKeywordsByScraperId...")
+}
+*/

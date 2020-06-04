@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+// import "fmt"
 
 func main() {
     DbConnect()
@@ -22,6 +22,14 @@ func main() {
     if err != nil {
         panic(err.Error())
     }
+    _ = results
+
+    /**
+    keywords, err := GetKeywordsByScraperId(scraper)
+    if err != nil {
+        panic(err.Error())
+    }
+    */
 
     // Select all the keywords based on scraper name
 
