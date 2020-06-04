@@ -1,18 +1,18 @@
 package data
 
 import (
-    "database/sql"
-    "encoding/json"
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 )
 
 type User struct {
 	Id                int            `db:"id"`
-	UserName          string         `db:"username" validate:"min=1"`
-	Email             string         `db:"email" validate:"email"`
+	UserName          string         `db:"username"    validate:"min=1"`
+	Email             string         `db:"email"       validate:"email"`
 	Password          string         `db:"password"`
-    CreatedAt         time.Time      `db:"createdat"`
+	CreatedAt         time.Time      `db:"createdat"`
 	UpdatedAt         time.Time      `db:"updatedat"`
 	DeletedAt         time.Time      `db:"deletedat"`
 	FirstName         sql.NullString `db:"firstname"`
@@ -21,9 +21,9 @@ type User struct {
 	Country           sql.NullString `db:"country"`
 	City              sql.NullString `db:"city"`
 	Gender            sql.NullString `db:"gender"`
-	CurrentPassword   string         `validate:"required,eqfield=Password"`
+	CurrentPassword   string         `                 validate:"required,eqfield=Password"`
 	NewPassword       string         `db:"newpassword" validate:"eqfield=RepeatNewPassword"`
-	RepeatNewPassword string         `validate:"eqfield=NewPassword"`
+	RepeatNewPassword string         `                 validate:"eqfield=NewPassword"`
 }
 
 type Session struct {
@@ -146,11 +146,11 @@ func (user *User) Create() (err error) {
 		user.UserName,
 		user.Email,
 		Encrypt(user.Password),
-        time.Now(),
+		time.Now(),
 		time.Now(),
 	).Scan(
 		&user.Id,
-        &user.CreatedAt,
+		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
 	return
@@ -181,7 +181,7 @@ func UserByEmail(email string) (user User, err error) {
 			&user.UserName,
 			&user.Email,
 			&user.Password,
-            &user.CreatedAt,
+			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.FirstName,
 			&user.LastName,
@@ -218,7 +218,7 @@ func UserById(id int) (user User, err error) {
 			&user.UserName,
 			&user.Email,
 			&user.Password,
-            &user.CreatedAt,
+			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.FirstName,
 			&user.LastName,
@@ -253,35 +253,35 @@ func (user User) UpdateUser() {
 	_, err = stmt.Exec(
 		user.Id,
 		user.UserName,
-        user.Email,
+		user.Email,
 		user.NewPassword,
 		user.FirstName.String,
 		user.LastName.String,
 		user.Country.String,
 		user.City.String,
 		user.Gender.String,
-        user.DateOfBirth.String,
-        time.Now())
+		user.DateOfBirth.String,
+		time.Now())
 }
 
 func (user User) UpdateUserUpdates() {
 	fmt.Println("Starting UpdateUserUpdates...")
-    statement := `INSERT INTO usersupdates (userid, data, createdat) 
+	statement := `INSERT INTO usersupdates (userid, data, createdat) 
                     VALUES ($1, $2, $3)`
 
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		panic(err.Error())
 	}
-    defer stmt.Close()
-    
-    user_json, err := json.Marshal(user)
-    if err != nil {
-        panic(err.Error())
-    }
+	defer stmt.Close()
+
+	user_json, err := json.Marshal(user)
+	if err != nil {
+		panic(err.Error())
+	}
 
 	_, err = stmt.Exec(
 		user.Id,
 		user_json,
-        time.Now())
+		time.Now())
 }
