@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -91,8 +90,6 @@ func (target *Target) TargetByUrl() (err error) {
 // Get all the targets based on a list of urls
 func TargetsByUrls(targetUrls []string) (targets []Target, err error) {
 	fmt.Println("Starting TargetsByUrls...")
-
-	fmt.Println("{'" + strings.Join(targetUrls, "','") + "'}")
 
 	rows, err := Db.Query(`SELECT
                                 t.id
