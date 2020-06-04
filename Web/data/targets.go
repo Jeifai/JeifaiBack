@@ -20,8 +20,7 @@ func (target *Target) CreateTarget() (err error) {
                   RETURNING id, url, host, createdat`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
-		fmt.Println("Error on CreateTarget")
-		return
+		panic(err.Error())
 	}
 	defer stmt.Close()
 	err = stmt.QueryRow(
