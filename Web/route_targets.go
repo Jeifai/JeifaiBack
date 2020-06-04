@@ -73,7 +73,7 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 		// Try to create a target
 		if err := target.CreateTarget(); err != nil {
 			// If already exists, get its url
-			err := target.TargetsByUrl()
+			err := target.TargetByUrl()
 			if err != nil {
 				panic(err.Error())
 			}

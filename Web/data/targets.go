@@ -2,12 +2,15 @@ package data
 
 import (
 	"fmt"
+	"strings"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type Target struct {
 	Id        int
-	Url       string    `validate:"url"`
+	Url       string `validate:"url"`
 	Host      string
 	CreatedAt time.Time
 }
@@ -75,13 +78,37 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 	return
 }
 
-// Get all the targets for a specific url
-func (target *Target) TargetsByUrl() (err error) {
-	fmt.Println("Starting TargetsByUrl...")
+// Get the target for a specific url
+func (target *Target) TargetByUrl() (err error) {
+	fmt.Println("Starting TargetByUrl...")
 	err = Db.QueryRow(`SELECT
                          t.id
                        FROM targets t
                        WHERE t.url=$1`, target.Url).Scan(&target.Id)
+	return
+}
+
+// Get all the targets based on a list of urls
+func TargetsByUrls(targetUrls []string) (targets []Target, err error) {
+	fmt.Println("Starting TargetsByUrls...")
+
+	fmt.Println("{'" + strings.Join(targetUrls, "','") + "'}")
+
+	rows, err := Db.Query(`SELECT
+                                t.id
+                            FROM targets t
+                            WHERE t.url LIKE ANY($1)`, pq.Array(targetUrls))
+	if err != nil {
+		return
+	}
+	for rows.Next() {
+		target := Target{}
+		if err = rows.Scan(&target.Id); err != nil {
+			return
+		}
+		targets = append(targets, target)
+	}
+	rows.Close()
 	return
 }
 
