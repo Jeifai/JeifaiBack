@@ -2,11 +2,11 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
-    "os"
-    "time"
-    "strconv"
-    "encoding/json"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -25,14 +25,14 @@ type Scraping struct {
 }
 
 type Result struct {
-	Title       string
-	ResultUrl   string
-	Data        json.RawMessage
+	Title     string
+	ResultUrl string
+	Data      json.RawMessage
 }
 
 type Keyword struct {
-    Id          int
-    Text        string   
+	Id   int
+	Text string
 }
 
 var Db *sql.DB
@@ -102,7 +102,7 @@ func GetLastScrapingByScraperId(scraper Scraper) (scraping Scraping, err error) 
 
 func GetNewResultsByScrapingId(scraping Scraping) (results []Result, err error) {
 	fmt.Println("Starting GetNewResultsByScrapingId...")
-    rows, err := Db.Query(`SELECT
+	rows, err := Db.Query(`SELECT
                                 r.title,
                                 r.url
                             FROM results r
