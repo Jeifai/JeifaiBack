@@ -1004,9 +1004,9 @@ func (runtime Runtime) Shopify(
 		err := json.Unmarshal(body, &jsonJobs)
 		if err != nil {
 			panic(err.Error())
-        }
-        
-        response = Response{body}
+		}
+
+		response = Response{body}
 
 		for _, elem := range jsonJobs {
 			result_title := elem.Text

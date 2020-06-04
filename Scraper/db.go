@@ -103,8 +103,8 @@ func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	fmt.Println("Starting SaveResults...")
 	valueStrings := []string{}
-    valueArgs := []interface{}{}
-    timeNow := time.Now() //updatedAt and createdAt will be identical
+	valueArgs := []interface{}{}
+	timeNow := time.Now() // updatedAt and createdAt will be identical
 	for i, elem := range results {
 		str1 := "$" + strconv.Itoa(1+i*7) + ","
 		str2 := "$" + strconv.Itoa(2+i*7) + ","

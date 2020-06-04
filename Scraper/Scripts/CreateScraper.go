@@ -1,33 +1,33 @@
 package main
 
 import (
-    "github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"database/sql"
+	"fmt"
+	"os"
 	"strconv"
 	"time"
-    "fmt"
-	"os"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-    scraper_name := "Shopify"
-    scraper_version := 1 
-    jobs_url := "https://www.shopify.com/careers/search?keywords=&sort=specialty_asc"
-    host_url := "https://www.shopify.com"
-    scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
-    scraper.CreateScraper()
+	scraper_name := "Deutschebahn"
+	scraper_version := 1
+	jobs_url := "https://karriere.deutschebahn.com"
+	host_url := "https://www.deutschebahn.com/de"
+	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
+	scraper.CreateScraper()
 }
 
 type Scraper struct {
-    Name    string
-    JobsUrl string
-    HostUrl string
-    Version int
+	Name    string
+	JobsUrl string
+	HostUrl string
+	Version int
 }
 
 func DbConnect() (Db *sql.DB) {
-
 	err := godotenv.Load()
 	if err != nil {
 		panic(err.Error())
@@ -55,36 +55,35 @@ func DbConnect() (Db *sql.DB) {
 		fmt.Println("Unsuccessfully connected to the database")
 		return
 	}
-    fmt.Println("Successfully connected to the database")  
-    return
+	fmt.Println("Successfully connected to the database")
+	return
 }
 
 func (scraper Scraper) CreateScraper() {
+	Db := DbConnect()
+	defer Db.Close()
+	defer fmt.Println("Successfully created new scraper")
 
-    Db := DbConnect()
-    defer Db.Close()
-    defer fmt.Println("Successfully created new scraper")
+	statement_1 := `INSERT INTO targets (name, url, host, createdat)
+                    VALUES ($1, $2, $3, $4) RETURNING id`
+	stmt_1, err := Db.Prepare(statement_1)
+	if err != nil {
+		panic(err)
+	}
+	defer stmt_1.Close()
+	var target_id int
+	err = stmt_1.QueryRow(
+		scraper.Name, scraper.JobsUrl, scraper.HostUrl, time.Now()).Scan(&target_id)
+	if err != nil {
+		panic(err)
+	}
 
-    statement_1 := `INSERT INTO targets (name, url, host, created_at)
+	statement_2 := `INSERT INTO scrapers (name, version, targetid, createdat)
                     VALUES ($1, $2, $3, $4) RETURNING id`
-    stmt_1, err := Db.Prepare(statement_1)
-    if err != nil {
-        panic(err)
-    }
-    defer stmt_1.Close()
-    var target_id int
-    err = stmt_1.QueryRow(
-        scraper.Name, scraper.JobsUrl, scraper.HostUrl, time.Now()).Scan(&target_id)
-    if err != nil {
-        panic(err)
-    }
-    
-    statement_2 := `INSERT INTO scrapers (name, version, target_id, created_at)
-                    VALUES ($1, $2, $3, $4) RETURNING id`
-    stmt_2, err := Db.Prepare(statement_2)
-    if err != nil {
-        panic(err)
-    }
-    defer stmt_2.Close()
-    stmt_2.QueryRow(scraper.Name, scraper.Version, target_id, time.Now())
+	stmt_2, err := Db.Prepare(statement_2)
+	if err != nil {
+		panic(err)
+	}
+	defer stmt_2.Close()
+	stmt_2.QueryRow(scraper.Name, scraper.Version, target_id, time.Now())
 }
