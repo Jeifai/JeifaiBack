@@ -33,7 +33,7 @@ UPDATE targets SET url = replace(url, 'https://', '')
 /* New scraper process */
 INSERT INTO targets (url, host, createdat, name) VALUES('https://www.babelforce.com/jobs/', 'https://www.babelforce.com', currenttimestamp, 'Babelforce');
 SELECT id FROM targets WHERE name = 'Babelforce';
-INSERT INTO scrapers (name, version, targetid, createdat) VALUES('Babelforce', 1, 86, currenttimestamp);
+INSERT INTO scrapers (name, version, targetid, createdat) VALUES('Babelforce', 1, 86, current_timestamp);
 
 
 /* Get the latest two extractions */
