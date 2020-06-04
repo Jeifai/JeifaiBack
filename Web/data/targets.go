@@ -7,7 +7,7 @@ import (
 
 type Target struct {
 	Id        int
-	Url       string
+	Url       string    `validate:"url"`
 	Host      string
 	CreatedAt time.Time
 }

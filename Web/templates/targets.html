@@ -1,7 +1,7 @@
 {{ define "content" }}
     <div class="content">
         <div id="app">
-            [[ message ]]
+            <span v-html="message"></span>
             <ul>
                 <li v-for="(target, index) in targets">
                     [[ target.Url ]]
