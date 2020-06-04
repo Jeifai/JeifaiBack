@@ -72,3 +72,10 @@ create table results (
   updatedat     timestamp,
   data          json
 );
+
+create table keywords (
+  id            serial primary key,
+  text          varchar(100) not null,
+  createdat     timestamp not null,
+  deletedat     timestamp  
+);
