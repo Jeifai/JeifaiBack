@@ -25,15 +25,14 @@ func main() {
 	r.HandleFunc("/profile", profile).Methods("GET")
 	r.HandleFunc("/profile", updateProfile).Methods("PUT")
 
-    
 	r.HandleFunc("/targets", targets).Methods("GET")
 	r.HandleFunc("/targets", putTarget).Methods("PUT")
 	r.HandleFunc("/targets/remove", removeTarget).Methods("PUT")
 
 	r.HandleFunc("/keywords", keywords).Methods("GET")
 
-    r.HandleFunc("/results", results)
-    
+	r.HandleFunc("/results", results)
+
 	fmt.Println("Application is running")
 
 	server := &http.Server{

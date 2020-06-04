@@ -19,34 +19,25 @@
                     v-model="newKeyword.Text">
                 <button v-on:click="createKeyword">Create</button>
             </div>
-        </div>
-        <div id="app2">
-            <lable>Assign it to as many targets as you wish</lable>
-            <vue-multi-select
-                v-model="fruit"
-                :options="fruits"
-            ></vue-multi-select>
+            <div>
+                <lable>Assign it to as many targets as you wish</lable>
+                <vue-multi-select
+                    v-model="fruit"
+                    :options="targets"
+                ></vue-multi-select>
+            </div>
         </div>
     </div>
-    <script src="https://unpkg.com/vue@latest"></script>
     <script src="https://unpkg.com/vue-simple-multi-select@latest"></script>
-    <script>
-    new Vue({
-        el:"#app2",
-        data: {
-            fruit: null,
-            fruits: ['peach','pear','apple','orange']
-        }
-    });
-    </script>
     <script>
         new Vue({
             el: '#app',
             delimiters: ["[[","]]"],
             data: {
                     message: '',
-                    keywords: {{.Data}},
-                    newKeyword: {}
+                    targets: {{.Targets}},
+                    newKeyword: {},
+                    fruit: null
                 },
             methods: {
                 createKeyword: function() {
