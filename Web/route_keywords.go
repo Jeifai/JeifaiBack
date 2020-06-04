@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"html/template"
-    "net/http"
-    // "io/ioutil"
-    "encoding/json"
+	"net/http"
+
+	// "io/ioutil"
+	"encoding/json"
 
 	"./data"
 )
@@ -15,7 +16,7 @@ func keywords(w http.ResponseWriter, r *http.Request) {
 	sess, err := session(r)
 	user, err := data.UserById(sess.UserId)
 	if err != nil {
-		danger(err, "Cannot find user")
+		panic(err.Error())
 	}
 
 	templates := template.Must(
@@ -37,29 +38,58 @@ func keywords(w http.ResponseWriter, r *http.Request) {
 	}
 
 	infos := TempStruct{user, arr_targets}
-    templates.ExecuteTemplate(w, "layout", infos)
-    
-    _ = err
+	templates.ExecuteTemplate(w, "layout", infos)
+
+	_ = err
 }
 
 func putKeywordsTargets(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("Starting putKeywordsTargets...")
- 
-    type TempResponse struct {
-        SelectedTargets []string `json:"selectedTargets"` // HERE RECEIVE data.Target
-        NewKeyword  data.Keyword `json:"newKeyword"`
-    }
+	fmt.Println("Starting putKeywordsTargets...")
+	sess, err := session(r)
+	user, err := data.UserById(sess.UserId)
+	if err != nil {
+		panic(err.Error())
+	}
 
-    response := TempResponse{}
+	type TempResponse struct {
+		SelectedTargets []string     `json:"selectedTargets"`
+		Keyword         data.Keyword `json:"newKeyword"`
+	}
 
-    err := json.NewDecoder(r.Body).Decode(&response)
+	response := TempResponse{}
 
-    fmt.Println(response)
+	err = json.NewDecoder(r.Body).Decode(&response)
+	if err != nil {
+		panic(err.Error())
+	}
 
-    _ = err
+	// Before creating the relation user <-> target, check if it is not already present
+	err = response.Keyword.KeywordByText()
+	if err != nil {
+		panic(err.Error())
+	}
 
-    // Check if keyword exists, if not create, if yes, get keyword id
-    // Get all the data of the actual selected targets
-    // if the relation userid, targetid, keywordid does not exist, create it, otherwise return a proper message
+	// If keyword does not exist, create it
+	if response.Keyword.Id == 0 {
+		response.Keyword.CreateKeyword()
+	}
 
+	// Get target's detail based on
+	targets, err := data.TargetsByUrls(response.SelectedTargets)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	fmt.Println("response.Keyword")
+	fmt.Println(response.Keyword)
+	fmt.Println("targets")
+	fmt.Println(targets)
+	fmt.Println("user")
+	fmt.Println(user)
+
+	data.SetUserTargetKeyword(user, targets, response.Keyword)
+
+	_ = err
+
+	// if the relation userid, targetid, keywordid does not exist, create it, otherwise return a proper message
 }

@@ -79,3 +79,12 @@ create table keywords (
   createdat     timestamp not null,
   deletedat     timestamp  
 );
+
+create table userstargetskeywords (
+  id            serial primary key,
+  userid        integer references users(id),
+  targetid      integer references targets(id),
+  keywordid     integer references keywords(id),
+  createdat     timestamp not null,
+  deletedat     timestamp
+);
