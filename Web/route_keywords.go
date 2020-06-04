@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"net/http"
+    "net/http"
+    // "io/ioutil"
+    "encoding/json"
 
 	"./data"
 )
@@ -35,5 +37,29 @@ func keywords(w http.ResponseWriter, r *http.Request) {
 	}
 
 	infos := TempStruct{user, arr_targets}
-	templates.ExecuteTemplate(w, "layout", infos)
+    templates.ExecuteTemplate(w, "layout", infos)
+    
+    _ = err
+}
+
+func putKeywordsTargets(w http.ResponseWriter, r *http.Request) {
+    fmt.Println("Starting putKeywordsTargets...")
+ 
+    type TempResponse struct {
+        SelectedTargets []string `json:"selectedTargets"` // HERE RECEIVE data.Target
+        NewKeyword  data.Keyword `json:"newKeyword"`
+    }
+
+    response := TempResponse{}
+
+    err := json.NewDecoder(r.Body).Decode(&response)
+
+    fmt.Println(response)
+
+    _ = err
+
+    // Check if keyword exists, if not create, if yes, get keyword id
+    // Get all the data of the actual selected targets
+    // if the relation userid, targetid, keywordid does not exist, create it, otherwise return a proper message
+
 }

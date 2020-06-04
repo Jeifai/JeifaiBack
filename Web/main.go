@@ -29,7 +29,8 @@ func main() {
 	r.HandleFunc("/targets", putTarget).Methods("PUT")
 	r.HandleFunc("/targets/remove", removeTarget).Methods("PUT")
 
-	r.HandleFunc("/keywords", keywords).Methods("GET")
+    r.HandleFunc("/keywords", keywords).Methods("GET")
+	r.HandleFunc("/keywords", putKeywordsTargets).Methods("PUT")
 
 	r.HandleFunc("/results", results)
 
