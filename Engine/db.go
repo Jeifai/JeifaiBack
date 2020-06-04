@@ -103,7 +103,8 @@ func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	fmt.Println("Starting SaveResults...")
 	valueStrings := []string{}
-	valueArgs := []interface{}{}
+    valueArgs := []interface{}{}
+    timeNow := time.Now() //updatedAt and createdAt will be identical
 	for i, elem := range results {
 		str1 := "$" + strconv.Itoa(1+i*7) + ","
 		str2 := "$" + strconv.Itoa(2+i*7) + ","
@@ -119,8 +120,8 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 		valueArgs = append(valueArgs, elem.Title)
 		valueArgs = append(valueArgs, elem.ResultUrl)
 		valueArgs = append(valueArgs, elem.Data)
-		valueArgs = append(valueArgs, time.Now())
-		valueArgs = append(valueArgs, time.Now())
+		valueArgs = append(valueArgs, timeNow)
+		valueArgs = append(valueArgs, timeNow)
 	}
 	smt := `INSERT INTO results (
                 scraperid, scrapingid, title, url, data, createdat, updatedat)
