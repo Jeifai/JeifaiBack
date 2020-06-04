@@ -1,3 +1,5 @@
+/* HERE A LIST OF EXAMPLE QUERIES */
+
 /* Make a table empty and reset id */
 TRUNCATE scrapers RESTART IDENTITY;
 
