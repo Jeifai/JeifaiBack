@@ -3,8 +3,8 @@
         <div id="app">
             <span v-html="message"></span>
             <ul>
-                <li v-for="(keyword, index) in keywords">
-                    [[ keyword.Text ]]
+                <li v-for="(utk, index) in utks">
+                    [[ utk.TargetUrl ]], [[ utk.KeywordText ]]
                     <span>
                         <button v-on:click="deleteKeyword(index)">
                             <i></i>
@@ -37,6 +37,7 @@
             data: {
                     message: '',
                     targets: {{.Targets}},
+                    utks: {{.Utks}},
                     newKeyword: {},
                     selectedTargets: null
                 },

@@ -14,9 +14,13 @@ type Keyword struct {
 }
 
 type UserTargetKeyword struct {
-	UserId    int
-	TargetId  int
-	KeywordId int
+	Id          int
+	UserId      int
+	TargetId    int
+	KeywordId   int
+	CreatedAt   time.Time
+	KeywordText string
+	TargetUrl   string
 }
 
 // Add a new keyword
@@ -48,9 +52,47 @@ func (keyword *Keyword) KeywordByText() (err error) {
 	return
 }
 
+func (user *User) GetUserTargetKeyword() (
+	utks []UserTargetKeyword, err error) {
+	fmt.Println("Starting GetUserTargetKeyword...")
+
+	rows, err := Db.Query(`SELECT
+                                utk.id,
+                                utk.userid,
+                                utk.targetid,
+                                utk.keywordid,
+                                utk.createdat,
+                                k.text,
+                                t.url
+                            FROM userstargetskeywords utk
+                            LEFT JOIN keywords k ON(utk.keywordid = k.id)
+                            LEFT JOIN targets t ON(utk.targetid = t.id)
+                            WHERE utk.userid = $1
+                            AND utk.deletedat IS NULL`, user.Id)
+	if err != nil {
+		return
+	}
+	for rows.Next() {
+		utk := UserTargetKeyword{}
+		if err = rows.Scan(
+			&utk.Id,
+			&utk.UserId,
+			&utk.TargetId,
+			&utk.KeywordId,
+			&utk.CreatedAt,
+			&utk.KeywordText,
+			&utk.TargetUrl); err != nil {
+			return
+		}
+		utks = append(utks, utk)
+	}
+	rows.Close()
+	return
+}
+
 func SetUserTargetKeyword(
 	user User, targets []Target, keyword Keyword) (
-	err error, utk UserTargetKeyword) {
+	utk UserTargetKeyword, err error) {
 	fmt.Println("Starting SetUserTargetKeyword...")
 
 	valueStrings := []string{}
