@@ -4,7 +4,7 @@ package main
 
 func main() {
 	DbConnect()
-	scraper_name := "Microsoft"
+	scraper_name := "Mitte"
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
