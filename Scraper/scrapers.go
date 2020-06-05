@@ -1339,7 +1339,7 @@ func (runtime Runtime) Deutschebahn(
 
             c := colly.NewCollector()
 
-            url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum="
+            start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum="
             d_base_url := "https://karriere.deutschebahn.com/"
 
             main_section_tag := "ul"
@@ -1358,7 +1358,7 @@ func (runtime Runtime) Deutschebahn(
             c.OnHTML(main_section_tag, func(e *colly.HTMLElement) {
                 if strings.Contains(e.Attr(main_section_attr), main_section_value) {
                     e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-                        job_url, exists := el.DOM.Find("div[class=info]").Find("a").Attr("href")
+                        temp_job_url, exists := el.DOM.Find("div[class=info]").Find("a").Attr("href")
                         _ = exists
                         job_title := el.DOM.Find("span[class=title]").Text()
                         job_location := strings.TrimSpace(el.DOM.Find("span[class=location]").Text())
@@ -1366,8 +1366,16 @@ func (runtime Runtime) Deutschebahn(
                         job_publication := strings.TrimSpace(el.DOM.Find("span[class=publication]").Text())
                         job_description := strings.TrimSpace(el.DOM.Find("p[class=responsibilities-text]").Text())
 
+                        temp_job_url = d_base_url + temp_job_url
+                        u, err := netUrl.Parse(temp_job_url)
+                        if err != nil {
+                            panic(err.Error())
+                        }
+                        u.RawQuery = ""
+                        job_url := u.String()
+
                         temp_elem_json := Job{
-                            d_base_url + job_url,
+                            job_url,
                             job_title,
                             job_location,
                             job_entity,
@@ -1392,12 +1400,12 @@ func (runtime Runtime) Deutschebahn(
 
             // Find and visit next page links
             c.OnHTML("a[class=active]", func(e *colly.HTMLElement) {
-                next_page_url := url + e.Text
+                next_page_url := start_url + e.Text
 			    fmt.Println("Visiting", next_page_url)
                 e.Request.Visit(next_page_url)
             })
-            fmt.Println("Visiting", url + "0")
-            c.Visit(url + "0")
+            fmt.Println("Visiting", start_url + "0")
+            c.Visit(start_url + "0")
         }
 
 		response_json, err := json.Marshal(results)
