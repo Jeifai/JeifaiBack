@@ -1225,6 +1225,20 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 				}
 				response = Response{[]byte(response_json)}
             })
+
+            c.OnError(func(r *colly.Response, err error) {
+                fmt.Println(
+                    "Request URL:", r.Request.URL,
+                    "failed with response:", r,
+                    "\nError:", err)
+            })
+
+            l.OnError(func(r *colly.Response, err error) {
+                fmt.Println(
+                    "Request URL:", r.Request.URL,
+                    "failed with response:", r,
+                    "\nError:", err)
+            })
             
             c.Visit(url)
 		}
