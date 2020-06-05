@@ -2,6 +2,7 @@
 
 /* Make a table empty and reset id */
 TRUNCATE scrapers RESTART IDENTITY;
+TRUNCATE userstargetskeywords, keywords RESTART IDENTITY;
 
 /* Useful drop constraint and create index*/
 ALTER TABLE results DROP CONSTRAINT resultspkey;
