@@ -1224,20 +1224,9 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 					panic(err.Error())
 				}
 				response = Response{[]byte(response_json)}
-			})
-		}
-
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
+            })
+            
+            c.Visit(url)
 		}
 	}
 	return
