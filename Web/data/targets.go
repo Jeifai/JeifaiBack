@@ -92,7 +92,8 @@ func TargetsByUrls(targetUrls []string) (targets []Target, err error) {
 	fmt.Println("Starting TargetsByUrls...")
 
 	rows, err := Db.Query(`SELECT
-                                t.id
+                                t.id,
+                                t.url
                             FROM targets t
                             WHERE t.url LIKE ANY($1)`, pq.Array(targetUrls))
 	if err != nil {
@@ -100,7 +101,7 @@ func TargetsByUrls(targetUrls []string) (targets []Target, err error) {
 	}
 	for rows.Next() {
 		target := Target{}
-		if err = rows.Scan(&target.Id); err != nil {
+		if err = rows.Scan(&target.Id, &target.Url); err != nil {
 			return
 		}
 		targets = append(targets, target)

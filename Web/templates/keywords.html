@@ -43,12 +43,20 @@
                 },
             methods: {
                 createKeyword: function() {
-                    console.log(this.selectedTargets)
                     this.$http.put('/keywords', {
                         "selectedTargets": this.selectedTargets,
                         "newKeyword": this.newKeyword
                         }).then(function(response) {
-                            console.log(response)
+                            if(response.data.Added){
+                                temp_utks = response.data.Utks
+                                for (var i = 0; i < temp_utks.length; i++) {
+                                    if (this.utks == null){
+                                        this.utks = [temp_utks[i]]
+                                    } else {
+                                        this.utks.push(temp_utks[i])
+                                    }
+                                }
+                            }
                     }).catch(function(error) {
                         console.log(error)
                     });

@@ -2,8 +2,6 @@ package data
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -92,33 +90,35 @@ func (user *User) GetUserTargetKeyword() (
 
 func SetUserTargetKeyword(
 	user User, targets []Target, keyword Keyword) (
-	utk UserTargetKeyword, err error) {
+	utks []UserTargetKeyword, err error) {
 	fmt.Println("Starting SetUserTargetKeyword...")
 
-	valueStrings := []string{}
-	valueArgs := []interface{}{}
-	for i, elem := range targets {
-		str1 := "$" + strconv.Itoa(1+i*4) + ","
-		str2 := "$" + strconv.Itoa(2+i*4) + ","
-		str3 := "$" + strconv.Itoa(3+i*4) + ","
-		str4 := "$" + strconv.Itoa(4+i*4)
-		str_n := "(" + str1 + str2 + str3 + str4 + ")"
-		valueStrings = append(valueStrings, str_n)
-		valueArgs = append(valueArgs, user.Id)
-		valueArgs = append(valueArgs, elem.Id)
-		valueArgs = append(valueArgs, keyword.Id)
-		valueArgs = append(valueArgs, time.Now())
+	for _, elem := range targets {
+		statement := `INSERT INTO userstargetskeywords (
+                        userid, targetid, keywordid, createdat)
+                        VALUES ($1, $2, $3, $4)
+                        RETURNING id, userid, targetid, keywordid, createdat`
+		stmt, err := Db.Prepare(statement)
+		if err != nil {
+			panic(err.Error())
+		}
+		defer stmt.Close()
+		utk := UserTargetKeyword{}
+		err = stmt.QueryRow(
+			user.Id,
+			elem.Id,
+			keyword.Id,
+			time.Now(),
+		).Scan(
+			&utk.Id,
+			&utk.UserId,
+			&utk.TargetId,
+			&utk.KeywordId,
+			&utk.CreatedAt,
+		)
+		utk.KeywordText = keyword.Text
+		utk.TargetUrl = elem.Url
+		utks = append(utks, utk)
 	}
-
-	smt := `INSERT INTO userstargetskeywords (
-                userid, targetid, keywordid, createdat)
-            VALUES %s`
-	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
-
-	_, err = Db.Exec(smt, valueArgs...)
-	if err != nil {
-		panic(err.Error())
-	}
-
 	return
 }

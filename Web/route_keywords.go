@@ -79,5 +79,18 @@ func putKeywordsTargets(w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 
-	data.SetUserTargetKeyword(user, targets, response.Keyword)
+	type TempStruct struct {
+		Added bool
+		Utks  []data.UserTargetKeyword
+	}
+
+	utks, err := data.SetUserTargetKeyword(user, targets, response.Keyword)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	infos := TempStruct{true, utks}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(infos)
 }
