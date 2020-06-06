@@ -420,9 +420,7 @@ func (runtime Runtime) Zalando(
 				panic(err.Error())
 			}
 
-			jsonJobs.Data = append(jsonJobs.Data, tempJsonJobs_2.Data...)
-
-			for _, elem := range jsonJobs.Data {
+			for _, elem := range tempJsonJobs_2.Data {
 
 				result_title := elem.Title
 				result_url := z_base_result_url + strconv.Itoa(elem.ID)
@@ -439,6 +437,8 @@ func (runtime Runtime) Zalando(
 					elem_json,
 				})
 			}
+
+			jsonJobs.Data = append(jsonJobs.Data, tempJsonJobs_2.Data...)
 
 			if tempJsonJobs_2.Next != "" {
 				time.Sleep(SecondsSleep * time.Second)
@@ -519,9 +519,7 @@ func (runtime Runtime) Google(
 				panic(err.Error())
 			}
 
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs_2.Jobs...)
-
-			for _, elem := range jsonJobs.Jobs {
+			for _, elem := range tempJsonJobs_2.Jobs {
 
 				result_title := elem.JobTitle
 				result_url := g_base_result_url + strings.Split(elem.JobID, "/")[1]
@@ -538,6 +536,8 @@ func (runtime Runtime) Google(
 					elem_json,
 				})
 			}
+
+			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs_2.Jobs...)
 
 			total_pages := tempJsonJobs_2.Count/number_results_per_page + 2
 			if total_pages <= tempJsonJobs_2.NextPage {
@@ -679,12 +679,14 @@ func (runtime Runtime) Microsoft(
 	response Response, results []Result) {
 	if version == 1 {
 
+		m_start_url := "https://careers.microsoft.com/us/en/search-results?s=1&from=1"
 		m_base_url := "https://careers.microsoft.com/us/en/search-results?s=1&from="
-
 		m_base_result_url := "https://careers.microsoft.com/us/en/job/"
 
 		first_part_json := `"eagerLoadRefineSearch":`
 		second_part_json := `}; phApp.sessionParams`
+
+		counter := 0
 
 		type JsonJobs struct {
 			Status    int `json:"status"`
@@ -726,91 +728,94 @@ func (runtime Runtime) Microsoft(
 			Eid string `json:"eid"`
 		}
 
-		var jsonJobs_1 JsonJobs
+		var jsonJobs JsonJobs
+
+		c := colly.NewCollector()
+
+		c.OnResponse(func(r *colly.Response) {
+			var resultsJson []byte
+			if isLocal {
+				resultsJson = r.Body
+			} else {
+				temp_resultsJson := strings.Split(string(r.Body), first_part_json)[1]
+				s_resultsJson := strings.Split(temp_resultsJson, second_part_json)[0]
+				resultsJson = []byte(s_resultsJson)
+			}
+
+			var tempJsonJobs_2 JsonJobs
+			err := json.Unmarshal(resultsJson, &tempJsonJobs_2)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJsonJobs_2.Data.Jobs {
+
+				result_title := elem.Title
+				result_url := m_base_result_url + elem.JobID
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Data.Jobs = append(jsonJobs.Data.Jobs, tempJsonJobs_2.Data.Jobs...)
+
+			number_results_per_page := 10 // len(jsonJobs.Data.Jobs)
+
+			total_pages := tempJsonJobs_2.TotalHits/number_results_per_page + 2
+
+			if isLocal {
+				return
+			} else {
+				if counter >= total_pages {
+					return
+				} else {
+					counter = counter + 1
+					time.Sleep(SecondsSleep * time.Second)
+					temp_m_url := m_base_url + strconv.Itoa(counter*number_results_per_page)
+					c.Visit(temp_m_url)
+				}
+			}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
 
 		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
 			dir, err := os.Getwd()
 			if err != nil {
 				panic(err.Error())
 			}
-			body, err := ioutil.ReadFile(dir + "/response.html")
-			fmt.Println("Visiting", dir+"/response.html")
-			if err != nil {
-				panic(err.Error())
-			}
-			err = json.Unmarshal(body, &jsonJobs_1)
-			if err != nil {
-				panic(err.Error())
-			}
+			c.Visit("file:" + dir + "/response.html")
 		} else {
-			res, err := http.Get(m_base_url)
-			fmt.Println("Visiting", m_base_url)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			temp_body, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			temp_resultsJson := strings.Split(string(temp_body), first_part_json)[1]
-			resultsJson := strings.Split(temp_resultsJson, second_part_json)[0]
-
-			err = json.Unmarshal([]byte(resultsJson), &jsonJobs_1)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			results_per_page := 10 // len(jsonJobs_1.Data.Jobs)
-
-			number_pages := jsonJobs_1.TotalHits / results_per_page
-
-			for i := 1; i <= number_pages; i++ {
-				temp_m_url := m_base_url + strconv.Itoa(i*results_per_page)
-				res, err := http.Get(temp_m_url)
-				if err != nil {
-					panic(err.Error())
-				}
-				fmt.Println("Visiting", temp_m_url)
-				temp_body, err := ioutil.ReadAll(res.Body)
-				if err != nil {
-					panic(err.Error())
-				}
-				temp_resultsJson := strings.Split(string(temp_body), first_part_json)[1]
-				resultsJson := strings.Split(temp_resultsJson, second_part_json)[0]
-				var jsonJobs_2 JsonJobs
-				err = json.Unmarshal([]byte(resultsJson), &jsonJobs_2)
-				if err != nil {
-					panic(err.Error())
-				}
-				jsonJobs_1.Data.Jobs = append(jsonJobs_1.Data.Jobs, jsonJobs_2.Data.Jobs...)
-				time.Sleep(SecondsSleep * time.Second)
-			}
-		}
-
-		response_json, err := json.Marshal(jsonJobs_1)
-		if err != nil {
-			panic(err.Error())
-		}
-		response = Response{[]byte(response_json)}
-
-		for _, elem := range jsonJobs_1.Data.Jobs {
-
-			result_title := elem.Title
-			result_url := m_base_result_url + elem.JobID
-
-			elem_json, err := json.Marshal(elem)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			results = append(results, Result{
-				runtime.Name,
-				result_title,
-				result_url,
-				elem_json,
-			})
+			c.Visit(m_start_url)
 		}
 	}
 	return
