@@ -383,7 +383,9 @@ func (runtime Runtime) Zalando(
 	version int, isLocal bool) (response Response, results []Result) {
 	if version == 1 {
 
-		z_base_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset="
+		z_start_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset=0"
+		z_base_url := "https://jobs.zalando.com"
+		z_base_result_url := "https://jobs.zalando.com/de/jobs/"
 
 		type Jobs struct {
 			Data []struct {
@@ -407,7 +409,7 @@ func (runtime Runtime) Zalando(
 			Next  string `json:"next"`
 		}
 
-		var jsonJobs_1 Jobs
+		var jsonJobs Jobs
 
 		if isLocal {
 			dir, err := os.Getwd()
@@ -419,65 +421,47 @@ func (runtime Runtime) Zalando(
 			if err != nil {
 				panic(err.Error())
 			}
-			err = json.Unmarshal(body, &jsonJobs_1)
+			err = json.Unmarshal(body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 		} else {
-			var first_body []byte
-			res, err := http.Get(z_base_url + "0")
-			fmt.Println("Visiting ", z_base_url+"0")
-			if err != nil {
-				panic(err.Error())
-			}
-			temp_body, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				panic(err.Error())
-			}
-			first_body = temp_body
-			err = json.Unmarshal(first_body, &jsonJobs_1)
-			if err != nil {
-				panic(err.Error())
-			}
 
-			offset, err := strconv.Atoi(
-				strings.Split(jsonJobs_1.Last, "offset=")[1])
-			if err != nil {
-				panic(err.Error())
-			}
+			c := colly.NewCollector()
 
-			for i := 1; i < (offset/100)+1; i++ {
-				temp_z_url := z_base_url + strconv.Itoa(i*100)
-				res, err := http.Get(temp_z_url)
-				fmt.Println("Visiting ", temp_z_url)
-				if err != nil {
-					panic(err.Error())
-				}
-				temp_body, err := ioutil.ReadAll(res.Body)
-				if err != nil {
-					panic(err.Error())
-				}
+			c.OnResponse(func(r *colly.Response) {
 				var tempJsonJobs_2 Jobs
-				err = json.Unmarshal(temp_body, &tempJsonJobs_2)
+				err := json.Unmarshal(r.Body, &tempJsonJobs_2)
 				if err != nil {
 					panic(err.Error())
 				}
-				jsonJobs_1.Data = append(
-					jsonJobs_1.Data, tempJsonJobs_2.Data...)
-				time.Sleep(SecondsSleep * time.Second)
-			}
+				jsonJobs.Data = append(jsonJobs.Data, tempJsonJobs_2.Data...)
 
-			response_json, err := json.Marshal(jsonJobs_1)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(response_json)}
+				time.Sleep(SecondsSleep * time.Second)
+
+				if tempJsonJobs_2.Next != "" {
+					c.Visit(z_base_url + tempJsonJobs_2.Next)
+				}
+			})
+
+			c.OnRequest(func(r *colly.Request) {
+				fmt.Println("Visiting", r.URL.String())
+			})
+
+			c.OnScraped(func(r *colly.Response) {
+				jsonJobs_marshal, err := json.Marshal(jsonJobs)
+				if err != nil {
+					panic(err.Error())
+				}
+				response = Response{[]byte(jsonJobs_marshal)}
+			})
+
+			c.Visit(z_start_url)
 		}
 
-		for _, elem := range jsonJobs_1.Data {
+		for _, elem := range jsonJobs.Data {
 
 			result_title := elem.Title
-			z_base_result_url := "https://jobs.zalando.com/de/jobs/"
 			result_url := z_base_result_url + strconv.Itoa(elem.ID)
 
 			elem_json, err := json.Marshal(elem)
