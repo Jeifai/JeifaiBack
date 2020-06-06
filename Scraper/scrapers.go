@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	netUrl "net/url"
 	"os"
@@ -1139,7 +1138,7 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 		c := colly.NewCollector()
 		l := c.Clone()
 
-		url := "https://n26.com/en/careers"
+		n_start_url := "https://n26.com/en/careers"
 		n_base_url := "https://www.n26.com/"
 
 		main_tag := "a"
@@ -1150,113 +1149,114 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 		tag_title := "div"
 		tag_details := "dd"
 
-		if isLocal {
+		c.OnResponse(func(r *colly.Response) {
+			if isLocal {
+				type JsonJob struct {
+					CompanyName string          `json:"CompanyName"`
+					Title       string          `json:"Title"`
+					Url         string          `json:"ResultUrl"`
+					Data        json.RawMessage `json:"Data"`
+				}
 
-			type JsonJob struct {
-				CompanyName string          `json:"CompanyName"`
-				Title       string          `json:"Title"`
-				Url         string          `json:"ResultUrl"`
-				Data        json.RawMessage `json:"Data"`
+				jobs := make([]JsonJob, 0)
+				json.Unmarshal(r.Body, &jobs)
+
+				for _, elem := range jobs {
+					results = append(results, Result{
+						runtime.Name,
+						elem.Title,
+						elem.Url,
+						elem.Data,
+					})
+				}
 			}
+		})
 
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_attr), string_location_url) {
+				temp_location_url := e.Attr(main_attr)
+				location_url := n_base_url + temp_location_url
+				fmt.Println("Visiting", location_url)
+				l.Visit(location_url)
+			}
+		})
+
+		l.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_attr), string_result_url) {
+				temp_result_url := e.Attr(main_attr)
+				result_url := n_base_url + temp_result_url
+
+				goquerySelection := e.DOM
+
+				var titles []string
+				goquerySelection.Find(tag_title).Each(func(i int, s *goquery.Selection) {
+					titles = append(titles, s.Nodes[0].FirstChild.Data)
+				})
+				result_title := titles[0]
+
+				details_nodes := goquerySelection.Find(tag_details).Nodes
+				location := details_nodes[0].FirstChild.Data
+				contract := ""
+				if len(details_nodes) > 1 {
+					contract = details_nodes[1].FirstChild.Data
+				}
+
+				type Job struct {
+					Title    string
+					Url      string
+					Location string
+					Contract string
+				}
+
+				temp_elem_json := Job{result_title, result_url, location, contract}
+
+				elem_json, err := json.Marshal(temp_elem_json)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			response_json, err := json.Marshal(results)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(response_json)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		l.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
 			dir, err := os.Getwd()
 			if err != nil {
 				panic(err.Error())
 			}
-			body, err := ioutil.ReadFile(dir + "/response.html")
-			fmt.Println("Visiting", dir+"/response.html")
-			if err != nil {
-				panic(err.Error())
-			}
-
-			jobs := make([]JsonJob, 0)
-			json.Unmarshal(body, &jobs)
-
-			for _, elem := range jobs {
-				results = append(results, Result{
-					runtime.Name,
-					elem.Title,
-					elem.Url,
-					elem.Data,
-				})
-			}
+			c.Visit("file:" + dir + "/response.html")
 		} else {
-
-			type Job struct {
-				Title    string
-				Url      string
-				Location string
-				Contract string
-			}
-
-			c.OnHTML(main_tag, func(e *colly.HTMLElement) {
-				if strings.Contains(e.Attr(main_attr), string_location_url) {
-					temp_location_url := e.Attr(main_attr)
-					location_url := n_base_url + temp_location_url
-					fmt.Println("Visiting", location_url)
-					l.Visit(location_url)
-				}
-			})
-
-			l.OnHTML(main_tag, func(e *colly.HTMLElement) {
-				if strings.Contains(e.Attr(main_attr), string_result_url) {
-					temp_result_url := e.Attr(main_attr)
-					result_url := n_base_url + temp_result_url
-
-					goquerySelection := e.DOM
-
-					var titles []string
-					goquerySelection.Find(tag_title).Each(func(i int, s *goquery.Selection) {
-						titles = append(titles, s.Nodes[0].FirstChild.Data)
-					})
-					result_title := titles[0]
-
-					details_nodes := goquerySelection.Find(tag_details).Nodes
-					location := details_nodes[0].FirstChild.Data
-					contract := ""
-					if len(details_nodes) > 1 {
-						contract = details_nodes[1].FirstChild.Data
-					}
-
-					temp_elem_json := Job{result_title, result_url, location, contract}
-
-					elem_json, err := json.Marshal(temp_elem_json)
-					if err != nil {
-						panic(err.Error())
-					}
-
-					results = append(results, Result{
-						runtime.Name,
-						result_title,
-						result_url,
-						elem_json,
-					})
-				}
-			})
-
-			c.OnScraped(func(r *colly.Response) {
-				response_json, err := json.Marshal(results)
-				if err != nil {
-					panic(err.Error())
-				}
-				response = Response{[]byte(response_json)}
-			})
-
-			c.OnError(func(r *colly.Response, err error) {
-				fmt.Println(
-					"Request URL:", r.Request.URL,
-					"failed with response:", r,
-					"\nError:", err)
-			})
-
-			l.OnError(func(r *colly.Response, err error) {
-				fmt.Println(
-					"Request URL:", r.Request.URL,
-					"failed with response:", r,
-					"\nError:", err)
-			})
-
-			c.Visit(url)
+			c.Visit(n_start_url)
 		}
 	}
 	return
