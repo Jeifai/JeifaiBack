@@ -139,7 +139,7 @@ func (runtime Runtime) Mitte(
 	response Response, results []Result) {
 	if version == 1 {
 
-		url := "https://api.lever.co/v0/postings/mitte?&mode=json"
+		s_start_url := "https://api.lever.co/v0/postings/mitte?&mode=json"
 
 		type Jobs []struct {
 			AdditionalPlain string `json:"additionalPlain"`
@@ -163,54 +163,68 @@ func (runtime Runtime) Mitte(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var body []byte
+		var jsonJobs Jobs
+
+		c := colly.NewCollector()
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson Jobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson {
+
+				result_title := elem.Text
+				result_url := elem.HostedURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs = append(jsonJobs, tempJson...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
 		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
 			dir, err := os.Getwd()
 			if err != nil {
 				panic(err.Error())
 			}
-			temp_body, err := ioutil.ReadFile(dir + "/response.html")
-			fmt.Println("Visiting", dir+"/response.html")
-			if err != nil {
-				panic(err.Error())
-			}
-			body = temp_body
+			c.Visit("file:" + dir + "/response.html")
 		} else {
-			res, err := http.Get(url)
-			fmt.Println("Visiting", url)
-			if err != nil {
-				panic(err.Error())
-			}
-			temp_body, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				panic(err.Error())
-			}
-			body = temp_body
-		}
-
-		response = Response{body}
-
-		var jsonJobs Jobs
-		err := json.Unmarshal(body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-
-		for _, elem := range jsonJobs {
-			result_title := elem.Text
-			result_url := elem.HostedURL
-
-			elem_json, err := json.Marshal(elem)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			results = append(results, Result{
-				runtime.Name,
-				result_title,
-				result_url,
-				elem_json,
-			})
+			c.Visit(s_start_url)
 		}
 	}
 	return

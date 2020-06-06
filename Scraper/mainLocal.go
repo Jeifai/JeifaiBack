@@ -1,8 +1,8 @@
 package main
 
-func mainLocal() {
+func main() {
 	DbConnect()
-	scraper_name := "Microsoft"
+	scraper_name := "Shopify"
 	scraper_version := 1
 	scraping, err := LastScrapingByNameVersion(scraper_name, scraper_version)
 	file_path := GenerateFilePath(scraper_name, scraping)
