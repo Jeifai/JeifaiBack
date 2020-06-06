@@ -446,6 +446,13 @@ func (runtime Runtime) Zalando(
 
 			c.OnRequest(func(r *colly.Request) {
 				fmt.Println("Visiting", r.URL.String())
+            })
+            
+			c.OnError(func(r *colly.Response, err error) {
+				fmt.Println(
+					"Request URL:", r.Request.URL,
+					"failed with response:", r,
+					"\nError:", err)
 			})
 
 			c.OnScraped(func(r *colly.Response) {
@@ -550,6 +557,13 @@ func (runtime Runtime) Google(
 
 			c.OnRequest(func(r *colly.Request) {
 				fmt.Println("Visiting", r.URL.String())
+            })
+            
+			c.OnError(func(r *colly.Response, err error) {
+				fmt.Println(
+					"Request URL:", r.Request.URL,
+					"failed with response:", r,
+					"\nError:", err)
 			})
 
 			c.OnScraped(func(r *colly.Response) {
