@@ -484,14 +484,14 @@ func (runtime Runtime) Google(
 	version int, isLocal bool) (response Response, results []Result) {
 	if version == 1 {
 
-		g_base_url := "https://careers.google.com/api/jobs/jobs-v1/search/?page_size=100&page="
-
+		g_start_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page=1"
+		g_base_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page="
 		g_base_result_url := "https://careers.google.com/jobs/results/"
 
-		results_per_page := 100
+		number_results_per_page := 100
 
 		type JsonJobs struct {
-			Count string `json:"count"`
+			Count int `json:"count"`
 			Jobs  []struct {
 				CompanyID      string    `json:"company_id"`
 				CompanyName    string    `json:"company_name"`
@@ -499,15 +499,15 @@ func (runtime Runtime) Google(
 				JobID          string    `json:"job_id"`
 				JobTitle       string    `json:"job_title"`
 				Locations      []string  `json:"locations"`
-				LocationsCount string    `json:"locations_count"`
+				LocationsCount int       `json:"locations_count"`
 				PublishDate    time.Time `json:"publish_date"`
 				Summary        string    `json:"summary"`
 			} `json:"jobs"`
-			NextPage string `json:"next_page"`
-			PageSize string `json:"page_size"`
+			NextPage int `json:"next_page"`
+			PageSize int `json:"page_size"`
 		}
 
-		var jsonJobs_1 JsonJobs
+		var jsonJobs JsonJobs
 
 		if isLocal {
 			dir, err := os.Getwd()
@@ -519,56 +519,51 @@ func (runtime Runtime) Google(
 			if err != nil {
 				panic(err.Error())
 			}
-			err = json.Unmarshal(body, &jsonJobs_1)
+			err = json.Unmarshal(body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 		} else {
-			var first_body []byte
-			res, err := http.Get(g_base_url + "1")
-			if err != nil {
-				panic(err.Error())
-			}
-			fmt.Println("Visiting ", g_base_url+"1")
-			temp_body, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				panic(err.Error())
-			}
-			first_body = temp_body
-			err = json.Unmarshal(first_body, &jsonJobs_1)
-			if err != nil {
-				panic(err.Error())
-			}
 
-			in_count_results, err := strconv.Atoi(jsonJobs_1.Count)
-			for i := 2; i < in_count_results/results_per_page+2; i++ {
-				temp_g_url := g_base_url + strconv.Itoa(i)
-				res, err := http.Get(temp_g_url)
-				fmt.Println("Visiting", temp_g_url)
-				if err != nil {
-					panic(err.Error())
-				}
-				temp_body, err := ioutil.ReadAll(res.Body)
-				if err != nil {
-					panic(err.Error())
-				}
+			c := colly.NewCollector()
+
+			c.OnResponse(func(r *colly.Response) {
 				var tempJsonJobs_2 JsonJobs
-				err = json.Unmarshal(temp_body, &tempJsonJobs_2)
+				err := json.Unmarshal(r.Body, &tempJsonJobs_2)
 				if err != nil {
 					panic(err.Error())
 				}
-				jsonJobs_1.Jobs = append(jsonJobs_1.Jobs, tempJsonJobs_2.Jobs...)
+				jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs_2.Jobs...)
+
 				time.Sleep(SecondsSleep * time.Second)
-			}
+
+				total_pages := tempJsonJobs_2.Count/number_results_per_page + 2
+
+				if total_pages <= tempJsonJobs_2.NextPage {
+					return
+				}
+
+				if tempJsonJobs_2.NextPage != 0 {
+					c.Visit(g_base_url + strconv.Itoa(tempJsonJobs_2.NextPage))
+				}
+			})
+
+			c.OnRequest(func(r *colly.Request) {
+				fmt.Println("Visiting", r.URL.String())
+			})
+
+			c.OnScraped(func(r *colly.Response) {
+				jsonJobs_marshal, err := json.Marshal(jsonJobs)
+				if err != nil {
+					panic(err.Error())
+				}
+				response = Response{[]byte(jsonJobs_marshal)}
+			})
+
+			c.Visit(g_start_url)
 		}
 
-		response_json, err := json.Marshal(jsonJobs_1)
-		if err != nil {
-			panic(err.Error())
-		}
-		response = Response{[]byte(response_json)}
-
-		for _, elem := range jsonJobs_1.Jobs {
+		for _, elem := range jsonJobs.Jobs {
 
 			result_title := elem.JobTitle
 			result_url := g_base_result_url + strings.Split(elem.JobID, "/")[1]
