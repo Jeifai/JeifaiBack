@@ -20,7 +20,7 @@ type Runtime struct {
 }
 
 type Response struct {
-	Html []byte
+	Txt []byte
 }
 
 type Result struct {
@@ -1363,86 +1363,132 @@ func (runtime Runtime) Deutschebahn(
 	response Response, results []Result) {
 	if version == 1 {
 
-		if isLocal {
-			fmt.Println("I AM LOCAL")
-		} else {
+		counter := 0
 
-			c := colly.NewCollector()
+		c := colly.NewCollector()
 
-			start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum="
-			d_base_url := "https://karriere.deutschebahn.com/"
+		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum=0"
+		d_base_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum="
+		d_job_url := "https://karriere.deutschebahn.com/"
 
-			main_section_tag := "ul"
-			main_section_attr := "class"
-			main_section_value := "result-items"
+		main_section_tag := "ul"
+		main_section_attr := "class"
+		main_section_value := "result-items"
 
-			type Job struct {
-				Url         string
-				Title       string
-				Location    string
-				Entity      string
-				Publication string
-				Description string
-			}
+		type Job struct {
+			Url         string
+			Title       string
+			Location    string
+			Entity      string
+			Publication string
+			Description string
+		}
 
-			c.OnHTML(main_section_tag, func(e *colly.HTMLElement) {
-				if strings.Contains(e.Attr(main_section_attr), main_section_value) {
-					e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-						temp_job_url, exists := el.DOM.Find("div[class=info]").Find("a").Attr("href")
-						_ = exists
-						job_title := el.DOM.Find("span[class=title]").Text()
-						job_location := strings.TrimSpace(el.DOM.Find("span[class=location]").Text())
-						job_entity := strings.TrimSpace(el.DOM.Find("span[class=entity]").Text())
-						job_publication := strings.TrimSpace(el.DOM.Find("span[class=publication]").Text())
-						job_description := strings.TrimSpace(el.DOM.Find("p[class=responsibilities-text]").Text())
+		c.OnResponse(func(r *colly.Response) {
+			if isLocal {
 
-						temp_job_url = d_base_url + temp_job_url
-						u, err := netUrl.Parse(temp_job_url)
-						if err != nil {
-							panic(err.Error())
-						}
-						u.RawQuery = ""
-						job_url := u.String()
+				type JsonJob struct {
+					CompanyName string
+					Title       string
+					Url         string
+					Data        json.RawMessage
+				}
 
-						temp_elem_json := Job{
-							job_url,
-							job_title,
-							job_location,
-							job_entity,
-							job_publication,
-							job_description,
-						}
+				jobs := make([]JsonJob, 0)
+				json.Unmarshal(r.Body, &jobs)
 
-						elem_json, err := json.Marshal(temp_elem_json)
-						if err != nil {
-							panic(err.Error())
-						}
-
-						results = append(results, Result{
-							runtime.Name,
-							job_title,
-							job_url,
-							elem_json,
-						})
+				for _, elem := range jobs {
+					results = append(results, Result{
+						runtime.Name,
+						elem.Title,
+						elem.Url,
+						elem.Data,
 					})
 				}
-			})
+			}
+		})
 
-			// Find and visit next page links
-			c.OnHTML("a[class=active]", func(e *colly.HTMLElement) {
-				next_page_url := start_url + e.Text
-				fmt.Println("Visiting", next_page_url)
+		c.OnHTML(main_section_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_section_attr), main_section_value) {
+				e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+					temp_job_url, exists := el.DOM.Find("div[class=info]").Find("a").Attr("href")
+					_ = exists
+					job_title := el.DOM.Find("span[class=title]").Text()
+					job_location := strings.TrimSpace(el.DOM.Find("span[class=location]").Text())
+					job_entity := strings.TrimSpace(el.DOM.Find("span[class=entity]").Text())
+					job_publication := strings.TrimSpace(
+						el.DOM.Find("span[class=publication]").Text(),
+					)
+					job_description := strings.TrimSpace(
+						el.DOM.Find("p[class=responsibilities-text]").Text(),
+					)
+
+					temp_job_url = d_job_url + temp_job_url
+					u, err := netUrl.Parse(temp_job_url)
+					if err != nil {
+						panic(err.Error())
+					}
+					u.RawQuery = ""
+					job_url := u.String()
+
+					temp_elem_json := Job{
+						job_url,
+						job_title,
+						job_location,
+						job_entity,
+						job_publication,
+						job_description,
+					}
+
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						job_title,
+						job_url,
+						elem_json,
+					})
+				})
+			}
+		})
+
+		// Find and visit next page links
+		c.OnHTML("a[class=active]", func(e *colly.HTMLElement) {
+			next_page_url := d_base_url + e.Text
+			fmt.Println("Visiting", next_page_url)
+
+			counter = counter + 1
+
+			if counter > 5 {
+				return
+			} else {
 				e.Request.Visit(next_page_url)
-			})
-			fmt.Println("Visiting", start_url+"0")
-			c.Visit(start_url + "0")
-		}
+			}
+		})
 
-		response_json, err := json.Marshal(results)
-		if err != nil {
-			panic(err.Error())
+		c.OnScraped(func(r *colly.Response) {
+			response_json, err := json.Marshal(results)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(response_json)}
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(d_start_url)
 		}
-		response = Response{[]byte(response_json)}
 
 	}
 	return
