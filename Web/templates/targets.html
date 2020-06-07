@@ -37,7 +37,13 @@
                     this.$http.put('/targets', this.newTarget).then(function(response) {
                         this.message = response.data.Message
                         if(response.data.Added){
-                            this.targets.push(this.newTarget)
+
+                            if (this.targets == null){
+                                this.targets = [this.newTarget]
+                            } else {
+                                this.targets.push(this.newTarget)
+                            }
+
                         }
                         this.newTarget = {}
                     }).catch(function(error) {
