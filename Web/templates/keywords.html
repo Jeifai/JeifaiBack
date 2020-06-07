@@ -6,7 +6,7 @@
                 <li v-for="(utk, index) in utks">
                     [[ utk.TargetUrl ]], [[ utk.KeywordText ]]
                     <span>
-                        <button v-on:click="deleteKeyword(index)">
+                        <button v-on:click="deleteUtk(index)">
                             <i></i>
                         </button>
                     </span>
@@ -57,6 +57,19 @@
                                     }
                                 }
                             }
+                    }).catch(function(error) {
+                        console.log(error)
+                    });
+                },
+                deleteUtk: function(index) {
+                    payload = {
+                        "TargetUrl": this.utks[index].TargetUrl,
+                        "KeywordText": this.utks[index].KeywordText
+                        }
+                    this.$http.put('/keywords/remove', payload).then(function(response) {
+                        this.message = response.data.Message
+                        this.utks.splice(index, 1)
+                        console.log(response)
                     }).catch(function(error) {
                         console.log(error)
                     });

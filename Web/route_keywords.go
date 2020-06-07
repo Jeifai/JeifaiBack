@@ -44,8 +44,8 @@ func keywords(w http.ResponseWriter, r *http.Request) {
 	_ = err
 }
 
-func putKeywordsTargets(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Starting putKeywordsTargets...")
+func putKeyword(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Starting putKeyword...")
 	sess, err := session(r)
 	user, err := data.UserById(sess.UserId)
 	if err != nil {
@@ -90,6 +90,46 @@ func putKeywordsTargets(w http.ResponseWriter, r *http.Request) {
 	}
 
 	infos := TempStruct{true, utks}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(infos)
+}
+
+func removeKeyword(w http.ResponseWriter, r *http.Request) {
+	var utk data.UserTargetKeyword
+	err := json.NewDecoder(r.Body).Decode(&utk)
+
+	sess, err := session(r)
+	user, err := data.UserByEmail(sess.Email)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	target := data.Target{}
+	target.Url = utk.TargetUrl
+	err = target.TargetByUrl()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	keyword := data.Keyword{}
+	keyword.Text = utk.KeywordText
+	err = keyword.KeywordByText()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	utk.UserId = user.Id
+	utk.TargetId = target.Id
+	utk.KeywordId = keyword.Id
+
+	err = utk.SetDeletedAtIntUserTargetKeyword()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	type TempStruct struct{ Message string }
+	infos := TempStruct{"Target successfully removed"}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(infos)

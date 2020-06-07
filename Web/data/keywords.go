@@ -122,3 +122,20 @@ func SetUserTargetKeyword(
 	}
 	return
 }
+
+func (utk *UserTargetKeyword) SetDeletedAtIntUserTargetKeyword() (err error) {
+	fmt.Println("Starting SetDeletedAtIntUserTargetKeyword...")
+	statement := `UPDATE userstargetskeywords
+                  SET deletedat = current_timestamp
+                  WHERE userid = $1
+                  AND targetid = $2
+                  AND keywordid = $3;`
+
+	stmt, err := Db.Prepare(statement)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(utk.UserId, utk.TargetId, utk.KeywordId)
+	return
+}
