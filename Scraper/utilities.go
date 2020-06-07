@@ -30,7 +30,7 @@ func Unique(results []Result) []Result {
 func GenerateFilePath(
 	scraper_name string, scraper_version int) (file_path string) {
 	file_path = filepath.Join(
-		scraper_name, strconv.Itoa(scraper_version), "response.html")
+		scraper_name, strconv.Itoa(scraper_version), "response.txt")
 	return
 }
 
@@ -39,7 +39,7 @@ func SaveResponseToFile(response string) {
 	if err != nil {
 		panic(err.Error())
 	}
-	f, err := os.Create(dir + "/response.html")
+	f, err := os.Create(dir + "/response.txt")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -52,7 +52,7 @@ func RemoveFile() {
 	if err != nil {
 		panic(err.Error())
 	}
-	err = os.Remove(dir + "/response.html")
+	err = os.Remove(dir + "/response.txt")
 	if err != nil {
 		panic(err.Error())
 	}

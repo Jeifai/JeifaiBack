@@ -39,7 +39,7 @@ func TestUnique(t *testing.T) {
 func TestGenerateFilePath(t *testing.T) {
 	fmt.Println("\n\nTestGenerateFilePath")
 	got := GenerateFilePath("scraper_name", 1)
-	want := "scraper_name/1/response.html"
+	want := "scraper_name/1/response.txt"
 	assert.Equal(t, got, want, "The two path should be the same.")
 }
 
@@ -51,7 +51,7 @@ func TestSaveResponseToFile(t *testing.T) {
 	if err != nil {
 		panic(err.Error())
 	}
-	got, err := ioutil.ReadFile(dir + "/response.html")
+	got, err := ioutil.ReadFile(dir + "/response.txt")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -65,14 +65,14 @@ func TestRemoveFile(t *testing.T) {
 	if err != nil {
 		panic(err.Error())
 	}
-	f, err := os.Create(dir + "/response.html")
+	f, err := os.Create(dir + "/response.txt")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer f.Close()
 	f.WriteString(want)
 	RemoveFile()
-	file, err := ioutil.ReadFile(dir + "/response.html")
+	file, err := ioutil.ReadFile(dir + "/response.txt")
 	_ = file
 	if assert.Error(t, err) {
 		assert.NotNil(t, err, "The error should be nil")

@@ -125,7 +125,7 @@ func (runtime Runtime) Kununu(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(url)
 		}
@@ -221,7 +221,7 @@ func (runtime Runtime) Mitte(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(s_start_url)
 		}
@@ -306,7 +306,7 @@ func (runtime Runtime) IMusician(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(url)
 		}
@@ -384,7 +384,7 @@ func (runtime Runtime) Babelforce(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(url)
 		}
@@ -486,7 +486,7 @@ func (runtime Runtime) Zalando(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(z_start_url)
 		}
@@ -590,7 +590,7 @@ func (runtime Runtime) Google(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(g_start_url)
 		}
@@ -679,7 +679,7 @@ func (runtime Runtime) Soundcloud(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(url)
 		}
@@ -826,7 +826,7 @@ func (runtime Runtime) Microsoft(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(m_start_url)
 		}
@@ -939,7 +939,7 @@ func (runtime Runtime) Twitter(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(t_start_url)
 		}
@@ -1035,7 +1035,7 @@ func (runtime Runtime) Shopify(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(s_start_url)
 		}
@@ -1124,7 +1124,7 @@ func (runtime Runtime) Urbansport(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(url)
 		}
@@ -1254,7 +1254,7 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(n_start_url)
 		}
@@ -1350,7 +1350,7 @@ func (runtime Runtime) Blinkist(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(s_start_url)
 		}
@@ -1485,7 +1485,7 @@ func (runtime Runtime) Deutschebahn(
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
+			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(d_start_url)
 		}
