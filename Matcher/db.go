@@ -2,37 +2,17 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
-type Scraper struct {
-	Id      int
-	Name    string
-	Version int
-}
-
-type Scraping struct {
-	Id        int
-	ScraperId int
-	CreatedAt time.Time
-}
-
-type Result struct {
-	Title     string
-	ResultUrl string
-	Data      json.RawMessage
-}
-
-type Keyword struct {
-	Id   int
-	Text string
+type Match struct {
+	Title string
+	Text  string
 }
 
 var Db *sql.DB
@@ -68,61 +48,37 @@ func DbConnect() {
 	fmt.Println("Successfully connected to the database")
 }
 
-func GetScraperByScraperName(name string) (scraper Scraper, err error) {
-	fmt.Println("Starting GetScraperByScraperName...")
-	err = Db.QueryRow(`SELECT
-                        id,
-                        name,
-                        version
-                      FROM scrapers
-                      WHERE name = $1`,
-		name,
-	).
-		Scan(
-			&scraper.Id,
-			&scraper.Name,
-			&scraper.Version,
-		)
-	return
-}
-
-func GetLastScrapingByScraperId(scraper Scraper) (scraping Scraping, err error) {
-	fmt.Println("Starting GetLastScraping...")
-	err = Db.QueryRow(`SELECT
-                        MAX(id)
-                      FROM scrapings
-                      WHERE scraperid = $1`,
-		scraper.Id,
-	).
-		Scan(
-			&scraping.Id,
-		)
-	return
-}
-
-func GetNewResultsByScrapingId(scraping Scraping) (results []Result, err error) {
-	fmt.Println("Starting GetNewResultsByScrapingId...")
-	rows, err := Db.Query(`SELECT
-                                r.title,
-                                r.url
-                            FROM results r
-                            WHERE r.scrapingid = $1`, scraping.Id) // AND r.createdat = r.updatedat
+func GetMatches(scraper_name string) (matches []Match, err error) {
+	fmt.Println("Starting GetMatches...")
+	rows, err := Db.Query(`WITH latest_scraper AS(
+                            SELECT
+                                MAX(s.id) AS id
+                            FROM scrapers ss
+                            LEFT JOIN scrapings s ON(ss.id = s.scraperid)
+                            WHERE ss.name = $1)
+                        SELECT
+                            r.title,
+                            k.text
+                        FROM targets t
+                        INNER JOIN scrapers s ON(t.id = s.targetid)
+                        INNER JOIN results r ON(s.id = r.scraperid)
+                        INNER JOIN latest_scraper ls ON(r.scrapingid = ls.id)
+                        LEFT JOIN userstargetskeywords utk ON(t.id = utk.targetid)
+                        LEFT JOIN keywords k ON(utk.keywordid = k.id)
+                        WHERE r.createdat = r.updatedat
+                        AND REPLACE(LOWER(r.title), ' ', '') LIKE '%' || REPLACE(LOWER(k.text), ' ', '') || '%'`,
+		scraper_name)
 	if err != nil {
 		return
 	}
 	for rows.Next() {
-		result := Result{}
-		if err = rows.Scan(&result.Title, &result.ResultUrl); err != nil {
+		match := Match{}
+		if err = rows.Scan(
+			&match.Title, &match.Text); err != nil {
 			return
 		}
-		results = append(results, result)
+		matches = append(matches, match)
 	}
 	rows.Close()
 	return
 }
-
-/**
-func GetKeywordsByScraperId(scraper Scraper) (keywords []Keyword, err error) {
-	fmt.Println("Starting GetKeywordsByScraperId...")
-}
-*/
