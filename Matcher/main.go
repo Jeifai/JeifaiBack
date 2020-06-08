@@ -7,16 +7,18 @@ import (
 func main() {
 	DbConnect()
 
-	scraper_name := "Microsoft"
-
-	matches, err := GetMatches(scraper_name)
+	matches, err := GetMatches()
 	if err != nil {
 		panic(err.Error())
 	}
 
-	fmt.Println(matches)
-
-	_ = err
+	for _, elem := range matches {
+		fmt.Println(elem.CreatedAt)
+		fmt.Println("\t", elem.CompanyName)
+		fmt.Println("\t\t", elem.JobTitle)
+		fmt.Println("\t\t\t", elem.JobUrl)
+		fmt.Println("\t\t\t\t", elem.Keyword)
+	}
 
 	defer Db.Close()
 }

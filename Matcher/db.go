@@ -5,14 +5,18 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 type Match struct {
-	Title string
-	Text  string
+	CreatedAt   time.Time
+	CompanyName string
+	JobTitle    string
+	JobUrl      string
+	Keyword     string
 }
 
 var Db *sql.DB
@@ -48,17 +52,21 @@ func DbConnect() {
 	fmt.Println("Successfully connected to the database")
 }
 
-func GetMatches(scraper_name string) (matches []Match, err error) {
+func GetMatches() (matches []Match, err error) {
 	fmt.Println("Starting GetMatches...")
 	rows, err := Db.Query(`WITH latest_scraper AS(
                             SELECT
+                                ss.name,
                                 MAX(s.id) AS id
                             FROM scrapers ss
                             LEFT JOIN scrapings s ON(ss.id = s.scraperid)
-                            WHERE ss.name = $1)
+                            GROUP BY 1)
                         SELECT
-                            r.title,
-                            k.text
+                            r.createdat AS created_at,
+                            ls.name AS company,
+                            r.title AS job_title,
+                            r.url AS job_url,
+                            k.text AS keyword_text
                         FROM targets t
                         INNER JOIN scrapers s ON(t.id = s.targetid)
                         INNER JOIN results r ON(s.id = r.scraperid)
@@ -66,15 +74,18 @@ func GetMatches(scraper_name string) (matches []Match, err error) {
                         LEFT JOIN userstargetskeywords utk ON(t.id = utk.targetid)
                         LEFT JOIN keywords k ON(utk.keywordid = k.id)
                         WHERE r.createdat = r.updatedat
-                        AND REPLACE(LOWER(r.title), ' ', '') LIKE '%' || REPLACE(LOWER(k.text), ' ', '') || '%'`,
-		scraper_name)
+                        AND REPLACE(LOWER(r.title), ' ', '') LIKE '%' || REPLACE(LOWER(k.text), ' ', '') || '%'`)
 	if err != nil {
 		return
 	}
 	for rows.Next() {
 		match := Match{}
 		if err = rows.Scan(
-			&match.Title, &match.Text); err != nil {
+			&match.CreatedAt,
+			&match.CompanyName,
+			&match.JobTitle,
+			&match.JobUrl,
+			&match.Keyword); err != nil {
 			return
 		}
 		matches = append(matches, match)
