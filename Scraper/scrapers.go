@@ -498,14 +498,14 @@ func (runtime Runtime) Google(
 	version int, isLocal bool) (response Response, results []Result) {
 	if version == 1 {
 
-		g_start_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page=1"
-		g_base_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page="
+		g_start_url := "https://careers.google.com/api/jobs/jobs-v1/search/?page_size=100&page=1"
+		g_base_url := "https://careers.google.com/api/jobs/jobs-v1/search/?page_size=100&page="
 		g_base_result_url := "https://careers.google.com/jobs/results/"
 
 		number_results_per_page := 100
 
 		type JsonJobs struct {
-			Count int `json:"count"`
+			Count string `json:"count"`
 			Jobs  []struct {
 				CompanyID      string    `json:"company_id"`
 				CompanyName    string    `json:"company_name"`
@@ -513,12 +513,12 @@ func (runtime Runtime) Google(
 				JobID          string    `json:"job_id"`
 				JobTitle       string    `json:"job_title"`
 				Locations      []string  `json:"locations"`
-				LocationsCount int       `json:"locations_count"`
+				LocationsCount string       `json:"locations_count"`
 				PublishDate    time.Time `json:"publish_date"`
 				Summary        string    `json:"summary"`
 			} `json:"jobs"`
-			NextPage int `json:"next_page"`
-			PageSize int `json:"page_size"`
+			NextPage string `json:"next_page"`
+			PageSize string `json:"page_size"`
 		}
 
 		var jsonJobs JsonJobs
@@ -551,15 +551,26 @@ func (runtime Runtime) Google(
 			}
 
 			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
+            
+            total_count, err := strconv.Atoi(tempJsonJobs.Count)
+            if err != nil {
+                panic(err.Error())
+            }
 
-			total_pages := tempJsonJobs.Count/number_results_per_page + 2
-			if total_pages <= tempJsonJobs.NextPage {
+            next_page, err := strconv.Atoi(tempJsonJobs.NextPage)
+            if err != nil {
+                panic(err.Error())
+            }
+
+			total_pages := total_count/number_results_per_page + 2
+			if total_pages <= next_page {
 				return
-			}
+            }
+            
 
-			if tempJsonJobs.NextPage != 0 {
+			if next_page != 0 {
 				time.Sleep(SecondsSleep * time.Second)
-				c.Visit(g_base_url + strconv.Itoa(tempJsonJobs.NextPage))
+				c.Visit(g_base_url + tempJsonJobs.NextPage)
 			}
 		})
 
@@ -1367,7 +1378,7 @@ func (runtime Runtime) Deutschebahn(
 
 		c := colly.NewCollector()
 
-		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum=0"
+		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum=150"
 		d_base_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum="
 		d_job_url := "https://karriere.deutschebahn.com/"
 
@@ -1462,7 +1473,7 @@ func (runtime Runtime) Deutschebahn(
 
 			counter = counter + 1
 
-			if counter > 5 {
+			if counter > 200 {
 				return
 			} else {
 				e.Request.Visit(next_page_url)
