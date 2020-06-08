@@ -1,3 +1,4 @@
-.env
+Web/jeifai.log
+*.env
 utilities.txt
-jeifai.log
+*.log
