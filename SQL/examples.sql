@@ -55,3 +55,10 @@ LEFT JOIN scrapers s ON(r.scraperid = s.id)
 WHERE s.name = 'Microsoft'
 ORDER BY r.updatedat DESC
 LIMIT 10;
+
+
+/* Update targets CASCADE */
+INSERT INTO targets (url, host, createdat, name) VALUES('https://boards.greenhouse.io/urbansportsclub/', 'https://urbansportsclub.com', current_timestamp, 'Urbansport');
+UPDATE targets SET id = 7 WHERE url = 'https://boards.greenhouse.io/urbansportsclub/';
+UPDATE scrapers SET targetid = 7 WHERE targetid = 241;
+DELETE FROM targets WHERE id = 241;
