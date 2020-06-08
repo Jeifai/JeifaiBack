@@ -513,7 +513,7 @@ func (runtime Runtime) Google(
 				JobID          string    `json:"job_id"`
 				JobTitle       string    `json:"job_title"`
 				Locations      []string  `json:"locations"`
-				LocationsCount string       `json:"locations_count"`
+				LocationsCount string    `json:"locations_count"`
 				PublishDate    time.Time `json:"publish_date"`
 				Summary        string    `json:"summary"`
 			} `json:"jobs"`
@@ -551,22 +551,21 @@ func (runtime Runtime) Google(
 			}
 
 			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
-            
-            total_count, err := strconv.Atoi(tempJsonJobs.Count)
-            if err != nil {
-                panic(err.Error())
-            }
 
-            next_page, err := strconv.Atoi(tempJsonJobs.NextPage)
-            if err != nil {
-                panic(err.Error())
-            }
+			total_count, err := strconv.Atoi(tempJsonJobs.Count)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			next_page, err := strconv.Atoi(tempJsonJobs.NextPage)
+			if err != nil {
+				panic(err.Error())
+			}
 
 			total_pages := total_count/number_results_per_page + 2
 			if total_pages <= next_page {
 				return
-            }
-            
+			}
 
 			if next_page != 0 {
 				time.Sleep(SecondsSleep * time.Second)
@@ -1469,13 +1468,13 @@ func (runtime Runtime) Deutschebahn(
 		// Find and visit next page links
 		c.OnHTML("a[class=active]", func(e *colly.HTMLElement) {
 			next_page_url := d_base_url + e.Text
-            
+
 			counter = counter + 1
-            
+
 			if counter > 400 {
-                return
-            } else {
-                fmt.Println("Visiting", next_page_url)
+				return
+			} else {
+				fmt.Println("Visiting", next_page_url)
 				e.Request.Visit(next_page_url)
 			}
 		})
@@ -1596,6 +1595,124 @@ func (runtime Runtime) Celo(
 			c.Visit("file:" + dir + "/response.txt")
 		} else {
 			c.Visit(c_start_url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Penta(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	if version == 1 {
+
+		p_start_url := "https://penta.recruitee.com/api/offers"
+
+		type Jobs struct {
+			Offers []struct {
+				ID                 int           `json:"id"`
+				Slug               string        `json:"slug"`
+				Position           int           `json:"position"`
+				Status             string        `json:"status"`
+				OptionsPhone       string        `json:"options_phone"`
+				OptionsPhoto       string        `json:"options_photo"`
+				OptionsCoverLetter string        `json:"options_cover_letter"`
+				OptionsCv          string        `json:"options_cv"`
+				Remote             interface{}   `json:"remote"`
+				CountryCode        string        `json:"country_code"`
+				StateCode          string        `json:"state_code"`
+				PostalCode         string        `json:"postal_code"`
+				MinHours           interface{}   `json:"min_hours"`
+				MaxHours           interface{}   `json:"max_hours"`
+				OpenQuestions      []interface{} `json:"open_questions"`
+				Title              string        `json:"title"`
+				Description        string        `json:"description"`
+				Requirements       string        `json:"requirements"`
+				Location           string        `json:"location"`
+				City               string        `json:"city"`
+				Country            string        `json:"country"`
+				CareersURL         string        `json:"careers_url"`
+				CareersApplyURL    string        `json:"careers_apply_url"`
+				MailboxEmail       string        `json:"mailbox_email"`
+				CompanyName        string        `json:"company_name"`
+				Department         string        `json:"department"`
+				CreatedAt          string        `json:"created_at"`
+				EmploymentTypeCode string        `json:"employment_type_code"`
+				CategoryCode       string        `json:"category_code"`
+				ExperienceCode     string        `json:"experience_code"`
+				EducationCode      string        `json:"education_code"`
+				Tags               []interface{} `json:"tags"`
+				Translations       struct {
+					En struct {
+						Title        string `json:"title"`
+						Description  string `json:"description"`
+						Requirements string `json:"requirements"`
+					} `json:"en"`
+				} `json:"translations"`
+			} `json:"offers"`
+		}
+
+		var jsonJobs Jobs
+
+		c := colly.NewCollector()
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson Jobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Offers {
+
+				result_title := elem.Title
+				result_url := elem.CareersURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Offers = append(jsonJobs.Offers, tempJson.Offers...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.txt")
+		} else {
+			c.Visit(p_start_url)
 		}
 	}
 	return
