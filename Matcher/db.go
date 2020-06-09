@@ -63,18 +63,32 @@ func DbConnect() {
 	fmt.Println("Successfully connected to the database")
 }
 
-func (matching *Matching) StartMatchingSession() (err error) {
+func GetScraper(scraper_name string) (scraper_id int, err error) {
+	fmt.Println("Starting GetScraper...")
+	err = Db.QueryRow(`SELECT id
+                       FROM scrapers s 
+                       WHERE s.name = $1`,
+		scraper_name).Scan(&scraper_id)
+	if err != nil {
+		panic(err.Error())
+	}
+	return
+}
+
+func (matching *Matching) StartMatchingSession(scraper_id int) (err error) {
 	fmt.Println("Starting StartMatchingSession...")
-	statement := `INSERT INTO matchings (createdat)
-                  VALUES ($1)
-                  RETURNING id, createdat`
+	statement := `INSERT INTO matchings (scraperid, createdat)
+                  VALUES ($1, $2)
+                  RETURNING id`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(time.Now()).Scan(
-		&matching.Id, &matching.CreatedAt)
+	err = stmt.QueryRow(
+		scraper_id,
+		time.Now()).Scan(
+		&matching.Id)
 	if err != nil {
 		panic(err.Error())
 	}

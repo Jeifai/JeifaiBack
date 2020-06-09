@@ -6,9 +6,20 @@ import (
 
 func main() {
 	DbConnect()
+	defer Db.Close()
+
+	scraper_name := "Shopify"
+	scraper_id, err := GetScraper(scraper_name)
+
+	fmt.Println("SCRAPER")
+	fmt.Println(scraper_id)
+
+	if err != nil {
+		panic(err.Error())
+	}
 
 	matching := Matching{}
-	err := matching.StartMatchingSession()
+	err = matching.StartMatchingSession(scraper_id)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -27,6 +38,4 @@ func main() {
 	}
 
 	SaveMatches(matching, matches)
-
-	defer Db.Close()
 }
