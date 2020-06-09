@@ -7,7 +7,13 @@ import (
 func main() {
 	DbConnect()
 
-	matches, err := GetMatches()
+	matching := Matching{}
+	err := matching.StartMatchingSession()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	matches, err := GetMatches(matching)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -17,8 +23,10 @@ func main() {
 		fmt.Println("\t", elem.CompanyName)
 		fmt.Println("\t\t", elem.JobTitle)
 		fmt.Println("\t\t\t", elem.JobUrl)
-		fmt.Println("\t\t\t\t", elem.Keyword)
+		fmt.Println("\t\t\t\t", elem.KeywordText)
 	}
+
+	SaveMatches(matching, matches)
 
 	defer Db.Close()
 }

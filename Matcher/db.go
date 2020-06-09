@@ -5,18 +5,29 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
+type Matching struct {
+	Id        int
+	CreatedAt time.Time
+}
+
 type Match struct {
-	CreatedAt   time.Time
-	CompanyName string
-	JobTitle    string
-	JobUrl      string
-	Keyword     string
+	Id              int
+	ResultCreatedAt time.Time
+	CompanyName     string
+	JobTitle        string
+	JobUrl          string
+	KeywordText     string
+	KeywordId       int
+	ResultId        int
+	CreatedAt       time.Time
+	MatchingId      int
 }
 
 var Db *sql.DB
@@ -52,28 +63,42 @@ func DbConnect() {
 	fmt.Println("Successfully connected to the database")
 }
 
-func GetMatches() (matches []Match, err error) {
+func (matching *Matching) StartMatchingSession() (err error) {
+	fmt.Println("Starting StartMatchingSession...")
+	statement := `INSERT INTO matchings (createdat)
+                  VALUES ($1)
+                  RETURNING id, createdat`
+	stmt, err := Db.Prepare(statement)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(time.Now()).Scan(
+		&matching.Id, &matching.CreatedAt)
+	if err != nil {
+		panic(err.Error())
+	}
+	return
+}
+
+func GetMatches(matching Matching) (matches []Match, err error) {
 	fmt.Println("Starting GetMatches...")
-	rows, err := Db.Query(`WITH latest_scraper AS(
-                            SELECT
-                                ss.name,
-                                MAX(s.id) AS id
-                            FROM scrapers ss
-                            LEFT JOIN scrapings s ON(ss.id = s.scraperid)
-                            GROUP BY 1)
+	rows, err := Db.Query(`
                         SELECT
                             r.createdat AS created_at,
-                            ls.name AS company,
+                            s.name AS company,
                             r.title AS job_title,
                             r.url AS job_url,
-                            k.text AS keyword_text
+                            k.text AS keyword_text,
+                            k.id AS keyword_id,
+                            r.id AS result_id
                         FROM targets t
                         INNER JOIN scrapers s ON(t.id = s.targetid)
                         INNER JOIN results r ON(s.id = r.scraperid)
-                        INNER JOIN latest_scraper ls ON(r.scrapingid = ls.id)
                         LEFT JOIN userstargetskeywords utk ON(t.id = utk.targetid)
                         LEFT JOIN keywords k ON(utk.keywordid = k.id)
                         WHERE r.createdat = r.updatedat
+                        AND r.createdat > current_date
                         AND REPLACE(LOWER(r.title), ' ', '') LIKE '%' || REPLACE(LOWER(k.text), ' ', '') || '%'`)
 	if err != nil {
 		return
@@ -81,15 +106,47 @@ func GetMatches() (matches []Match, err error) {
 	for rows.Next() {
 		match := Match{}
 		if err = rows.Scan(
-			&match.CreatedAt,
+			&match.ResultCreatedAt,
 			&match.CompanyName,
 			&match.JobTitle,
 			&match.JobUrl,
-			&match.Keyword); err != nil {
+			&match.KeywordText,
+			&match.KeywordId,
+			&match.ResultId); err != nil {
 			return
 		}
+		match.CreatedAt = time.Now()
+		match.MatchingId = matching.Id
 		matches = append(matches, match)
 	}
 	rows.Close()
 	return
+}
+
+func SaveMatches(matching Matching, matches []Match) {
+	fmt.Println("Starting SaveMatches...")
+	valueStrings := []string{}
+	valueArgs := []interface{}{}
+	timeNow := time.Now() // updatedAt and createdAt will be identical
+	for i, elem := range matches {
+		str1 := "$" + strconv.Itoa(1+i*4) + ","
+		str2 := "$" + strconv.Itoa(2+i*4) + ","
+		str3 := "$" + strconv.Itoa(3+i*4) + ","
+		str4 := "$" + strconv.Itoa(4+i*4)
+		str_n := "(" + str1 + str2 + str3 + str4 + ")"
+		valueStrings = append(valueStrings, str_n)
+		valueArgs = append(valueArgs, elem.MatchingId)
+		valueArgs = append(valueArgs, elem.ResultId)
+		valueArgs = append(valueArgs, elem.KeywordId)
+		valueArgs = append(valueArgs, timeNow)
+	}
+	smt := `INSERT INTO matches (
+                matchingid, resultid, keywordid, createdat) 
+            VALUES %s ON CONFLICT DO NOTHING` //
+	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
+
+	_, err := Db.Exec(smt, valueArgs...)
+	if err != nil {
+		panic(err.Error())
+	}
 }

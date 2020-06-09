@@ -88,3 +88,17 @@ create table userstargetskeywords (
   createdat     timestamp not null,
   deletedat     timestamp
 );
+
+create table matchings (
+  id            serial primary key,
+  createdat     timestamp not null
+)
+
+create table matches (
+  id            serial primary key,
+  keywordid     integer references keywords(id),
+  resultid      integer references results(id),
+  matchingid    integer references matchings(id),
+  createdat     timestamp not null,
+  UNIQUE (keywordid, resultid)
+)
