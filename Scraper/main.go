@@ -4,7 +4,9 @@ package main
 
 func main() {
 	DbConnect()
-	scraper_name := "Shopify"
+	defer Db.Close()
+
+	scraper_name := "Blinkist"
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
@@ -22,5 +24,4 @@ func main() {
 			SaveResponseToStorage(response, file_path)
 		}
 	}
-	defer Db.Close()
 }

@@ -8,6 +8,9 @@ TRUNCATE userstargetskeywords, keywords RESTART IDENTITY;
 ALTER TABLE results DROP CONSTRAINT resultspkey;
 CREATE INDEX idxresultsurl ON results(url);
 
+/* Add constraint */
+ALTER TABLE results ADD CONSTRAINT id_unique UNIQUE (id);
+
 /* Rename table's name */
 ALTER TABLE userstargets RENAME TO userstargets;
 
@@ -55,10 +58,15 @@ LEFT JOIN scrapers s ON(r.scraperid = s.id)
 WHERE s.name = 'Microsoft'
 ORDER BY r.updatedat DESC
 LIMIT 10;
-
+<
 
 /* Update targets CASCADE */
 INSERT INTO targets (url, host, createdat, name) VALUES('https://boards.greenhouse.io/urbansportsclub/', 'https://urbansportsclub.com', current_timestamp, 'Urbansport');
 UPDATE targets SET id = 7 WHERE url = 'https://boards.greenhouse.io/urbansportsclub/';
 UPDATE scrapers SET targetid = 7 WHERE targetid = 241;
 DELETE FROM targets WHERE id = 241;
+
+/* Check if column is unique */
+SELECT CASE WHEN count(distinct id)= count(id)
+THEN 'column values are unique' ELSE 'column values are NOT unique' END
+FROM results;
