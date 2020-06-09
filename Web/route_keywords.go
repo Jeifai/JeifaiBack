@@ -6,6 +6,8 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/go-playground/validator"
+
 	"./data"
 )
 
@@ -53,7 +55,7 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type TempResponse struct {
-		SelectedTargets []string     `json:"selectedTargets"`
+		SelectedTargets []string     `json:"selectedTargets" validate:"required"`
 		Keyword         data.Keyword `json:"newKeyword"`
 	}
 
@@ -64,32 +66,72 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 
-	// Before creating the relation user <-> target,
-	// check if it is not already present
-	err = response.Keyword.KeywordByText()
+	validate := validator.New()
+	err = validate.Struct(response)
 
-	// If keyword does not exist, create it
-	if response.Keyword.Id == 0 {
-		response.Keyword.CreateKeyword()
+	var messages []string
+	added := false
+
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			red_1 := `<p style="color:red">`
+			red_2 := `</p>`
+			var temp_message string
+			if err.Field() == "SelectedTargets" {
+				if err.Tag() == "required" {
+					temp_message = `Targets cannot be empty`
+				}
+			} else if err.Field() == "Text" {
+				if err.Tag() == "required" {
+					temp_message = `Keyword cannot be empty`
+				}
+				if err.Tag() == "min" {
+					temp_message = `Keyword inserted is too short`
+				}
+				if err.Tag() == "max" {
+					temp_message = `Keyword inserted is too long`
+				}
+			}
+			messages = append(messages, red_1+temp_message+red_2)
+		}
 	}
 
-	// Get target's detail based on
-	targets, err := data.TargetsByUrls(response.SelectedTargets)
-	if err != nil {
-		panic(err.Error())
+	var utks []data.UserTargetKeyword
+
+	if len(messages) == 0 {
+
+		// Before creating the relation user <-> target,
+		// check if it is not already present
+		err = response.Keyword.KeywordByText()
+
+		// If keyword does not exist, create it
+		if response.Keyword.Id == 0 {
+			response.Keyword.CreateKeyword()
+		}
+
+		// Get target's detail based on
+		targets, err := data.TargetsByUrls(response.SelectedTargets)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		utks, err = data.SetUserTargetKeyword(user, targets, response.Keyword)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		temp_message := `<p style="color:green">Keyword successfully added</p>`
+		messages = append(messages, temp_message)
+		added = true
 	}
 
 	type TempStruct struct {
-		Added bool
-		Utks  []data.UserTargetKeyword
+		Messages []string
+		Added    bool
+		Utks     []data.UserTargetKeyword
 	}
 
-	utks, err := data.SetUserTargetKeyword(user, targets, response.Keyword)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	infos := TempStruct{true, utks}
+	infos := TempStruct{messages, added, utks}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(infos)

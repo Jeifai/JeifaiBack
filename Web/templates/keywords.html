@@ -1,7 +1,9 @@
 {{ define "content" }}
     <div class="content">
         <div id="app">
-            <span v-html="message"></span>
+            <p v-for="(message, index) in messages">
+                <span v-html="message"></span>
+            </p>
             <ul>
                 <li v-for="(utk, index) in utks">
                     [[ utk.TargetUrl ]], [[ utk.KeywordText ]]
@@ -35,7 +37,7 @@
             el: '#app',
             delimiters: ["[[","]]"],
             data: {
-                    message: '',
+                    messages: '',
                     targets: {{.Targets}},
                     utks: {{.Utks}},
                     newKeyword: {},
@@ -47,6 +49,7 @@
                         "selectedTargets": this.selectedTargets,
                         "newKeyword": this.newKeyword
                         }).then(function(response) {
+                            this.messages = response.data.Messages
                             if(response.data.Added){
                                 temp_utks = response.data.Utks
                                 for (var i = 0; i < temp_utks.length; i++) {
