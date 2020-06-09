@@ -1373,11 +1373,16 @@ func (runtime Runtime) Deutschebahn(
 	response Response, results []Result) {
 	if version == 1 {
 
-		counter := 0
+		start := 301
+		end := 400
+
+		counter := start
 
 		c := colly.NewCollector()
 
-		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum=300"
+		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum=" + strconv.Itoa(
+			start,
+		)
 		d_base_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum="
 		d_job_url := "https://karriere.deutschebahn.com/"
 
@@ -1471,7 +1476,7 @@ func (runtime Runtime) Deutschebahn(
 
 			counter = counter + 1
 
-			if counter > 400 {
+			if counter > end {
 				return
 			} else {
 				fmt.Println("Visiting", next_page_url)
@@ -1497,6 +1502,7 @@ func (runtime Runtime) Deutschebahn(
 			}
 			c.Visit("file:" + dir + "/response.txt")
 		} else {
+			fmt.Println("Visiting", d_start_url)
 			c.Visit(d_start_url)
 		}
 
