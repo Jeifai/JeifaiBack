@@ -8,7 +8,7 @@ func main() {
 	DbConnect()
 	defer Db.Close()
 
-	scraper_name := "Microsoft"
+	scraper_name := "Zalando"
 	scraper_id, err := GetScraper(scraper_name)
 	if err != nil {
 		panic(err.Error())
@@ -20,7 +20,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	matches, err := GetMatches(matching)
+	matches, err := GetMatches(matching, scraper_id)
 	if err != nil {
 		panic(err.Error())
 	}

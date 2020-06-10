@@ -95,7 +95,7 @@ func (matching *Matching) StartMatchingSession(scraper_id int) (err error) {
 	return
 }
 
-func GetMatches(matching Matching) (matches []Match, err error) {
+func GetMatches(matching Matching, scraper_id int) (matches []Match, err error) {
 	fmt.Println("Starting GetMatches...")
 	rows, err := Db.Query(`
                         SELECT
@@ -113,7 +113,8 @@ func GetMatches(matching Matching) (matches []Match, err error) {
                         LEFT JOIN keywords k ON(utk.keywordid = k.id)
                         WHERE r.createdat = r.updatedat
                         AND r.createdat > current_date
-                        AND REPLACE(LOWER(r.title), ' ', '') LIKE '%' || REPLACE(LOWER(k.text), ' ', '') || '%'`)
+                        AND s.id = $1
+                        AND REPLACE(LOWER(r.title), ' ', '') LIKE '%' || REPLACE(LOWER(k.text), ' ', '') || '%'`, scraper_id)
 	if err != nil {
 		return
 	}
