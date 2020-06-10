@@ -12,6 +12,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type Scraper struct {
+	Id      int
+	Name    string
+	Version int
+}
+
 type Matching struct {
 	Id        int
 	CreatedAt time.Time
@@ -63,15 +69,28 @@ func DbConnect() {
 	fmt.Println("Successfully connected to the database")
 }
 
-func GetScraper(scraper_name string) (scraper_id int, err error) {
-	fmt.Println("Starting GetScraper...")
-	err = Db.QueryRow(`SELECT id
-                       FROM scrapers s 
-                       WHERE s.name = $1`,
-		scraper_name).Scan(&scraper_id)
+func GetScrapers() (scrapers []Scraper, err error) {
+	fmt.Println("Starting GetScrapers...")
+	rows, err := Db.Query(`SELECT
+                                s.name, 
+                                MAX(s.version) AS version, 
+                                MAX(s.id) AS id 
+                           FROM scrapers s
+                           GROUP BY 1;`)
 	if err != nil {
 		panic(err.Error())
 	}
+	for rows.Next() {
+		scraper := Scraper{}
+		if err = rows.Scan(
+			&scraper.Name,
+			&scraper.Version,
+			&scraper.Id); err != nil {
+			return
+		}
+		scrapers = append(scrapers, scraper)
+	}
+	rows.Close()
 	return
 }
 
