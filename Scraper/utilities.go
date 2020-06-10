@@ -39,7 +39,7 @@ func SaveResponseToFile(response string) {
 	if err != nil {
 		panic(err.Error())
 	}
-	f, err := os.Create(dir + "/response.txt")
+	f, err := os.Create(dir + "/response.html")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -52,7 +52,7 @@ func RemoveFile() {
 	if err != nil {
 		panic(err.Error())
 	}
-	err = os.Remove(dir + "/response.txt")
+	err = os.Remove(dir + "/response.html")
 	if err != nil {
 		panic(err.Error())
 	}

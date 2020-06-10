@@ -51,7 +51,7 @@ func TestSaveResponseToFile(t *testing.T) {
 	if err != nil {
 		panic(err.Error())
 	}
-	got, err := ioutil.ReadFile(dir + "/response.txt")
+	got, err := ioutil.ReadFile(dir + "/response.html")
 	if err != nil {
 		panic(err.Error())
 	}
