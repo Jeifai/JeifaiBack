@@ -553,12 +553,12 @@ func (runtime Runtime) Google(
 
 			total_count, err := strconv.Atoi(tempJsonJobs.Count)
 			if err != nil {
-				panic(err.Error())
+				total_count = 0
 			}
 
 			next_page, err := strconv.Atoi(tempJsonJobs.NextPage)
 			if err != nil {
-				panic(err.Error())
+				next_page = 0
 			}
 
 			total_pages := total_count/number_results_per_page + 2
