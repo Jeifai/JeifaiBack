@@ -1722,3 +1722,430 @@ func (runtime Runtime) Penta(
 	}
 	return
 }
+
+func (runtime Runtime) Contentful(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	if version == 1 {
+
+		c := colly.NewCollector()
+
+		url := "https://boards.greenhouse.io/embed/job_board?for=contentful"
+		main_tag := "section"
+		main_tag_attr := "class"
+		main_tag_value := "level-0"
+		tag_title := "a"
+		tag_url := "a"
+		tag_department := "h3"
+		tag_location := "span"
+
+		type Job struct {
+			Title      string
+			Url        string
+			Department string
+			Location   string
+		}
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+				result_department := e.ChildText(tag_department)
+
+				e.ForEach("div", func(_ int, el *colly.HTMLElement) {
+					result_title := el.ChildText(tag_title)
+					result_url := el.ChildAttr(tag_url, "href")
+					result_location := el.ChildText(tag_location)
+
+					_, err := netUrl.ParseRequestURI(result_url)
+					if err == nil {
+
+						temp_elem_json := Job{
+							result_title,
+							result_url,
+							result_department,
+							result_location,
+						}
+
+						elem_json, err := json.Marshal(temp_elem_json)
+						if err != nil {
+							panic(err.Error())
+						}
+
+						results = append(results, Result{
+							runtime.Name,
+							result_title,
+							result_url,
+							elem_json,
+						})
+					}
+				})
+			}
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Gympass(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	if version == 1 {
+
+		c := colly.NewCollector()
+
+		url := "https://boards.greenhouse.io/embed/job_board?for=gympass"
+		main_tag := "section"
+		main_tag_attr := "class"
+		main_tag_value := "level-0"
+		tag_title := "a"
+		tag_url := "a"
+		tag_department := "h3"
+		tag_location := "span"
+
+		type Job struct {
+			Title      string
+			Url        string
+			Department string
+			Location   string
+		}
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+				result_department := e.ChildText(tag_department)
+
+				e.ForEach("div", func(_ int, el *colly.HTMLElement) {
+					result_title := el.ChildText(tag_title)
+					result_url := el.ChildAttr(tag_url, "href")
+					result_location := el.ChildText(tag_location)
+
+					_, err := netUrl.ParseRequestURI(result_url)
+					if err == nil {
+
+						temp_elem_json := Job{
+							result_title,
+							result_url,
+							result_department,
+							result_location,
+						}
+
+						elem_json, err := json.Marshal(temp_elem_json)
+						if err != nil {
+							panic(err.Error())
+						}
+
+						results = append(results, Result{
+							runtime.Name,
+							result_title,
+							result_url,
+							elem_json,
+						})
+					}
+				})
+			}
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Hometogo(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	if version == 1 {
+
+		h_start_url := "https://api.heavenhr.com/api/v1/positions/public/vacancies/?companyId=_VBAnjTs72rz0J-zBe1sYtA_"
+		h_job_url := "https://hometogo.heavenhr.com/jobs/"
+
+		type Jobs struct {
+			Links []interface{} `json:"links"`
+			Data  []struct {
+				ID                  string      `json:"id"`
+				Email               interface{} `json:"email"`
+				JobTitle            string      `json:"jobTitle"`
+				EmploymentTypes     []string    `json:"employmentTypes"`
+				Location            string      `json:"location"`
+				Department          string      `json:"department"`
+				PublicationDate     string      `json:"publicationDate"`
+				Status              string      `json:"status"`
+				Industry            interface{} `json:"industry"`
+				FieldOfWork         interface{} `json:"fieldOfWork"`
+				PositionType        interface{} `json:"positionType"`
+				Seniority           interface{} `json:"seniority"`
+				EmploymentStartDate interface{} `json:"employmentStartDate"`
+				HiringOrganization  string      `json:"hiringOrganization"`
+				Qualifications      string      `json:"qualifications"`
+				Responsibilities    string      `json:"responsibilities"`
+				Incentives          string      `json:"incentives"`
+				Contact             string      `json:"contact"`
+			} `json:"data"`
+			Meta struct {
+				Page     int `json:"page"`
+				PageSize int `json:"pageSize"`
+				Count    int `json:"count"`
+			} `json:"meta"`
+		}
+
+		var jsonJobs Jobs
+
+		c := colly.NewCollector()
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson Jobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Data {
+
+				result_title := elem.JobTitle
+				result_url := h_job_url + elem.ID + "/apply"
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Data = append(jsonJobs.Data, tempJson.Data...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(h_start_url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Amazon(
+	version int, isLocal bool) (response Response, results []Result) {
+	if version == 1 {
+
+		a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Germany&country=DEU&result_limit=1000&offset="
+
+		number_results_per_page := 1000
+
+		counter := 0
+
+		type JsonJobs struct {
+			Error  interface{} `json:"error"`
+			Hits   int         `json:"hits"`
+			Facets struct {
+			} `json:"facets"`
+			Jobs []struct {
+				BasicQualifications     string      `json:"basic_qualifications"`
+				BusinessCategory        string      `json:"business_category"`
+				City                    string      `json:"city"`
+				CompanyName             string      `json:"company_name"`
+				CountryCode             string      `json:"country_code"`
+				Description             string      `json:"description"`
+				DescriptionShort        string      `json:"description_short"`
+				DisplayDistance         interface{} `json:"display_distance"`
+				ID                      string      `json:"id"`
+				IDIcims                 string      `json:"id_icims"`
+				JobCategory             string      `json:"job_category"`
+				JobFamily               string      `json:"job_family"`
+				JobPath                 string      `json:"job_path"`
+				JobScheduleType         string      `json:"job_schedule_type"`
+				Location                string      `json:"location"`
+				NormalizedLocation      string      `json:"normalized_location"`
+				OptionalSearchLabels    []string    `json:"optional_search_labels"`
+				PostedDate              string      `json:"posted_date"`
+				PreferredQualifications interface{} `json:"preferred_qualifications"`
+				PrimarySearchLabel      interface{} `json:"primary_search_label"`
+				SourceSystem            string      `json:"source_system"`
+				State                   interface{} `json:"state"`
+				Title                   string      `json:"title"`
+				UniversityJob           interface{} `json:"university_job"`
+				UpdatedTime             string      `json:"updated_time"`
+				URLNextStep             string      `json:"url_next_step"`
+				Team                    struct {
+					ID                   interface{} `json:"id"`
+					BusinessCategoryID   interface{} `json:"business_category_id"`
+					Identifier           interface{} `json:"identifier"`
+					Label                interface{} `json:"label"`
+					CreatedAt            interface{} `json:"created_at"`
+					UpdatedAt            interface{} `json:"updated_at"`
+					ImageFileName        interface{} `json:"image_file_name"`
+					ImageContentType     interface{} `json:"image_content_type"`
+					ImageFileSize        interface{} `json:"image_file_size"`
+					ImageUpdatedAt       interface{} `json:"image_updated_at"`
+					ThumbnailFileName    interface{} `json:"thumbnail_file_name"`
+					ThumbnailContentType interface{} `json:"thumbnail_content_type"`
+					ThumbnailFileSize    interface{} `json:"thumbnail_file_size"`
+					ThumbnailUpdatedAt   interface{} `json:"thumbnail_updated_at"`
+					HideJobs             interface{} `json:"hide_jobs"`
+					Title                interface{} `json:"title"`
+					Headline             interface{} `json:"headline"`
+					Description          interface{} `json:"description"`
+				} `json:"team"`
+			} `json:"jobs"`
+		}
+
+		var jsonJobs JsonJobs
+
+		c := colly.NewCollector()
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJsonJobs.Jobs {
+
+				result_title := elem.Title
+				result_url := elem.URLNextStep
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
+
+			total_pages := tempJsonJobs.Hits / number_results_per_page
+
+			if counter < total_pages+1 {
+
+				counter = counter + 1
+
+				next_page := a_start_url + strconv.Itoa(counter*1000)
+
+				time.Sleep(SecondsSleep * time.Second)
+
+				c.Visit(next_page)
+			}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(a_start_url + "0")
+		}
+	}
+	return
+}
