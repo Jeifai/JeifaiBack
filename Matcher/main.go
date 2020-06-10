@@ -8,7 +8,7 @@ func main() {
 	DbConnect()
 	defer Db.Close()
 
-	scraper_name := "Zalando"
+	scraper_name := "Google"
 	scraper_id, err := GetScraper(scraper_name)
 	if err != nil {
 		panic(err.Error())
@@ -33,5 +33,7 @@ func main() {
 		fmt.Println("\t\t\t\t", elem.KeywordText)
 	}
 
-	SaveMatches(matching, matches)
+    if len(matches) > 0 {
+	    SaveMatches(matching, matches)
+    }
 }
