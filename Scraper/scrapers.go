@@ -2009,7 +2009,7 @@ func (runtime Runtime) Amazon(
 	version int, isLocal bool) (response Response, results []Result) {
 	if version == 1 {
 
-		a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Germany&country=DEU&result_limit=1000&offset="
+		a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Belgium&country=BEL&result_limit=1000&offset="
 
 		number_results_per_page := 1000
 
@@ -2099,19 +2099,18 @@ func (runtime Runtime) Amazon(
 				})
 			}
 
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
-
-			total_pages := tempJsonJobs.Hits / number_results_per_page
-
-			if counter < total_pages+1 {
-
-				counter = counter + 1
-
-				next_page := a_start_url + strconv.Itoa(counter*1000)
-
-				time.Sleep(SecondsSleep * time.Second)
-
-				c.Visit(next_page)
+            jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
+            
+            if isLocal {
+                return
+            } else {
+                total_pages := tempJsonJobs.Hits / number_results_per_page
+                if counter < total_pages+1 {
+                    counter = counter + 1
+                    next_page := a_start_url + strconv.Itoa(counter*1000)
+                    time.Sleep(SecondsSleep * time.Second)
+                    c.Visit(next_page)
+                }
 			}
 		})
 
