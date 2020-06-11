@@ -1,0 +1,22 @@
+body {
+  font-family: "Lato", sans-serif;
+}
+
+.content {
+    margin-top: 2%;
+    margin-left: 18%;
+}
+
+/* topnav */
+.topnav {
+  background-color: rgb(45, 49, 253);
+  overflow: hidden;
+}
+
+/* sidebar */
+.sidenav {
+    height: 100%;
+    width: 15%;
+    background-color: rgb(144, 197, 247);
+    position: fixed;
+}

@@ -12,12 +12,14 @@ func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting index...")
 	sess, err := session(r)
 	if err != nil {
-		fmt.Println("Generating HTML for index, user not logged in...")
+        fmt.Println("Generating HTML for index, user not logged in...")
+        /**
 		templates := template.Must(
 			template.ParseFiles(
 				"templates/layout.html",
 				"templates/public.navigation.html",
-				"templates/index.html"))
+                "templates/index.html"))*/
+		templates := template.Must(template.ParseFiles("templates/tempIndex.html"))
 		templates.ExecuteTemplate(w, "layout", nil)
 	} else {
 		user, err := data.UserById(sess.UserId)
