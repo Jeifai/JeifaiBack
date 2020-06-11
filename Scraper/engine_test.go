@@ -126,36 +126,41 @@ func TestDbConnect(t *testing.T) {
 }
 
 func TestScrape(t *testing.T) {
+
+    exclude_scrapers := []string{"Mitte", "Microsoft"}
+
 	fmt.Println("\n\nTestScrape")
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
 	}
 	for _, elem := range scrapers {
-		fmt.Println("TESTING -> ", elem.Name)
-		scraping, err := LastScrapingByNameVersion(elem.Name, elem.Version)
-		if err != nil {
-			panic(err.Error())
-		}
-		file_path := GenerateFilePath(elem.Name, scraping)
-		fileResponse := GetResponseFromStorage(file_path)
-		got, err := ResultsByScraping(scraping)
-		if err != nil {
-			panic(err.Error())
-		}
-		SaveResponseToFile(fileResponse)
-		isLocal := true
-		httpResponse, want := Scrape(elem.Name, elem.Version, isLocal)
-		RemoveFile()
-		_ = httpResponse
-		_ = err
-		sort.Slice(got, func(i, j int) bool {
-			return got[i].ResultUrl < got[j].ResultUrl
-		})
-		sort.Slice(want, func(i, j int) bool {
-			return want[i].ResultUrl < want[j].ResultUrl
-		})
-		assert.ElementsMatch(t, got, want, "The two []Result should be the same.")
+        if !Contains(exclude_scrapers, elem.Name) {
+            fmt.Println("TESTING -> ", elem.Name)
+            scraping, err := LastScrapingByNameVersion(elem.Name, elem.Version)
+            if err != nil {
+                panic(err.Error())
+            }
+            file_path := GenerateFilePath(elem.Name, scraping)
+            fileResponse := GetResponseFromStorage(file_path)
+            got, err := ResultsByScraping(scraping)
+            if err != nil {
+                panic(err.Error())
+            }
+            SaveResponseToFile(fileResponse)
+            isLocal := true
+            httpResponse, want := Scrape(elem.Name, elem.Version, isLocal)
+            RemoveFile()
+            _ = httpResponse
+            _ = err
+            sort.Slice(got, func(i, j int) bool {
+                return got[i].ResultUrl < got[j].ResultUrl
+            })
+            sort.Slice(want, func(i, j int) bool {
+                return want[i].ResultUrl < want[j].ResultUrl
+            })
+            assert.ElementsMatch(t, got, want, "The two []Result should be the same.")
+        }
 	}
 }
 
