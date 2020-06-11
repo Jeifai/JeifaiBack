@@ -13,8 +13,8 @@ import (
 
 func main() {
 	bucket := "jeifai"
-	replace_what := ".html"
-	replace_with := ".txt"
+	replace_what := ".txt"
+	replace_with := ".html"
 	RenameFilesInStorage(bucket, replace_what, replace_with)
 }
 
@@ -39,7 +39,7 @@ func RenameFilesInStorage(bucket, replace_what, replace_with string) {
 
 		old_name := attrs.Name
 
-		if strings.Contains(old_name, ".html") {
+		if strings.Contains(old_name, replace_what) {
 
 			new_name := strings.ReplaceAll(old_name, replace_what, replace_with)
 

@@ -39,7 +39,7 @@ func TestUnique(t *testing.T) {
 func TestGenerateFilePath(t *testing.T) {
 	fmt.Println("\n\nTestGenerateFilePath")
 	got := GenerateFilePath("scraper_name", 1)
-	want := "scraper_name/1/response.txt"
+	want := "scraper_name/1/response.html"
 	assert.Equal(t, got, want, "The two path should be the same.")
 }
 
@@ -65,14 +65,14 @@ func TestRemoveFile(t *testing.T) {
 	if err != nil {
 		panic(err.Error())
 	}
-	f, err := os.Create(dir + "/response.txt")
+	f, err := os.Create(dir + "/response.html")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer f.Close()
 	f.WriteString(want)
 	RemoveFile()
-	file, err := ioutil.ReadFile(dir + "/response.txt")
+	file, err := ioutil.ReadFile(dir + "/response.html")
 	_ = file
 	if assert.Error(t, err) {
 		assert.NotNil(t, err, "The error should be nil")
@@ -82,7 +82,7 @@ func TestRemoveFile(t *testing.T) {
 func TestSaveResponseToStorage(t *testing.T) {
 	fmt.Println("\n\nTestSaveResponseToStorage")
 	want := "this is a test to TestSaveResponseToStorage"
-	file_path := "test/TestSaveResponseToStorage.txt"
+	file_path := "test/TestSaveResponseToStorage.html"
 	response := Response{[]byte(want)}
 	SaveResponseToStorage(response, file_path)
 	ctx := context.Background()
@@ -108,7 +108,7 @@ func TestSaveResponseToStorage(t *testing.T) {
 func TestGetResponseFromStorage(t *testing.T) {
 	fmt.Println("\n\nTestGetResponseFromStorage")
 	want := "this is a test to TestGetResponseFromStorage"
-	file_path := "test/TestGetResponseFromStorage.txt"
+	file_path := "test/TestGetResponseFromStorage.html"
 	got := GetResponseFromStorage(file_path)
 	assert.Equal(t, got, want, "The two string should be the same")
 }
@@ -127,7 +127,7 @@ func TestDbConnect(t *testing.T) {
 
 func TestScrape(t *testing.T) {
 
-    exclude_scrapers := []string{"Mitte", "Microsoft"}
+    exclude_scrapers := []string{"Mitte", "Microsoft", "Amazon", "Deutschebahn"}
 
 	fmt.Println("\n\nTestScrape")
 	scrapers, err := GetScrapers()
@@ -171,7 +171,7 @@ func TestGetScrapers(t *testing.T) {
 		panic(err.Error())
 	}
 	assert.Equal(
-		t, scrapers[0].Name, "IMusician", "The two string should be the same")
+		t, scrapers[0].Name, "Soundcloud", "The two string should be the same")
 }
 
 func TestLastScrapingByNameVersion(t *testing.T) {

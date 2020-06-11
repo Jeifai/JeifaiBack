@@ -23,7 +23,7 @@ func SaveResponseToStorage(response Response, file_path string) {
 	defer cancel()
 
 	wc := client.Bucket("jeifai").Object(file_path).NewWriter(ctx)
-	if _, err = io.Copy(wc, bytes.NewReader(response.Txt)); err != nil {
+	if _, err = io.Copy(wc, bytes.NewReader(response.Html)); err != nil {
 		panic(err.Error())
 	}
 	if err := wc.Close(); err != nil {

@@ -20,7 +20,7 @@ type Runtime struct {
 }
 
 type Response struct {
-	Txt []byte
+	Html []byte
 }
 
 type Result struct {

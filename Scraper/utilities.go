@@ -39,7 +39,7 @@ func Unique(results []Result) []Result {
 func GenerateFilePath(
 	scraper_name string, scraper_version int) (file_path string) {
 	file_path = filepath.Join(
-		scraper_name, strconv.Itoa(scraper_version), "response.txt")
+		scraper_name, strconv.Itoa(scraper_version), "response.html")
 	return
 }
 
