@@ -2009,7 +2009,8 @@ func (runtime Runtime) Amazon(
 	version int, isLocal bool) (response Response, results []Result) {
 	if version == 1 {
 
-		a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Belgium&country=BEL&result_limit=1000&offset="
+        a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Belgium&country=BEL&result_limit=1000&offset="
+        a_job_url := "https://www.amazon.jobs"
 
 		number_results_per_page := 1000
 
@@ -2084,7 +2085,7 @@ func (runtime Runtime) Amazon(
 			for _, elem := range tempJsonJobs.Jobs {
 
 				result_title := elem.Title
-				result_url := elem.URLNextStep
+				result_url := a_job_url + elem.job_path
 
 				elem_json, err := json.Marshal(elem)
 				if err != nil {
