@@ -4,30 +4,41 @@
             <h1>
                 Your matches
             </h1>
-            <table v-if="results">
-                <tr>
-                    <th>CreatedAt</th>
-                    <th>Target</th>
-                    <th>Job Title</th>
-                    <th>Job Url</th>
-                </tr>
-                <tr v-for="(result, index) in results">
-                    <td>[[ result.CreatedAt ]]</td>
-                    <td>[[ result.Target ]]</td>
-                    <td>[[ result.Title ]]</td>
-                    <td>
-                        <span>
-                            <button class="buttonToTheJob">
-                                <a 
-                                    v-bind:href="[[ result.Url ]]" 
-                                    class="linkToTheJob" 
-                                    target="_blank" 
-                                    rel="noopener">To the job</a>
-                            </button>
-                        </span>
-                    </td>
-                </tr>
+            <div>
+                <input
+                    type="text" 
+                    placeholder="Filter by any field" 
+                    v-model="filter"/>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>CreatedAt</th>
+                        <th>Target</th>
+                        <th>Job Title</th>
+                        <th>Job Url</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(row, index) in filteredRows">
+                        <td v-html="row.CreatedAt"></td>
+                        <td v-html="row.Target"></td>
+                        <td v-html="row.Title"></td>
+                        <td>
+                            <span>
+                                <button class="buttonToTheJob">
+                                    <a 
+                                        v-bind:href="row.Url" 
+                                        class="linkToTheJob" 
+                                        target="_blank" 
+                                        rel="noopener">To the job</a>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
+
         </div>
     </div>
     <script>
@@ -35,8 +46,21 @@
             el: '#app',
             delimiters: ["[[","]]"],
             data: {
-                message: '',
+                filter: '',
                 results: {{.Data}},
+            },
+            computed: {
+                filteredRows() {
+                    return this.results.filter(row => {
+                        const CreatedAt = row.CreatedAt.toString().toLowerCase();
+                        const Target = row.Target.toString().toLowerCase();
+                        const Title = row.Title.toString().toLowerCase();
+                        const searchTerm = this.filter.toLowerCase();
+                        return (
+                            CreatedAt.includes(searchTerm) || Target.includes(searchTerm) || Title.includes(searchTerm)
+                        );
+                    });
+                }
             }
         })
     </script>
@@ -48,7 +72,7 @@
             width: 82%;
             margin-top: 6vh;
         }
-            table {
+        table {
             font-family: arial, sans-serif;
             border-collapse: collapse;
         }
@@ -59,6 +83,15 @@
         }
         tr:nth-child(even) {
             background-color: #dddddd;
+        }
+        input[type=text], select {
+            width: 50%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
         .buttonToTheJob {
             background-color: #A9A9A9;

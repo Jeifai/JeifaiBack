@@ -26,7 +26,7 @@ func (user *User) ResultsByUser() (results []Result, err error) {
                             INNER JOIN results r ON(m.resultid = r.id)
                             INNER JOIN scrapers s ON(r.scraperid = s.id)
                             INNER JOIN userstargetskeywords utk ON(k.id = utk.keywordid)
-                            WHERE m.createdat > current_date - interval '0' day
+                            WHERE m.createdat > current_date - interval '3' day
                             AND utk.userid = $1;`, user.Id)
 	if err != nil {
 		fmt.Println(err.Error())
