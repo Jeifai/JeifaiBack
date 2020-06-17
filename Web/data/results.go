@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	"time"
 )
 
 type Result struct {
@@ -11,33 +10,26 @@ type Result struct {
 	ScraperId int
 	Title     string
 	Url       string
-	CreatedAt time.Time
+	CreatedAt string
 }
 
 // Get all the results belonging to the targets of a specific user
 func (user *User) ResultsByUser() (results []Result, err error) {
 	fmt.Println("Starting ResultsByUser...")
-	rows, err := Db.Query(`WITH latest_scraping_per_target AS(
-                                SELECT
-                                    s.targetid,
-                                    MAX(ss.id) AS latest_scraping
-                                FROM scrapers s
-                                LEFT JOIN scrapings ss ON(s.id = ss.scraperid)
-                                GROUP BY 1)
-                            SELECT
-                                t.url,
-                                r.createdat,
+	rows, err := Db.Query(`SELECT DISTINCT
+                                s.name,
+                                TO_CHAR(m.createdat, 'DD/MM/YYYY'),
                                 r.title,
                                 r.url
-                            FROM userstargets ut
-                            LEFT JOIN targets t ON(ut.targetid = t.id)
-                            LEFT JOIN scrapers s ON(ut.targetid = s.targetid)
-                            LEFT JOIN results r ON(s.id = r.scraperid)
-                            LEFT JOIN latest_scraping_per_target ls ON(ut.targetid = ls.targetid)
-                            WHERE ut.userid = $1
-                            AND ut.deletedat IS NULL
-                            AND r.scrapingid = ls.latest_scraping`, user.Id)
+                            FROM matches m
+                            INNER JOIN keywords k ON(m.keywordid = k.id)
+                            INNER JOIN results r ON(m.resultid = r.id)
+                            INNER JOIN scrapers s ON(r.scraperid = s.id)
+                            INNER JOIN userstargetskeywords utk ON(k.id = utk.keywordid)
+                            WHERE m.createdat > current_date - interval '0' day
+                            AND utk.userid = $1;`, user.Id)
 	if err != nil {
+		fmt.Println(err.Error())
 		return
 	}
 	for rows.Next() {

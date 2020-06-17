@@ -10,23 +10,26 @@ import (
 
 func results(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Generating HTML for results...")
+
+	templates := template.Must(
+		template.ParseFiles(
+			"templates/layout.html",
+			"templates/topbar.html",
+			"templates/sidebar.html",
+			"templates/results.html"))
+
 	sess, err := session(r)
 	user, err := data.UserById(sess.UserId)
 	if err != nil {
 		danger(err, "Cannot find user")
 	}
 	results, err := user.ResultsByUser()
-	templates := template.Must(
-		template.ParseFiles(
-			"templates/layout.html",
-            "templates/topbar.html",
-			"templates/sidebar.html",
-			"templates/results.html"))
+
 	type TempStruct struct {
-		User    data.User
-		Results []data.Result
-		Message string
+		User data.User
+		Data []data.Result
 	}
-	infos := TempStruct{user, results, "Here the list of all your results"}
+
+	infos := TempStruct{user, results}
 	templates.ExecuteTemplate(w, "layout", infos)
 }

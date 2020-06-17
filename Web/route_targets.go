@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -12,10 +13,11 @@ import (
 )
 
 func targets(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Generating HTML for targets...")
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
-            "templates/topbar.html",
+			"templates/topbar.html",
 			"templates/sidebar.html",
 			"templates/targets.html"))
 
@@ -24,13 +26,12 @@ func targets(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
+	targets, err := user.UsersTargetsByUser()
 
 	type TempStruct struct {
 		User data.User
 		Data []data.Target
 	}
-
-	targets, err := user.UsersTargetsByUser()
 
 	infos := TempStruct{user, targets}
 	templates.ExecuteTemplate(w, "layout", infos)

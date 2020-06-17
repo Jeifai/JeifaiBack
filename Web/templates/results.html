@@ -1,17 +1,45 @@
 {{ define "content" }}
     <div id="app">
         <div class="content">
-            {{if .Message}} <h2>{{.Message}}</h2><br> {{else}}  {{end}}
-            <div>
-                YOUR RESULTS
-            </div>
-            {{ range .Results }}
-            <div>
-                - {{ .Target }} <a href="{{ .Url }}">{{ .Title }}</a>
-            </div>
-            {{ end }}
+            <h1>
+                Your matches
+            </h1>
+            <table v-if="results">
+                <tr>
+                    <th>CreatedAt</th>
+                    <th>Target</th>
+                    <th>Job Title</th>
+                    <th>Job Url</th>
+                </tr>
+                <tr v-for="(result, index) in results">
+                    <td>[[ result.CreatedAt ]]</td>
+                    <td>[[ result.Target ]]</td>
+                    <td>[[ result.Title ]]</td>
+                    <td>
+                        <span>
+                            <button class="buttonToTheJob">
+                                <a 
+                                    v-bind:href="[[ result.Url ]]" 
+                                    class="linkToTheJob" 
+                                    target="_blank" 
+                                    rel="noopener">To the job</a>
+                            </button>
+                        </span>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
+    <script>
+        new Vue({
+            el: '#app',
+            delimiters: ["[[","]]"],
+            data: {
+                message: '',
+                results: {{.Data}},
+            }
+        })
+    </script>
     <style scoped>
         .content {
             height: 100%;
@@ -19,6 +47,39 @@
             float:right;
             width: 82%;
             margin-top: 6vh;
+        }
+            table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+        }
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+        .buttonToTheJob {
+            background-color: #A9A9A9;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        a.linkToTheJob:link, a.linkToTheJob:visited {
+            background-color: #76bbdb;
+            color: black;
+            padding: 10px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        a.linkToTheJob:hover, a.linkToTheJob:active {
+            background-color: #267cad;
         }
     </style>
 {{ end }}
