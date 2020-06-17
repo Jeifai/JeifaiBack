@@ -1,26 +1,39 @@
 {{ define "content" }}
     <div class="content">
         <div id="app">
+            <h1>
+                Add a new target:
+            </h1>
             <span v-html="message"></span>
-            <ul>
-                <li v-for="(target, index) in targets">
-                    [[ target.Url ]]
-                    <span>
-                        <button v-on:click="deleteTarget(index)">
-                            <i></i>
-                        </button>
-                    </span>
-                </li>
-            </ul>
-            <div>
+            <div class="addtarget">
                 <input type="text" 
                     placeholder="New Target" 
                     v-on:keyup.enter="createTarget"
                     v-model="newTarget.Url">
                 <span>
-                    <button v-on:click="createTarget">Create</button>
+                    <button v-on:click="createTarget" class="buttonCreate">Create</button>
                 </span>
             </div>
+            <h1>
+                My targets:
+            </h1>
+            <table v-if="targets">
+                <tr>
+                    <th>CreatedAt</th>
+                    <th>Target</th>
+                </tr>
+                <tr v-for="(target, index) in targets">
+                    <td>[[ target.CreatedAt ]]</td>
+                    <td>[[ target.Url ]]</td>
+                    <td>
+                        <span>
+                            <button v-on:click="deleteTarget(index)" class="buttonDelete">
+                                <i>Delete</i>
+                            </button>
+                        </span>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
     <script>
@@ -62,4 +75,49 @@
             }
         })
     </script>
+    <style scoped>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+        input[type=text], select {
+            width: 50%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .buttonCreate {
+            background-color: #A9A9A9;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .buttonDelete {
+            background-color: #FF9999;
+            border: none;
+            color: white;
+            padding: 8px 32px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .addtarget {
+            margin-bottom: 25px;
+        }
+    </style>
 {{ end }}

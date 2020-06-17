@@ -11,7 +11,7 @@ type Target struct {
 	Id        int
 	Url       string `validate:"url"`
 	Host      string
-	CreatedAt time.Time
+	CreatedAt string
 }
 
 // Add a new target
@@ -57,7 +57,7 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 	rows, err := Db.Query(`SELECT
                             t.id,
                             t.url,
-                            t.createdat 
+                            TO_CHAR(t.createdat, 'DD/MM/YYYY') 
                            FROM users u
                            INNER JOIN userstargets ut ON(u.id = ut.userid) 
                            INNER JOIN targets t ON(ut.targetid = t.id)
