@@ -1,34 +1,56 @@
 {{ define "content" }}
     <div class="content">
         <div id="app">
-            <p v-for="(message, index) in messages">
-                <span v-html="message"></span>
-            </p>
-            <ul>
-                <li v-for="(utk, index) in utks">
-                    [[ utk.TargetUrl ]], [[ utk.KeywordText ]]
+            <div class="addkeyword"> 
+                <h1>
+                    Add a new keyword
+                </h1>
+                <p v-for="(message, index) in messages">
+                    <span v-html="message"></span>
+                </p>
+                <div>
+                    <span>Keyword's targets</span>
+                    <vue-multi-select
+                        v-model="selectedTargets"
+                        :options="targets"
+                        class="multiselect"
+                    ></vue-multi-select>
+                </div>
+                <div>
+                    <span>Keyword's text</span>
+                    <input type="text" 
+                        placeholder="New Keyword" 
+                        v-on:keyup.enter="createKeyword"
+                        v-model="newKeyword.Text">
                     <span>
-                        <button v-on:click="deleteUtk(index)">
-                            <i></i>
-                        </button>
+                        <button v-on:click="createKeyword" class="buttonCreate">Create</button>
                     </span>
-                </li>
-            </ul>
-            <div>
-                Insert a keyword
-                <input type="text" 
-                    placeholder="New Keyword" 
-                    v-on:keyup.enter="createKeyword"
-                    v-model="newKeyword.Text">
+                </div>
             </div>
             <div>
-                Assign it to one or more targets
-                <vue-multi-select
-                    v-model="selectedTargets"
-                    :options="targets"
-                ></vue-multi-select>
+                <h1>
+                    My keywords
+                </h1>
+                <table v-if="utks">
+                    <tr>
+                        <th>CreatedAt</th>
+                        <th>Keyword</th>
+                        <th>Target</th>
+                    </tr>
+                    <tr v-for="(utk, index) in utks">
+                        <td>[[ utk.CreatedAt ]]</td>
+                        <td>[[ utk.KeywordText ]]</td>
+                        <td>[[ utk.TargetUrl ]]</td>
+                        <td>
+                            <span>
+                                <button v-on:click="deleteUtk(index)" class="buttonDelete">
+                                    <i>Delete</i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
             </div>
-            <button v-on:click="createKeyword">Create</button>
         </div>
     </div>
     <script src="https://unpkg.com/vue-simple-multi-select@latest"></script>
@@ -80,4 +102,53 @@
             }
         })
     </script>
+    <style>
+        input[type=text], select {
+            width: 50%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .multiselect {
+            width: 50%;
+            display: inline-block;
+        }
+        .addkeyword {
+            margin-bottom: 25px;
+        }
+        .buttonCreate {
+            background-color: #A9A9A9;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+        .buttonDelete {
+            background-color: #FF9999;
+            border: none;
+            color: white;
+            padding: 8px 32px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 12px;
+        }
+    </style>
 {{ end }}

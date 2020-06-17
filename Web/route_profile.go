@@ -17,7 +17,8 @@ func profile(w http.ResponseWriter, r *http.Request) {
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
-			"templates/private.navigation.html",
+			"templates/topbar.html",
+			"templates/sidebar.html",
 			"templates/profile.html"))
 
 	sess, err := session(r)

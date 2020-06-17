@@ -8,7 +8,7 @@ import (
 type Keyword struct {
 	Id        int
 	Text      string `validate:"required,max=30,min=3"`
-	CreatedAt time.Time
+	CreatedAt string
 }
 
 type UserTargetKeyword struct {
@@ -16,7 +16,7 @@ type UserTargetKeyword struct {
 	UserId      int
 	TargetId    int
 	KeywordId   int
-	CreatedAt   time.Time
+	CreatedAt   string
 	KeywordText string
 	TargetUrl   string
 }
@@ -59,7 +59,7 @@ func (user *User) GetUserTargetKeyword() (
                                 utk.userid,
                                 utk.targetid,
                                 utk.keywordid,
-                                utk.createdat,
+                                TO_CHAR(utk.createdat, 'DD/MM/YYYY'),
                                 k.text,
                                 t.url
                             FROM userstargetskeywords utk

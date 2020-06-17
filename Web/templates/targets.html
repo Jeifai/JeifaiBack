@@ -2,7 +2,7 @@
     <div class="content">
         <div id="app">
             <h1>
-                Add a new target:
+                Add a new target
             </h1>
             <span v-html="message"></span>
             <div class="addtarget">
@@ -14,26 +14,28 @@
                     <button v-on:click="createTarget" class="buttonCreate">Create</button>
                 </span>
             </div>
-            <h1>
-                My targets:
-            </h1>
-            <table v-if="targets">
-                <tr>
-                    <th>CreatedAt</th>
-                    <th>Target</th>
-                </tr>
-                <tr v-for="(target, index) in targets">
-                    <td>[[ target.CreatedAt ]]</td>
-                    <td>[[ target.Url ]]</td>
-                    <td>
-                        <span>
-                            <button v-on:click="deleteTarget(index)" class="buttonDelete">
-                                <i>Delete</i>
-                            </button>
-                        </span>
-                    </td>
-                </tr>
-            </table>
+            <div>
+                <h1>
+                    My targets
+                </h1>
+                <table v-if="targets">
+                    <tr>
+                        <th>CreatedAt</th>
+                        <th>Target</th>
+                    </tr>
+                    <tr v-for="(target, index) in targets">
+                        <td>[[ target.CreatedAt ]]</td>
+                        <td>[[ target.Url ]]</td>
+                        <td>
+                            <span>
+                                <button v-on:click="deleteTarget(index)" class="buttonDelete">
+                                    <i>Delete</i>
+                                </button>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
     <script>
