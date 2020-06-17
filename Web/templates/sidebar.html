@@ -1,17 +1,36 @@
 {{ define "sidebar" }}
     <div class="sidebar">
-        <ul>
-            <li><a href="/targets">Targets</a></li>
-            <li><a href="/keywords">Keywords</a></li>
-            <li><a href="/results">Results</a></li>
-        </ul>
+        <p>
+            <a href="/targets" class="sidebarbutton">Targets</a>
+        </p>
+        <p>
+            <a href="/keywords" class="sidebarbutton">Keywords</a>
+        </p>
+        <p>
+            <a href="/results" class="sidebarbutton">Results</a>
+        </p>
     </div>
     <style scoped>
         .sidebar {
+            background-color: #4287f5;
+            position: fixed;
+            text-align: center;
+            font-size:20px;
             height: 100%;
             width: 15%;
-            background-color: rgb(144, 197, 247);
-            position: fixed;
+            top: 6vh;
+        }
+        a.sidebarbutton:link, a.sidebarbutton:visited {
+            background-color: #76bbdb;
+            color: black;
+            padding: 14px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        a.sidebarbutton:hover, a.sidebarbutton:active {
+            background-color: #267cad;
         }
     </style>
 {{ end }}

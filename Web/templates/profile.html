@@ -1,6 +1,6 @@
 {{ define "content" }}
-    <div class="content">
-        <div id="app">
+    <div id="app">
+        <div class="content">
             <p v-for="(message, index) in messages">
                 <span v-html="message"></span>
             </p>
@@ -76,4 +76,13 @@
             }
         })
     </script>
+    <style scoped>
+        .content {
+            height: 100%;
+            margin-left:18%;
+            float:right;
+            width: 82%;
+            margin-top: 6vh;
+        }
+    </style>
 {{ end }}

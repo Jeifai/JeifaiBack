@@ -1,13 +1,24 @@
 {{ define "content" }}
-    <div class="content">
-        {{if .Message}} <h2>{{.Message}}</h2><br> {{else}}  {{end}}
-        <div>
-            YOUR RESULTS
+    <div id="app">
+        <div class="content">
+            {{if .Message}} <h2>{{.Message}}</h2><br> {{else}}  {{end}}
+            <div>
+                YOUR RESULTS
+            </div>
+            {{ range .Results }}
+            <div>
+                - {{ .Target }} <a href="{{ .Url }}">{{ .Title }}</a>
+            </div>
+            {{ end }}
         </div>
-        {{ range .Results }}
-        <div>
-            - {{ .Target }} <a href="{{ .Url }}">{{ .Title }}</a>
-        </div>
-        {{ end }}
     </div>
+    <style scoped>
+        .content {
+            height: 100%;
+            margin-left:18%;
+            float:right;
+            width: 82%;
+            margin-top: 6vh;
+        }
+    </style>
 {{ end }}
