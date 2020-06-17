@@ -1,0 +1,14 @@
+{{ define "topbar" }}
+    <div class="topbar">
+        <a href="/logout">Logout</a>
+        <a href="/profile">Profile</a>
+        <a href="/">Home</a>
+        <a>HI {{.User.UserName}}</a>
+    </div>
+    <style scoped>
+        .topbar {
+            background-color: rgb(45, 49, 253);
+            overflow: hidden;
+        }
+    </style>
+{{ end }}

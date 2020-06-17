@@ -22,7 +22,8 @@ func keywords(w http.ResponseWriter, r *http.Request) {
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
-			"templates/private.navigation.html",
+            "templates/topbar.html",
+			"templates/sidebar.html",
 			"templates/keywords.html"))
 
 	struct_targets, err := user.UsersTargetsByUser()

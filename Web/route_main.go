@@ -30,7 +30,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 		templates := template.Must(
 			template.ParseFiles(
 				"templates/layout.html",
-				"templates/private.navigation.html",
+                "templates/topbar.html",
+                "templates/sidebar.html",
 				"templates/index.html"))
 		type TempStruct struct {
 			User data.User
