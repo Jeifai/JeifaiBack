@@ -1,6 +1,6 @@
 package main
 
-func mainLocal() {
+func main() {
 	DbConnect()
 	scraper_name := "Shopify"
 	scraper_version := 1

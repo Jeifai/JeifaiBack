@@ -2085,7 +2085,7 @@ func (runtime Runtime) Amazon(
 			for _, elem := range tempJsonJobs.Jobs {
 
 				result_title := elem.Title
-				result_url := a_job_url + elem.job_path
+				result_url := a_job_url + elem.JobPath
 
 				elem_json, err := json.Marshal(elem)
 				if err != nil {
