@@ -91,6 +91,7 @@ create table userstargetskeywords (
 
 create table matchings (
   id            serial primary key,
+  scraperid     integer references scrapers(id),
   createdat     timestamp not null
 )
 
@@ -101,4 +102,19 @@ create table matches (
   matchingid    integer references matchings(id),
   createdat     timestamp not null,
   UNIQUE (keywordid, resultid)
+)
+
+create table notifiers (
+  id            serial primary key,
+  scraperid     integer references scrapers(id),
+  createdat     timestamp not null
+)
+
+create table notifications (
+  id            serial primary key,
+  utkid         integer references userstargetskeywords(id),
+  matchid       integer references matches(id),
+  notifierid    integer references notifiers(id),
+  createdat     timestamp not null,
+  UNIQUE (utkid, matchid)
 )
