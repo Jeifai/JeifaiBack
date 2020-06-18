@@ -51,6 +51,98 @@ func Scrape(
 	return
 }
 
+func (runtime Runtime) Dreamingjobs(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	if version == 1 {
+
+		c := colly.NewCollector()
+
+		url := "https://robimalco.github.io/dreamingjobs.github.io/"
+		main_tag := "ul"
+		main_tag_attr := "class"
+		main_tag_value := "position"
+		tag_title := "h2"
+		tag_url := "a"
+		tag_department := "li[class=department]"
+		tag_type := "li[class=type]"
+		tag_location := "li[class=location]"
+
+		type Job struct {
+			Title      string
+			Url        string
+			Department string
+			Type       string
+			Location   string
+		}
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+				e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+					result_title := el.ChildText(tag_title)
+					result_url := url + el.ChildAttr(tag_url, "href")
+					result_department := el.ChildText(tag_department)
+					result_type := el.ChildText(tag_type)
+					result_location := el.ChildText(tag_location)
+
+					_, err := netUrl.ParseRequestURI(result_url)
+					if err == nil {
+
+						temp_elem_json := Job{
+							result_title,
+							result_url,
+							result_department,
+							result_type,
+							result_location,
+						}
+
+						elem_json, err := json.Marshal(temp_elem_json)
+						if err != nil {
+							panic(err.Error())
+						}
+
+						results = append(results, Result{
+							runtime.Name,
+							result_title,
+							result_url,
+							elem_json,
+						})
+					}
+				})
+			}
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
+	return
+}
+
 func (runtime Runtime) Kununu(
 	version int, isLocal bool) (
 	response Response, results []Result) {
@@ -2009,8 +2101,8 @@ func (runtime Runtime) Amazon(
 	version int, isLocal bool) (response Response, results []Result) {
 	if version == 1 {
 
-        a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Belgium&country=BEL&result_limit=1000&offset="
-        a_job_url := "https://www.amazon.jobs"
+		a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Belgium&country=BEL&result_limit=1000&offset="
+		a_job_url := "https://www.amazon.jobs"
 
 		number_results_per_page := 1000
 
@@ -2100,18 +2192,18 @@ func (runtime Runtime) Amazon(
 				})
 			}
 
-            jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
-            
-            if isLocal {
-                return
-            } else {
-                total_pages := tempJsonJobs.Hits / number_results_per_page
-                if counter < total_pages+1 {
-                    counter = counter + 1
-                    next_page := a_start_url + strconv.Itoa(counter*1000)
-                    time.Sleep(SecondsSleep * time.Second)
-                    c.Visit(next_page)
-                }
+			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
+
+			if isLocal {
+				return
+			} else {
+				total_pages := tempJsonJobs.Hits / number_results_per_page
+				if counter < total_pages+1 {
+					counter = counter + 1
+					next_page := a_start_url + strconv.Itoa(counter*1000)
+					time.Sleep(SecondsSleep * time.Second)
+					c.Visit(next_page)
+				}
 			}
 		})
 
@@ -2164,23 +2256,22 @@ func (runtime Runtime) Lanalabs(
 		tag_title := "h2"
 		tag_url := "a"
 		tag_department := "li[class=department]"
-        tag_type := "li[class=type]"
+		tag_type := "li[class=type]"
 		tag_location := "li[class=location]"
 
 		type Job struct {
 			Title      string
 			Url        string
 			Department string
-            Type       string
+			Type       string
 			Location   string
 		}
 
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
-                
-                e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-                    result_title := el.ChildText(tag_title)
-                    result_url := url + el.ChildAttr(tag_url, "href")
+				e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+					result_title := el.ChildText(tag_title)
+					result_url := url + el.ChildAttr(tag_url, "href")
 					result_department := el.ChildText(tag_department)
 					result_type := el.ChildText(tag_type)
 					result_location := el.ChildText(tag_location)
@@ -2191,8 +2282,8 @@ func (runtime Runtime) Lanalabs(
 						temp_elem_json := Job{
 							result_title,
 							result_url,
-                            result_department,
-                            result_type,
+							result_department,
+							result_type,
 							result_location,
 						}
 
