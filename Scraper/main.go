@@ -18,7 +18,7 @@ func main() {
 	      "Kununu", "IMusician", "Mitte",
 	      "Soundcloud", "Penta", "Celo", "N26",
 	      "Shopify", "Twitter", "Zalando",
-	      "Google", "Hometogo", "Contentful", "Gympass"}
+	      "Google", "Hometogo", "Contentful", "Gympass", "Lanalabs"}
 
 	scrapers, err := GetScrapers()
 
