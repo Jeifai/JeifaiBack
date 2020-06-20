@@ -2333,3 +2333,90 @@ func (runtime Runtime) Lanalabs(
 	}
 	return
 }
+
+func (runtime Runtime) Slack(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	if version == 1 {
+
+		c := colly.NewCollector()
+
+		url := "https://slack.com/intl/de-de/careers?eu_nc=1#opening"
+		main_tag := ".shadow-table"
+		sub_tag := "table"
+		tag_division := "th"
+		tag_data := "tr"
+		sub_tag_data := ".for-desktop-only--table-cell"
+		tag_url := "a"
+		attr_url := "href"
+
+		type Job struct {
+			Title    string
+			Url      string
+			Location string
+			Division string
+		}
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			e.ForEach(sub_tag, func(_ int, el *colly.HTMLElement) {
+				job_division := el.ChildText(tag_division)
+				el.ForEach(tag_data, func(_ int, ell *colly.HTMLElement) {
+					job_data := ell.ChildTexts(sub_tag_data)
+					if len(job_data) > 0 {
+						result_title := job_data[0]
+						result_url := ell.ChildAttr(tag_url, attr_url)
+						result_location := job_data[2]
+
+						temp_elem_json := Job{
+							result_title,
+							result_url,
+							result_location,
+							job_division,
+						}
+
+						elem_json, err := json.Marshal(temp_elem_json)
+						if err != nil {
+							panic(err.Error())
+						}
+
+						results = append(results, Result{
+							runtime.Name,
+							result_title,
+							result_url,
+							elem_json,
+						})
+					}
+				})
+			})
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println("Visiting", r.URL.String())
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				"Request URL:", r.Request.URL,
+				"failed with response:", r,
+				"\nError:", err)
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
+	return
+}
