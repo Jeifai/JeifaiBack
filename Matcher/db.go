@@ -130,7 +130,7 @@ func GetMatches(matching Matching, scraper_id int) (matches []Match, err error) 
                         INNER JOIN results r ON(s.id = r.scraperid)
                         LEFT JOIN userstargetskeywords utk ON(t.id = utk.targetid)
                         LEFT JOIN keywords k ON(utk.keywordid = k.id)
-                        WHERE r.createdat = r.updatedat
+                        WHERE r.createdat::date = date_trunc('day', now()) 
                         AND r.createdat > current_date
                         AND s.id = $1
                         AND REPLACE(LOWER(r.title), ' ', '') LIKE '%' || REPLACE(LOWER(k.text), ' ', '') || '%'`, scraper_id)
