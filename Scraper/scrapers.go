@@ -589,27 +589,27 @@ func (runtime Runtime) Google(
 	version int, isLocal bool) (response Response, results []Result) {
 	if version == 1 {
 
-		g_start_url := "https://careers.google.com/api/jobs/jobs-v1/search/?page_size=100&page=1"
-		g_base_url := "https://careers.google.com/api/jobs/jobs-v1/search/?page_size=100&page="
+		g_start_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page=1"
+		g_base_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page="
 		g_base_result_url := "https://careers.google.com/jobs/results/"
 
 		number_results_per_page := 100
 
 		type JsonJobs struct {
-			Count string `json:"count"`
-			Jobs  []struct {
-				CompanyID      string    `json:"company_id"`
-				CompanyName    string    `json:"company_name"`
-				Description    string    `json:"description"`
-				JobID          string    `json:"job_id"`
-				JobTitle       string    `json:"job_title"`
-				Locations      []string  `json:"locations"`
-				LocationsCount string    `json:"locations_count"`
-				PublishDate    time.Time `json:"publish_date"`
-				Summary        string    `json:"summary"`
-			} `json:"jobs"`
-			NextPage string `json:"next_page"`
-			PageSize string `json:"page_size"`
+            Count    int `json:"count"`
+            NextPage int `json:"next_page"`
+            Jobs     []struct {
+                Description   string    `json:"description"`
+                CompanyID     string    `json:"company_id"`
+                Locations     []string  `json:"locations"`
+                Summary       string    `json:"summary"`
+                LocationCount int       `json:"location_count"`
+                PublishDate   time.Time `json:"publish_date"`
+                CompanyName   string    `json:"company_name"`
+                JobTitle      string    `json:"job_title"`
+                JobID         string    `json:"job_id"`
+            } `json:"jobs"`
+            PageSize int `json:"page_size"`
 		}
 
 		var jsonJobs JsonJobs
@@ -643,6 +643,7 @@ func (runtime Runtime) Google(
 
 			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
 
+            /**
 			total_count, err := strconv.Atoi(tempJsonJobs.Count)
 			if err != nil {
 				total_count = 0
@@ -653,7 +654,7 @@ func (runtime Runtime) Google(
 				next_page = 0
 			}
 
-			total_pages := total_count/number_results_per_page + 2
+            total_pages := total_count/number_results_per_page + 2
 			if total_pages <= next_page {
 				return
 			}
@@ -661,7 +662,19 @@ func (runtime Runtime) Google(
 			if next_page != 0 {
 				time.Sleep(SecondsSleep * time.Second)
 				c.Visit(g_base_url + tempJsonJobs.NextPage)
+            }
+            */
+
+            total_pages := tempJsonJobs.Count/number_results_per_page + 2
+
+			if total_pages <= tempJsonJobs.NextPage {
+				return
 			}
+
+			if tempJsonJobs.NextPage != 0 {
+                time.Sleep(SecondsSleep * time.Second)
+				c.Visit(g_base_url + strconv.Itoa(tempJsonJobs.NextPage))
+            }
 		})
 
 		c.OnRequest(func(r *colly.Request) {
