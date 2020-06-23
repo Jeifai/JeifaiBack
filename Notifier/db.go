@@ -31,6 +31,14 @@ type Notification struct {
 	CreatedAt  time.Time
 }
 
+type Email struct {
+    UserId          int
+    UserName        string
+    CompanyName     string
+    JobTitle        string
+    JobUrl          string
+}
+
 var Db *sql.DB
 
 func DbConnect() {

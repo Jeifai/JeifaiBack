@@ -22,6 +22,10 @@ func main() {
 			panic(err.Error())
 		}
 
+        // Prepare templates
+        // Send emails
+        // Save notifications into db
+        users := []
 		for _, elem := range notifications {
 			fmt.Println(elem.CreatedAt)
 			fmt.Println("\t", elem.UtkId)
