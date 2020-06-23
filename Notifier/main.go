@@ -7,8 +7,6 @@ import (
 
 func main() {
 
-    var emails []Email
-
 	DbConnect()
 	defer Db.Close()
 
@@ -25,21 +23,35 @@ func main() {
 			panic(err.Error())
 		}
 
+        users := GetUniqueUsers(notifications)
+
+        fmt.Println(users)
+
+        /**
+
 		for _, elem := range notifications {
             var email Email
-            var company Company
-            var jobs []Job
 
             email.UserId = elem.UserId
             email.UserName = elem.UserName
-            company.
-            email.Companies
+            email.Company.CompanyName = elem.CompanyName
+            email.Company.Job.JobTitle = elem.JobTitle
+            email.Company.Job.JobUrl = elem.JobUrl
 
             emails = append(emails, email)
-		}
+        }
+        
+        */
     }
     
-    fmt.Println(users)
+    // fmt.Println(emails)
+}
+
+func GetUniqueUsers(notifications []Notification) (users []int) {
+    for _, elem := range notifications {
+        users = AppendIfMissing(users, elem.UserId)
+    }
+    return 
 }
 
 func AppendIfMissing(slice []int, element int) []int {

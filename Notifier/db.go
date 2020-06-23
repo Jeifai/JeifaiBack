@@ -36,23 +36,17 @@ type Notification struct {
 	CreatedAt       time.Time
 }
 
-type Company struct {
-    CompanyName string
-    Jobs        []Job
-}
-
-type Job struct {
-    JobId		int
-    JobTitle 	string
-    JobUrl		string
-}
-
 type Email struct {
     UserId		int
     UserName	string
-    Companies   []Company
+    Company struct {
+        CompanyName string
+        Job struct {
+            JobTitle 	string
+            JobUrl		string
+        }
+    }
 }
-    
 
 var Db *sql.DB
 
