@@ -24,20 +24,35 @@ type Notifier struct {
 }
 
 type Notification struct {
-	Id         int
-	UtkId      int
-	NotifierId int
-	MatchId    int
-	CreatedAt  time.Time
-}
-
-type Email struct {
+	Id              int
+	UtkId           int
+	NotifierId      int
+    MatchId         int
     UserId          int
     UserName        string
     CompanyName     string
     JobTitle        string
     JobUrl          string
+	CreatedAt       time.Time
 }
+
+type Company struct {
+    CompanyName string
+    Jobs        []Job
+}
+
+type Job struct {
+    JobId		int
+    JobTitle 	string
+    JobUrl		string
+}
+
+type Email struct {
+    UserId		int
+    UserName	string
+    Companies   []Company
+}
+    
 
 var Db *sql.DB
 
@@ -116,13 +131,17 @@ func (notifier *Notifier) StartNotifierSession(scraper_id int) (err error) {
 	}
 	return
 }
-
 func GetNotifications(notifier Notifier, scraper_id int) (notifications []Notification, err error) {
-	fmt.Println("Starting GetNotifications...")
+	// fmt.Println("Starting GetNotifications...")
 	rows, err := Db.Query(`
                         SELECT DISTINCT
-                            utk.id,
-                            m.id
+                            utk.id AS utkId,
+                            m.id AS matchId,
+                            u.id AS userId,
+                            u.username AS userName,
+                            s.name AS scraperName,
+                            r.title AS resultTitle,
+                            r.url AS resultUrl
                         FROM results r
                         INNER JOIN matches m ON(r.id = m.resultid)
                         LEFT JOIN scrapers s ON(r.scraperid = s.id)
@@ -140,7 +159,12 @@ func GetNotifications(notifier Notifier, scraper_id int) (notifications []Notifi
 		notification := Notification{}
 		if err = rows.Scan(
 			&notification.UtkId,
-			&notification.MatchId); err != nil {
+            &notification.MatchId,
+            &notification.UserId,
+            &notification.UserName,
+            &notification.CompanyName,
+            &notification.JobTitle,
+            &notification.JobUrl); err != nil {
 			return
 		}
 		notification.NotifierId = notifier.Id
