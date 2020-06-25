@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	. "github.com/logrusorgru/aurora"
 )
 
 func SaveResponseToStorage(response Response, file_path string) {
-	fmt.Println("Starting SaveResponseToStorage...")
+	fmt.Println(Gray(8-1, "Starting SaveResponseToStorage..."))
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -32,7 +33,7 @@ func SaveResponseToStorage(response Response, file_path string) {
 }
 
 func GetResponseFromStorage(file_path string) (response string) {
-	fmt.Println("Starting GetResponseFromStorage...")
+	fmt.Println(Gray(8-1, "Starting GetResponseFromStorage..."))
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)

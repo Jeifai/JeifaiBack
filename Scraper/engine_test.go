@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-
+	. "github.com/logrusorgru/aurora"
 	"github.com/stretchr/testify/assert"
 	// "log"
 )
@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 */
 
 func TestUnique(t *testing.T) {
-	fmt.Println("TestUnique")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestUnique")))
 	testJson, err := json.Marshal("test")
 	_ = err
 	result_1 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
@@ -37,14 +37,14 @@ func TestUnique(t *testing.T) {
 }
 
 func TestGenerateFilePath(t *testing.T) {
-	fmt.Println("\n\nTestGenerateFilePath")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestGenerateFilePath")))
 	got := GenerateFilePath("scraper_name", 1)
 	want := "scraper_name/1/response.html"
 	assert.Equal(t, got, want, "The two path should be the same.")
 }
 
 func TestSaveResponseToFile(t *testing.T) {
-	fmt.Println("\n\nTestSaveResponseToFile")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestSaveResponseToFile")))
 	want := "this is a test string"
 	SaveResponseToFile(want)
 	dir, err := os.Getwd()
@@ -59,7 +59,7 @@ func TestSaveResponseToFile(t *testing.T) {
 }
 
 func TestRemoveFile(t *testing.T) {
-	fmt.Println("\n\nTestRemoveFile")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestRemoveFile")))
 	want := "this is a test string"
 	dir, err := os.Getwd()
 	if err != nil {
@@ -80,7 +80,7 @@ func TestRemoveFile(t *testing.T) {
 }
 
 func TestSaveResponseToStorage(t *testing.T) {
-	fmt.Println("\n\nTestSaveResponseToStorage")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestSaveResponseToStorage")))
 	want := "this is a test to TestSaveResponseToStorage"
 	file_path := "test/TestSaveResponseToStorage.html"
 	response := Response{[]byte(want)}
@@ -106,7 +106,7 @@ func TestSaveResponseToStorage(t *testing.T) {
 }
 
 func TestGetResponseFromStorage(t *testing.T) {
-	fmt.Println("\n\nTestGetResponseFromStorage")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestGetResponseFromStorage")))
 	want := "this is a test to TestGetResponseFromStorage"
 	file_path := "test/TestGetResponseFromStorage.html"
 	got := GetResponseFromStorage(file_path)
@@ -114,7 +114,7 @@ func TestGetResponseFromStorage(t *testing.T) {
 }
 
 func TestDbConnect(t *testing.T) {
-	fmt.Println("\n\nTestDbConnect")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestDbConnect")))
 	type TempResult struct{ MinUser int }
 	temp_result := TempResult{}
 	DbConnect()
@@ -126,46 +126,45 @@ func TestDbConnect(t *testing.T) {
 }
 
 func TestScrape(t *testing.T) {
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestScrape")))
 
-    exclude_scrapers := []string{"Mitte", "Microsoft", "Amazon", "Deutschebahn"}
-
-	fmt.Println("\n\nTestScrape")
+	exclude_scrapers := []string{"Mitte", "Microsoft", "Amazon", "Deutschebahn"}
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
 	}
 	for _, elem := range scrapers {
-        if !Contains(exclude_scrapers, elem.Name) {
-            fmt.Println("TESTING -> ", elem.Name)
-            scraping, err := LastScrapingByNameVersion(elem.Name, elem.Version)
-            if err != nil {
-                panic(err.Error())
-            }
-            file_path := GenerateFilePath(elem.Name, scraping)
-            fileResponse := GetResponseFromStorage(file_path)
-            got, err := ResultsByScraping(scraping)
-            if err != nil {
-                panic(err.Error())
-            }
-            SaveResponseToFile(fileResponse)
-            isLocal := true
-            httpResponse, want := Scrape(elem.Name, elem.Version, isLocal)
-            RemoveFile()
-            _ = httpResponse
-            _ = err
-            sort.Slice(got, func(i, j int) bool {
-                return got[i].ResultUrl < got[j].ResultUrl
-            })
-            sort.Slice(want, func(i, j int) bool {
-                return want[i].ResultUrl < want[j].ResultUrl
-            })
-            assert.ElementsMatch(t, got, want, "The two []Result should be the same.")
-        }
+		if !Contains(exclude_scrapers, elem.Name) {
+			fmt.Println(BrightBlue("TESTING -> "), Bold(BrightBlue(elem.Name)))
+			scraping, err := LastScrapingByNameVersion(elem.Name, elem.Version)
+			if err != nil {
+				panic(err.Error())
+			}
+			file_path := GenerateFilePath(elem.Name, scraping)
+			fileResponse := GetResponseFromStorage(file_path)
+			got, err := ResultsByScraping(scraping)
+			if err != nil {
+				panic(err.Error())
+			}
+			SaveResponseToFile(fileResponse)
+			isLocal := true
+			httpResponse, want := Scrape(elem.Name, elem.Version, isLocal)
+			RemoveFile()
+			_ = httpResponse
+			_ = err
+			sort.Slice(got, func(i, j int) bool {
+				return got[i].ResultUrl < got[j].ResultUrl
+			})
+			sort.Slice(want, func(i, j int) bool {
+				return want[i].ResultUrl < want[j].ResultUrl
+			})
+			assert.ElementsMatch(t, got, want, "The two []Result should be the same.")
+		}
 	}
 }
 
 func TestGetScrapers(t *testing.T) {
-	fmt.Println("\n\nTestGetScrapers")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestGetScrapers")))
 	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
@@ -175,7 +174,7 @@ func TestGetScrapers(t *testing.T) {
 }
 
 func TestLastScrapingByNameVersion(t *testing.T) {
-	fmt.Println("\n\nTestLastScrapingByNameVersion")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestLastScrapingByNameVersion")))
 	last_scraping_version, err := LastScrapingByNameVersion("Mitte", 1)
 	if err != nil {
 		panic(err.Error())
@@ -185,7 +184,7 @@ func TestLastScrapingByNameVersion(t *testing.T) {
 }
 
 func TestResultsByScraping(t *testing.T) {
-	fmt.Println("\n\nTestResultsByScraping")
+	fmt.Println(Blue("Running --> "), Bold(Blue("TestResultsByScraping")))
 	results, err := ResultsByScraping(245)
 	if err != nil {
 		panic(err.Error())

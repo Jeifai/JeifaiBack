@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+
+	. "github.com/logrusorgru/aurora"
 )
 
 func main() {
@@ -13,6 +15,8 @@ func main() {
 		panic(err.Error())
 	}
 	for _, elem := range scrapers {
+
+		fmt.Println(Blue("Running --> "), Bold(Blue(elem.Name)))
 
 		matching := Matching{}
 		err = matching.StartMatchingSession(elem.Id)
@@ -26,11 +30,11 @@ func main() {
 		}
 
 		for _, elem := range matches {
-			fmt.Println(elem.CreatedAt)
-			fmt.Println("\t", elem.CompanyName)
-			fmt.Println("\t\t", elem.JobTitle)
-			fmt.Println("\t\t\t", elem.JobUrl)
-			fmt.Println("\t\t\t\t", elem.KeywordText)
+			fmt.Println(
+				Bold(Green("\tNew Match -->")),
+				Faint(Green(elem.KeywordText)),
+				Bold(Green(elem.JobTitle)),
+				Faint(Underline(BrightGreen(elem.JobUrl))))
 		}
 
 		if len(matches) > 0 {

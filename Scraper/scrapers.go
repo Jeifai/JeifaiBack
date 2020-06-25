@@ -13,6 +13,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
+	. "github.com/logrusorgru/aurora"
 )
 
 type Runtime struct {
@@ -35,7 +36,7 @@ const SecondsSleep = 2 // Seconds between pagination
 func Scrape(
 	scraper_name string, scraper_version int, isLocal bool) (
 	response Response, results []Result) {
-	fmt.Println("Starting Scrape...")
+	fmt.Println(Gray(8-1, "Starting Scrape..."))
 	runtime := Runtime{scraper_name}
 	strucReflected := reflect.ValueOf(runtime)
 	method := strucReflected.MethodByName(scraper_name)
@@ -47,7 +48,7 @@ func Scrape(
 	response = function_output[0].Interface().(Response)
 	results = function_output[1].Interface().([]Result)
 	results = Unique(results)
-	fmt.Println("Number of results scraped: " + strconv.Itoa(len(results)))
+	fmt.Println(Green("Number of results scraped: "), Bold(Green(strconv.Itoa(len(results)))))
 	return
 }
 
@@ -117,14 +118,14 @@ func (runtime Runtime) Dreamingjobs(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -199,14 +200,14 @@ func (runtime Runtime) Kununu(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -287,14 +288,14 @@ func (runtime Runtime) Mitte(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -379,14 +380,14 @@ func (runtime Runtime) IMusician(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -457,14 +458,14 @@ func (runtime Runtime) Babelforce(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -551,14 +552,14 @@ func (runtime Runtime) Zalando(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -596,20 +597,20 @@ func (runtime Runtime) Google(
 		number_results_per_page := 100
 
 		type JsonJobs struct {
-            Count    int `json:"count"`
-            NextPage int `json:"next_page"`
-            Jobs     []struct {
-                Description   string    `json:"description"`
-                CompanyID     string    `json:"company_id"`
-                Locations     []string  `json:"locations"`
-                Summary       string    `json:"summary"`
-                LocationCount int       `json:"location_count"`
-                PublishDate   time.Time `json:"publish_date"`
-                CompanyName   string    `json:"company_name"`
-                JobTitle      string    `json:"job_title"`
-                JobID         string    `json:"job_id"`
-            } `json:"jobs"`
-            PageSize int `json:"page_size"`
+			Count    int `json:"count"`
+			NextPage int `json:"next_page"`
+			Jobs     []struct {
+				Description   string    `json:"description"`
+				CompanyID     string    `json:"company_id"`
+				Locations     []string  `json:"locations"`
+				Summary       string    `json:"summary"`
+				LocationCount int       `json:"location_count"`
+				PublishDate   time.Time `json:"publish_date"`
+				CompanyName   string    `json:"company_name"`
+				JobTitle      string    `json:"job_title"`
+				JobID         string    `json:"job_id"`
+			} `json:"jobs"`
+			PageSize int `json:"page_size"`
 		}
 
 		var jsonJobs JsonJobs
@@ -643,49 +644,49 @@ func (runtime Runtime) Google(
 
 			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
 
-            /**
-			total_count, err := strconv.Atoi(tempJsonJobs.Count)
-			if err != nil {
-				total_count = 0
-			}
+			/**
+						total_count, err := strconv.Atoi(tempJsonJobs.Count)
+						if err != nil {
+							total_count = 0
+						}
 
-			next_page, err := strconv.Atoi(tempJsonJobs.NextPage)
-			if err != nil {
-				next_page = 0
-			}
+						next_page, err := strconv.Atoi(tempJsonJobs.NextPage)
+						if err != nil {
+							next_page = 0
+						}
 
-            total_pages := total_count/number_results_per_page + 2
-			if total_pages <= next_page {
-				return
-			}
+			            total_pages := total_count/number_results_per_page + 2
+						if total_pages <= next_page {
+							return
+						}
 
-			if next_page != 0 {
-				time.Sleep(SecondsSleep * time.Second)
-				c.Visit(g_base_url + tempJsonJobs.NextPage)
-            }
-            */
+						if next_page != 0 {
+							time.Sleep(SecondsSleep * time.Second)
+							c.Visit(g_base_url + tempJsonJobs.NextPage)
+			            }
+			*/
 
-            total_pages := tempJsonJobs.Count/number_results_per_page + 2
+			total_pages := tempJsonJobs.Count/number_results_per_page + 2
 
 			if total_pages <= tempJsonJobs.NextPage {
 				return
 			}
 
 			if tempJsonJobs.NextPage != 0 {
-                time.Sleep(SecondsSleep * time.Second)
+				time.Sleep(SecondsSleep * time.Second)
 				c.Visit(g_base_url + strconv.Itoa(tempJsonJobs.NextPage))
-            }
+			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -775,14 +776,14 @@ func (runtime Runtime) Soundcloud(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -914,14 +915,14 @@ func (runtime Runtime) Microsoft(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -1027,14 +1028,14 @@ func (runtime Runtime) Twitter(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -1123,14 +1124,14 @@ func (runtime Runtime) Shopify(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -1220,14 +1221,14 @@ func (runtime Runtime) Urbansport(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -1290,7 +1291,6 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 			if strings.Contains(e.Attr(main_attr), string_location_url) {
 				temp_location_url := e.Attr(main_attr)
 				location_url := n_base_url + temp_location_url
-				fmt.Println("Visiting", location_url)
 				l.Visit(location_url)
 			}
 		})
@@ -1338,6 +1338,14 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 			}
 		})
 
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		l.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
 		c.OnScraped(func(r *colly.Response) {
 			response_json, err := json.Marshal(results)
 			if err != nil {
@@ -1348,16 +1356,16 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		l.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -1438,14 +1446,14 @@ func (runtime Runtime) Blinkist(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -1583,9 +1591,19 @@ func (runtime Runtime) Deutschebahn(
 			if counter > end {
 				return
 			} else {
-				fmt.Println("Visiting", next_page_url)
 				e.Request.Visit(next_page_url)
 			}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -1606,7 +1624,6 @@ func (runtime Runtime) Deutschebahn(
 			}
 			c.Visit("file:" + dir + "/response.html")
 		} else {
-			fmt.Println("Visiting", d_start_url)
 			c.Visit(d_start_url)
 		}
 
@@ -1676,14 +1693,14 @@ func (runtime Runtime) Celo(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -1794,14 +1811,14 @@ func (runtime Runtime) Penta(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -1825,7 +1842,7 @@ func (runtime Runtime) Penta(
 			c.Visit(p_start_url)
 		}
 	} else if version == 2 {
-        c := colly.NewCollector()
+		c := colly.NewCollector()
 
 		url := "https://boards.greenhouse.io/embed/job_board?for=penta"
 		main_tag := "section"
@@ -1883,14 +1900,14 @@ func (runtime Runtime) Penta(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -1905,7 +1922,7 @@ func (runtime Runtime) Penta(
 		} else {
 			c.Visit(url)
 		}
-    }
+	}
 	return
 }
 
@@ -1972,14 +1989,14 @@ func (runtime Runtime) Contentful(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -2061,14 +2078,14 @@ func (runtime Runtime) Gympass(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -2157,14 +2174,14 @@ func (runtime Runtime) Hometogo(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -2302,14 +2319,14 @@ func (runtime Runtime) Amazon(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -2402,14 +2419,14 @@ func (runtime Runtime) Lanalabs(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -2489,14 +2506,14 @@ func (runtime Runtime) Slack(
 		})
 
 		c.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
-				"Request URL:", r.Request.URL,
-				"failed with response:", r,
-				"\nError:", err)
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {

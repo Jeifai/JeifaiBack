@@ -10,6 +10,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	. "github.com/logrusorgru/aurora"
 )
 
 type Scraping struct {
@@ -51,14 +52,14 @@ func DbConnect() {
 
 	if err = Db.Ping(); err != nil {
 		Db.Close()
-		fmt.Println("Unsuccessfully connected to the database")
+		fmt.Println(Bold(Red("Unsuccessfully connected to the database")))
 		return
 	}
-	fmt.Println("Successfully connected to the database")
+	fmt.Println(Bold(Green("Successfully connected to the database")))
 }
 
 func GetScrapers() (scrapers []Scraper, err error) {
-	fmt.Println("Starting GetScrapers...")
+	fmt.Println(Gray(8-1, "Starting GetScrapers..."))
 	rows, err := Db.Query(`SELECT
                                 s.name, 
                                 MAX(s.version) AS version, 
@@ -83,7 +84,7 @@ func GetScrapers() (scrapers []Scraper, err error) {
 }
 
 func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
-	fmt.Println("Starting StartScrapingSession...")
+	fmt.Println(Gray(8-1, "Starting StartScrapingSession..."))
 	statement := `INSERT INTO scrapings (scraperid, createdat)
                   VALUES ($1, $2) 
                   RETURNING id, scraperid, createdat`
@@ -101,7 +102,7 @@ func (scraper *Scraper) StartScrapingSession() (scraping Scraping, err error) {
 }
 
 func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
-	fmt.Println("Starting SaveResults...")
+	fmt.Println(Gray(8-1, "Starting SaveResults..."))
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
 	timeNow := time.Now() // updatedAt and createdAt will be identical
@@ -140,7 +141,7 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 
 func LastScrapingByNameVersion(
 	scraper_name string, scraper_version int) (scraping int, err error) {
-	fmt.Println("Starting LastScrapingByNameVersion...")
+	fmt.Println(Gray(8-1, "Starting LastScrapingByNameVersion..."))
 	err = Db.QueryRow(`SELECT MAX(s.id)
                        FROM scrapings s 
                        LEFT JOIN scrapers ss ON(s.scraperid = ss.id)
@@ -154,7 +155,7 @@ func LastScrapingByNameVersion(
 }
 
 func ResultsByScraping(scraping int) (results []Result, err error) {
-	fmt.Println("Starting ResultsByScraping...")
+	fmt.Println(Gray(8-1, "Starting ResultsByScraping..."))
 	rows, err := Db.Query(`SELECT
                                 t.name,
                                 r.title, 
@@ -180,6 +181,5 @@ func ResultsByScraping(scraping int) (results []Result, err error) {
 		results = append(results, result)
 	}
 	rows.Close()
-	fmt.Println("Number of results loaded: " + strconv.Itoa(len(results)))
 	return
 }

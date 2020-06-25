@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+
+	. "github.com/logrusorgru/aurora"
 )
 
 func main() {
@@ -22,19 +24,29 @@ func main() {
 	}
 
 	scrapers, err := GetScrapers()
+	if err != nil {
+		panic(err.Error())
+	}
 
 	for _, elem := range scrapers {
 		if Contains(want_scrapers, elem.Name) {
-			fmt.Println(elem.Name)
+			fmt.Println(BrightBlue("Scraping -->"), Bold(BrightBlue(elem.Name)))
 			response, results := Scrape(elem.Name, elem.Version, false)
 			if len(results) > 0 {
 				scraping, err := elem.StartScrapingSession()
+				if err != nil {
+					panic(err.Error())
+				}
 				file_path := GenerateFilePath(elem.Name, scraping.Id)
 				SaveResults(elem, scraping, results)
 				SaveResponseToStorage(response, file_path)
-				_ = err
+				if err != nil {
+					panic(err.Error())
+				}
 			}
 		}
 	}
-	_ = err
+	if err != nil {
+		panic(err.Error())
+	}
 }

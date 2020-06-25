@@ -10,6 +10,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	. "github.com/logrusorgru/aurora"
 )
 
 type Scraper struct {
@@ -63,14 +64,14 @@ func DbConnect() {
 
 	if err = Db.Ping(); err != nil {
 		Db.Close()
-		fmt.Println("Unsuccessfully connected to the database")
+		fmt.Println(Bold(Red("Unsuccessfully connected to the database")))
 		return
 	}
-	fmt.Println("Successfully connected to the database")
+	fmt.Println(Bold(Green("Successfully connected to the database")))
 }
 
 func GetScrapers() (scrapers []Scraper, err error) {
-	fmt.Println("Starting GetScrapers...")
+	fmt.Println(Gray(8-1, "Starting GetScrapers..."))
 	rows, err := Db.Query(`SELECT
                                 s.name, 
                                 MAX(s.version) AS version, 
@@ -95,7 +96,7 @@ func GetScrapers() (scrapers []Scraper, err error) {
 }
 
 func (matching *Matching) StartMatchingSession(scraper_id int) (err error) {
-	fmt.Println("Starting StartMatchingSession...")
+	fmt.Println(Gray(8-1, "Starting StartMatchingSession..."))
 	statement := `INSERT INTO matchings (scraperid, createdat)
                   VALUES ($1, $2)
                   RETURNING id`
@@ -115,7 +116,7 @@ func (matching *Matching) StartMatchingSession(scraper_id int) (err error) {
 }
 
 func GetMatches(matching Matching, scraper_id int) (matches []Match, err error) {
-	fmt.Println("Starting GetMatches...")
+	fmt.Println(Gray(8-1, "Starting GetMatches..."))
 	rows, err := Db.Query(`
                         SELECT
                             r.createdat AS created_at,
@@ -158,7 +159,7 @@ func GetMatches(matching Matching, scraper_id int) (matches []Match, err error) 
 }
 
 func SaveMatches(matching Matching, matches []Match) {
-	fmt.Println("Starting SaveMatches...")
+	fmt.Println(Gray(8-1, "Starting SaveMatches..."))
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
 	timeNow := time.Now() // updatedAt and createdAt will be identical
