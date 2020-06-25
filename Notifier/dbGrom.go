@@ -21,8 +21,8 @@ type Session struct {
 
 func main() {
 	db, _ := gorm.Open("postgres", "host=35.223.132.23 port=5432 user=postgres dbname=jeifai password=jeifai")
-	var s []User
-	db.Preload("Session").Find(&s)
+	var u []User
+	db.Preload("Session").Find(&u)
 
-	fmt.Println(s)
+	fmt.Println(u)
 }
