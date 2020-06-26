@@ -24,28 +24,26 @@ type Notifier struct {
 }
 
 type Notification struct {
-	Id              int
-	UtkId           int
-	NotifierId      int
-    MatchId         int
-    UserId          int
-    UserName        string
-    CompanyName     string
-    JobTitle        string
-    JobUrl          string
-	CreatedAt       time.Time
+	UserName    string
+	UserEmail   string
+	CompanyName string
+	JobTitle    string
+	JobUrl      string
 }
 
 type Email struct {
-    UserId		int
-    UserName	string
-    Company struct {
-        CompanyName string
-        Job struct {
-            JobTitle 	string
-            JobUrl		string
-        }
-    }
+	UserName string
+	Company  []Company
+}
+
+type Company struct {
+	CompanyName string
+	Job         []Job
+}
+
+type Job struct {
+	JobTitle string
+	JobUrl   string
 }
 
 var Db *sql.DB
@@ -125,24 +123,23 @@ func (notifier *Notifier) StartNotifierSession(scraper_id int) (err error) {
 	}
 	return
 }
+
 func GetNotifications(notifier Notifier, scraper_id int) (notifications []Notification, err error) {
 	// fmt.Println("Starting GetNotifications...")
 	rows, err := Db.Query(`
                         SELECT DISTINCT
-                            utk.id AS utkId,
-                            m.id AS matchId,
-                            u.id AS userId,
-                            u.username AS userName,
-                            s.name AS scraperName,
-                            r.title AS resultTitle,
-                            r.url AS resultUrl
+                            u.username,
+                            u.email,
+                            s.name,
+                            r.title,
+                            r.url
                         FROM results r
                         INNER JOIN matches m ON(r.id = m.resultid)
                         LEFT JOIN scrapers s ON(r.scraperid = s.id)
                         LEFT JOIN notifications n ON(m.id = n.matchid)
                         LEFT JOIN userstargetskeywords utk ON(m.keywordid = utk.keywordid)
                         LEFT JOIN users u ON(utk.userid = u.id)
-                        WHERE m.createdat > current_date - interval '0' day
+                        WHERE m.createdat > current_date - interval '1' day
                         AND s.id = $1
                         AND n.id IS NULL
                         ORDER BY 1 DESC;`, scraper_id)
@@ -152,17 +149,13 @@ func GetNotifications(notifier Notifier, scraper_id int) (notifications []Notifi
 	for rows.Next() {
 		notification := Notification{}
 		if err = rows.Scan(
-			&notification.UtkId,
-            &notification.MatchId,
-            &notification.UserId,
-            &notification.UserName,
-            &notification.CompanyName,
-            &notification.JobTitle,
-            &notification.JobUrl); err != nil {
+			&notification.UserName,
+			&notification.UserEmail,
+			&notification.CompanyName,
+			&notification.JobTitle,
+			&notification.JobUrl); err != nil {
 			return
 		}
-		notification.NotifierId = notifier.Id
-		notification.CreatedAt = time.Now()
 		notifications = append(notifications, notification)
 	}
 	rows.Close()
