@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"io/ioutil"
 )
 
@@ -20,8 +20,8 @@ func main() {
 		panic(err.Error())
     }
     
-    emails := GetEmails(notifications)
-	fmt.Println(emails)
+    emails := CreateEmailsStruct(notifications)
+    SendEmails(emails)
 
 	file, _ := json.MarshalIndent(emails, "", " ")
 

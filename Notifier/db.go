@@ -32,8 +32,9 @@ type Notification struct {
 }
 
 type Email struct {
-	UserName string
-	Company  []Company
+    UserName    string
+    UserEmail   string
+	Company     []Company
 }
 
 type Company struct {
@@ -148,6 +149,7 @@ func GetNotifications(scrapers []Scraper) (notifications []Notification, err err
                             WHERE m.createdat > current_date - interval '1' day
                             AND s.id = $1
                             AND n.id IS NULL
+                            AND u.id = 1
                             ORDER BY 1 DESC;`, elem.Id)
         if err != nil {
 		    panic(err.Error())
