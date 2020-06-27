@@ -1,11 +1,5 @@
 package main
 
-import (
-	"encoding/json"
-	// "fmt"
-	"io/ioutil"
-)
-
 func main() {
 	DbConnect()
 	defer Db.Close()
@@ -23,8 +17,4 @@ func main() {
 	emails := CreateEmailsStruct(notifications)
 
 	SendEmails(emails)
-
-	file, _ := json.MarshalIndent(emails, "", " ")
-
-	_ = ioutil.WriteFile("test.json", file, 0o644)
 }
