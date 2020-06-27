@@ -56,13 +56,10 @@ func logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func signup(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Generating HTML for signup...")
-	templates := template.Must(
-		template.ParseFiles(
-			"templates/layout.html",
-			"templates/public.navigation.html",
-			"templates/signup.html"))
-	templates.ExecuteTemplate(w, "layout", nil)
+	fmt.Println("Starting signup...")
+	login_template := template.Must(template.ParseFiles("templates/signup.html"))
+	fmt.Println("Closing signup...")
+	login_template.ExecuteTemplate(w, "signup.html", nil)
 }
 
 func signupAccount(w http.ResponseWriter, r *http.Request) {
