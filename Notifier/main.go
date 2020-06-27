@@ -15,13 +15,14 @@ func main() {
 		panic(err.Error())
 	}
 
-    notifications, err := GetNotifications(scrapers)
+	notifications, err := PrepareNotifications(scrapers)
 	if err != nil {
 		panic(err.Error())
-    }
-    
-    emails := CreateEmailsStruct(notifications)
-    SendEmails(emails)
+	}
+
+	emails := CreateEmailsStruct(notifications)
+
+	SendEmails(emails)
 
 	file, _ := json.MarshalIndent(emails, "", " ")
 

@@ -19,32 +19,37 @@ type Scraper struct {
 
 type Notifier struct {
 	Id        int
-	ScraperId int
+	UserId    int
 	CreatedAt time.Time
 }
 
 type Notification struct {
-	UserName    string
-	UserEmail   string
-	Name        string
-	Title       string
-	Url         string
+	MatchId   int
+	UserId    int
+	UserName  string
+	UserEmail string
+	Name      string
+	Title     string
+	Url       string
 }
 
 type Email struct {
-    UserName    string
-    UserEmail   string
-	Company     []Company
+	MatchId   int
+	UserId    int
+	UserName  string
+	UserEmail string
+	Company   []Company
 }
 
 type Company struct {
 	Name string
-	Job         []Job
+	Job  []Job
 }
 
 type Job struct {
-	Title string
-	Url   string
+	MatchId int
+	Title   string
+	Url     string
 }
 
 var Db *sql.DB
@@ -105,36 +110,17 @@ func GetScrapers() (scrapers []Scraper, err error) {
 	return
 }
 
-func (notifier *Notifier) StartNotifierSession(scraper_id int) (err error) {
-	fmt.Println("Starting StartNotifierSession...")
-	statement := `INSERT INTO notifiers (scraperid, createdat)
-                  VALUES ($1, $2)
-                  RETURNING id`
-	stmt, err := Db.Prepare(statement)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer stmt.Close()
-	err = stmt.QueryRow(
-		scraper_id,
-		time.Now()).Scan(
-		&notifier.Id)
-	if err != nil {
-		panic(err.Error())
-	}
-	return
-}
+func PrepareNotifications(scrapers []Scraper) (notifications []Notification, err error) {
+	fmt.Println("Starting GetNotifications...")
 
-func GetNotifications(scrapers []Scraper) (notifications []Notification, err error) {
-    fmt.Println("Starting GetNotifications...")
+	for _, elem := range scrapers {
 
-    for _, elem := range scrapers {
+		scraper_id := elem.Id
 
-        //notifier := Notifier{1, 1, time.Now()}
-        // notifier.StartNotifierSession(elem.id)
-
-        rows, err := Db.Query(`
+		rows, err := Db.Query(`
                             SELECT DISTINCT
+                                m.id,
+                                u.id,
                                 u.username,
                                 u.email,
                                 s.name,
@@ -150,21 +136,58 @@ func GetNotifications(scrapers []Scraper) (notifications []Notification, err err
                             AND s.id = $1
                             AND n.id IS NULL
                             AND u.id = 1
-                            ORDER BY 1 DESC;`, elem.Id)
-        if err != nil {
-		    panic(err.Error())
-        }
-        for rows.Next() {
-            notification := Notification{}
-            rows.Scan(
-                &notification.UserName,
-                &notification.UserEmail,
-                &notification.Name,
-                &notification.Title,
-                &notification.Url)
-            notifications = append(notifications, notification)
-        }
-        rows.Close()
-    }
+                            ORDER BY 1 DESC;`, scraper_id)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		counter := 0
+		for rows.Next() {
+			notification := Notification{}
+			rows.Scan(
+				&notification.MatchId,
+				&notification.UserId,
+				&notification.UserName,
+				&notification.UserEmail,
+				&notification.Name,
+				&notification.Title,
+				&notification.Url)
+			counter++
+			notifications = append(notifications, notification)
+		}
+		rows.Close()
+	}
 	return
+}
+
+func (notifier *Notifier) StartNotifierSession(user_id int) (err error) {
+	fmt.Println("Starting StartNotifierSession...")
+	statement := `INSERT INTO notifiers (userid, createdat)
+                  VALUES ($1, $2)
+                  RETURNING id, userid, createdat`
+	stmt, err := Db.Prepare(statement)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(
+		user_id,
+		time.Now()).Scan(
+		&notifier.Id, &notifier.UserId, &notifier.CreatedAt)
+	if err != nil {
+		panic(err.Error())
+	}
+	return
+}
+
+func SaveNotification(notifier Notifier, match_id int) {
+	fmt.Println("Starting SaveNotification...")
+	statement := `INSERT INTO notifications(notifierid, matchid, createdat)
+                  VALUES ($1, $2, $3)`
+	stmt, err := Db.Prepare(statement)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer stmt.Close()
+	stmt.QueryRow(notifier.Id, match_id, time.Now())
 }

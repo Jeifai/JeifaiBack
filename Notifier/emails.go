@@ -1,22 +1,23 @@
 package main
 
 import (
-    "os"
-    "fmt"
-    "bytes"
+	"bytes"
+	"fmt"
 	"html/template"
+	"os"
 
 	"github.com/joho/godotenv"
-    "gopkg.in/gomail.v2"
+	"gopkg.in/gomail.v2"
 )
 
 func CreateEmailsStruct(notifications []Notification) (emails []Email) {
-    fmt.Println("Starting GetEmails...")
+	fmt.Println("Starting GetEmails...")
 	var users []string
 	for _, notif_1 := range notifications {
 		if !Contains(users, notif_1.UserName) {
 			var email Email
-            email.UserName = notif_1.UserName
+			email.UserId = notif_1.UserId
+			email.UserName = notif_1.UserName
 			email.UserEmail = notif_1.UserEmail
 			users = append(users, notif_1.UserName)
 			var companies []string
@@ -32,6 +33,7 @@ func CreateEmailsStruct(notifications []Notification) (emails []Email) {
 								if notif_2.Name == notif_3.Name {
 									if !Contains(jobs, notif_3.Title) {
 										var job Job
+										job.MatchId = notif_3.MatchId
 										job.Title = notif_3.Title
 										job.Url = notif_3.Url
 										company.Job = append(company.Job, job)
@@ -46,13 +48,12 @@ func CreateEmailsStruct(notifications []Notification) (emails []Email) {
 			}
 			emails = append(emails, email)
 		}
-    }
-    return
+	}
+	return
 }
 
 func SendEmails(emails []Email) {
-    
-    err := godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -62,27 +63,40 @@ func SendEmails(emails []Email) {
 
 	t, err = t.ParseFiles("template.html")
 	if err != nil {
-		fmt.Println(err)
-    }
-    
-    for _, email := range emails {
-        var tpl bytes.Buffer
-        if err := t.Execute(&tpl, email); err != nil {
-            fmt.Println(err)
-        }
+		panic(err.Error())
+	}
 
-        result := tpl.String()
+	for _, email := range emails {
 
-        m := gomail.NewMessage()
-        m.SetHeader("From", "robimalco@gmail.com")
-        m.SetHeader("To", email.UserEmail)
-        m.SetHeader("Subject", "Hello! There are new matches!")
-        m.SetBody("text/html", result)
+		var notifier Notifier
+		err := notifier.StartNotifierSession(email.UserId)
+		if err != nil {
+			panic(err.Error())
+		}
 
-        d := gomail.NewDialer("smtp.gmail.com", 587, "robimalco@gmail.com", password)
+		for _, company := range email.Company {
+			for _, job := range company.Job {
+				SaveNotification(notifier, job.MatchId)
+			}
+		}
 
-        if err := d.DialAndSend(m); err != nil {
-            panic(err)
-        }
-    }
+		var tpl bytes.Buffer
+		if err := t.Execute(&tpl, email); err != nil {
+			fmt.Println(err)
+		}
+
+		result := tpl.String()
+
+		m := gomail.NewMessage()
+		m.SetHeader("From", "robimalco@gmail.com")
+		m.SetHeader("To", email.UserEmail)
+		m.SetHeader("Subject", "Hello! There are new matches!")
+		m.SetBody("text/html", result)
+
+		d := gomail.NewDialer("smtp.gmail.com", 587, "robimalco@gmail.com", password)
+
+		if err := d.DialAndSend(m); err != nil {
+			panic(err)
+		}
+	}
 }
