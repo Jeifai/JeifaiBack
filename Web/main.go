@@ -33,7 +33,9 @@ func main() {
 	r.HandleFunc("/keywords", putKeyword).Methods("PUT")
 	r.HandleFunc("/keywords/remove", removeKeyword).Methods("PUT")
 
-	r.HandleFunc("/results", results)
+    r.HandleFunc("/results", results)
+    
+	r.HandleFunc("/test", test)
 
 	fmt.Println("Application is running")
 

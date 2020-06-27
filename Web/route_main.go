@@ -40,3 +40,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 		templates.ExecuteTemplate(w, "layout", infos)
 	}
 }
+
+func test(w http.ResponseWriter, r *http.Request) {
+	login_template := template.Must(template.ParseFiles("templates/test.html"))
+	login_template.ExecuteTemplate(w, "test.html", nil)
+}
