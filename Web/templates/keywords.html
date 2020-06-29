@@ -31,24 +31,34 @@
                 <h1>
                     My keywords
                 </h1>
+                <div>
+                    <input
+                        type="text" 
+                        placeholder="Filter by any field" 
+                        v-model="filter"/>
+                </div>
                 <table v-if="utks">
-                    <tr>
-                        <th>CreatedAt</th>
-                        <th>Keyword</th>
-                        <th>Target</th>
-                    </tr>
-                    <tr v-for="(utk, index) in utks">
-                        <td>[[ utk.CreatedAt ]]</td>
-                        <td>[[ utk.KeywordText ]]</td>
-                        <td>[[ utk.TargetUrl ]]</td>
-                        <td>
-                            <span>
-                                <button v-on:click="deleteUtk(index)" class="buttonDelete">
-                                    <i>Delete</i>
-                                </button>
-                            </span>
-                        </td>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th>CreatedAt</th>
+                            <th>Keyword</th>
+                            <th>Target</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(row, index) in filteredRows">
+                            <td v-html="row.CreatedAt"></td>
+                            <td v-html="row.KeywordText"></td>
+                            <td v-html="row.TargetUrl"></td>
+                            <td>
+                                <span>
+                                    <button v-on:click="deleteUtk(index)" class="buttonDelete">
+                                        <i>Delete</i>
+                                    </button>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -63,7 +73,8 @@
                     targets: {{.Targets}},
                     utks: {{.Utks}},
                     newKeyword: {},
-                    selectedTargets: null
+                    selectedTargets: null,
+                    filter: ''
                 },
             methods: {
                 createKeyword: function() {
@@ -87,6 +98,19 @@
                         this.utks = response.data.Utks;
                     }).catch(function(error) {
                         console.log(error)
+                    });
+                }
+            },
+            computed: {
+                filteredRows() {
+                    return this.utks.filter(row => {
+                        const CreatedAt = row.CreatedAt.toString().toLowerCase();
+                        const KeywordText = row.KeywordText.toString().toLowerCase();
+                        const TargetUrl = row.TargetUrl.toString().toLowerCase();
+                        const searchTerm = this.filter.toLowerCase();
+                        return (
+                            CreatedAt.includes(searchTerm) || KeywordText.includes(searchTerm) || TargetUrl.includes(searchTerm)
+                        );
                     });
                 }
             }
