@@ -83,9 +83,8 @@
                         "KeywordText": this.utks[index].KeywordText
                         }
                     this.$http.put('/keywords/remove', payload).then(function(response) {
-                        this.message = response.data.Message
-                        this.utks.splice(index, 1)
-                        console.log(response)
+                        this.messages = response.data.Messages
+                        this.utks = response.data.Utks;
                     }).catch(function(error) {
                         console.log(error)
                     });

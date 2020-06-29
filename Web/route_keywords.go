@@ -138,6 +138,7 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 }
 
 func removeKeyword(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Starting removeKeyword...")
 	var utk data.UserTargetKeyword
 	err := json.NewDecoder(r.Body).Decode(&utk)
 
@@ -168,10 +169,23 @@ func removeKeyword(w http.ResponseWriter, r *http.Request) {
 	err = utk.SetDeletedAtIntUserTargetKeyword()
 	if err != nil {
 		panic(err.Error())
+    }
+    
+	var utks []data.UserTargetKeyword
+	utks, err = user.GetUserTargetKeyword()
+	if err != nil {
+		panic(err.Error())
 	}
 
-	type TempStruct struct{ Message string }
-	infos := TempStruct{"Successfully removed"}
+	type TempStruct struct {
+		Messages []string
+		Utks     []data.UserTargetKeyword
+    }
+    
+    var messages []string
+    messages = append(messages, `<p style="color:green">Successfully removed</p>`)
+
+	infos := TempStruct{messages, utks}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(infos)
