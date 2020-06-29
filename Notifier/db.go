@@ -9,6 +9,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	. "github.com/logrusorgru/aurora"
 )
 
 type Scraper struct {
@@ -79,14 +80,14 @@ func DbConnect() {
 
 	if err = Db.Ping(); err != nil {
 		Db.Close()
-		fmt.Println("Unsuccessfully connected to the database")
+		fmt.Println(Bold(Red("Unsuccessfully connected to the database")))
 		return
 	}
-	fmt.Println("Successfully connected to the database")
+	fmt.Println(Bold(Green("Successfully connected to the database")))
 }
 
 func GetScrapers() (scrapers []Scraper, err error) {
-	fmt.Println("Starting GetScrapers...")
+	fmt.Println(Gray(8-1, "Starting GetScrapers..."))
 	rows, err := Db.Query(`SELECT
                                 s.name, 
                                 MAX(s.version) AS version, 
@@ -111,7 +112,7 @@ func GetScrapers() (scrapers []Scraper, err error) {
 }
 
 func PrepareNotifications(scrapers []Scraper) (notifications []Notification, err error) {
-	fmt.Println("Starting GetNotifications...")
+	fmt.Println(Gray(8-1, "Starting GetNotifications..."))
 
 	for _, elem := range scrapers {
 
@@ -161,7 +162,7 @@ func PrepareNotifications(scrapers []Scraper) (notifications []Notification, err
 }
 
 func (notifier *Notifier) StartNotifierSession(user_id int) (err error) {
-	fmt.Println("Starting StartNotifierSession...")
+	fmt.Println(Gray(8-1, "Starting StartNotifierSession..."))
 	statement := `INSERT INTO notifiers (userid, createdat)
                   VALUES ($1, $2)
                   RETURNING id, userid, createdat`
@@ -181,7 +182,7 @@ func (notifier *Notifier) StartNotifierSession(user_id int) (err error) {
 }
 
 func SaveNotification(notifier Notifier, match_id int) {
-	fmt.Println("Starting SaveNotification...")
+	fmt.Println(Gray(8-1, "Starting SaveNotification..."))
 	statement := `INSERT INTO notifications(notifierid, matchid, createdat)
                   VALUES ($1, $2, $3)`
 	stmt, err := Db.Prepare(statement)

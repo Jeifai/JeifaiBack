@@ -7,11 +7,12 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	. "github.com/logrusorgru/aurora"
 	"gopkg.in/gomail.v2"
 )
 
 func CreateEmailsStruct(notifications []Notification) (emails []Email) {
-	fmt.Println("Starting GetEmails...")
+	fmt.Println(Gray(8-1, "Starting CreateEmailsStruct..."))
 	var users []string
 	for _, notif_1 := range notifications {
 		if !Contains(users, notif_1.UserName) {
@@ -53,6 +54,7 @@ func CreateEmailsStruct(notifications []Notification) (emails []Email) {
 }
 
 func SendEmails(emails []Email) {
+	fmt.Println(Gray(8-1, "Starting SendEmails..."))
 	err := godotenv.Load()
 	if err != nil {
 		panic(err.Error())
@@ -67,6 +69,8 @@ func SendEmails(emails []Email) {
 	}
 
 	for _, email := range emails {
+
+		fmt.Println(Blue("Sending email to -->"), Bold(Blue(email.UserEmail)))
 
 		var notifier Notifier
 		err := notifier.StartNotifierSession(email.UserId)
