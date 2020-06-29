@@ -16,12 +16,12 @@ type UserTargetKeyword struct {
 	UserId      int
 	TargetId    int
 	KeywordId   int
-	CreatedAt   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 	KeywordText string
 	TargetUrl   string
 }
 
-// Add a new keyword
 func (keyword *Keyword) CreateKeyword() (err error) {
 	fmt.Println("Starting CreateKeyword...")
 	statement := `INSERT INTO keywords (text, createdat)
@@ -59,7 +59,8 @@ func (user *User) GetUserTargetKeyword() (
                                 utk.userid,
                                 utk.targetid,
                                 utk.keywordid,
-                                TO_CHAR(utk.createdat, 'DD/MM/YYYY'),
+                                utk.createdat,
+                                utk.updatedat,
                                 k.text,
                                 t.url
                             FROM userstargetskeywords utk
@@ -78,6 +79,7 @@ func (user *User) GetUserTargetKeyword() (
 			&utk.TargetId,
 			&utk.KeywordId,
 			&utk.CreatedAt,
+			&utk.UpdatedAt,
 			&utk.KeywordText,
 			&utk.TargetUrl); err != nil {
 			return
@@ -89,8 +91,7 @@ func (user *User) GetUserTargetKeyword() (
 }
 
 func SetUserTargetKeyword(
-	user User, targets []Target, keyword Keyword) (
-	utks []UserTargetKeyword, err error) {
+	user User, targets []Target, keyword Keyword) (err error) {
 	fmt.Println("Starting SetUserTargetKeyword...")
 
 	for _, elem := range targets {
@@ -98,29 +99,18 @@ func SetUserTargetKeyword(
                         userid, targetid, keywordid, createdat)
                         VALUES ($1, $2, $3, $4)
                         ON CONFLICT (userid, targetid, keywordid) 
-                        DO UPDATE SET deletedat = NULL
-                        RETURNING id, userid, targetid, keywordid, createdat`
+                        DO UPDATE SET deletedat = NULL, updatedat = current_timestamp`
 		stmt, err := Db.Prepare(statement)
 		if err != nil {
 			panic(err.Error())
 		}
 		defer stmt.Close()
-		utk := UserTargetKeyword{}
-		err = stmt.QueryRow(
+		stmt.QueryRow(
 			user.Id,
 			elem.Id,
 			keyword.Id,
 			time.Now(),
-		).Scan(
-			&utk.Id,
-			&utk.UserId,
-			&utk.TargetId,
-			&utk.KeywordId,
-			&utk.CreatedAt,
 		)
-		utk.KeywordText = keyword.Text
-		utk.TargetUrl = elem.Url
-		utks = append(utks, utk)
 	}
 	return
 }

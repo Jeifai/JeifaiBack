@@ -86,6 +86,7 @@ create table userstargetskeywords (
   targetid      integer references targets(id),
   keywordid     integer references keywords(id),
   createdat     timestamp not null,
+  updatedat     timestamp not null,
   deletedat     timestamp,
   UNIQUE (userid, targetid, keywordid)
 );

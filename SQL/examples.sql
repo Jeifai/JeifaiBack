@@ -28,7 +28,8 @@ DELETE FROM scrapers WHERE version = 2;
 ALTER TABLE userstargets DROP COLUMN uuid;
 
 /* Add column to table */
-ALTER TABLE results ADD COLUMN updatedat timestamp NOT NULL DEFAULT currenttimestamp;
+ALTER TABLE results ADD COLUMN updatedat timestamp NOT NULL DEFAULT current_timestamp;
+ALTER TABLE userstargetskeywords ADD COLUMN updatedat timestamp NOT NULL DEFAULT current_timestamp;
 ALTER TABLE jobs ADD COLUMN scrapingid integer references scraping(id);
 
 /* Update value in column based on condition */

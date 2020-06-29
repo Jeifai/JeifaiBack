@@ -22,7 +22,7 @@ func keywords(w http.ResponseWriter, r *http.Request) {
 	templates := template.Must(
 		template.ParseFiles(
 			"templates/layout.html",
-            "templates/topbar.html",
+			"templates/topbar.html",
 			"templates/sidebar.html",
 			"templates/keywords.html"))
 
@@ -71,7 +71,6 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 	err = validate.Struct(response)
 
 	var messages []string
-	added := false
 
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -97,8 +96,6 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var utks []data.UserTargetKeyword
-
 	if len(messages) == 0 {
 
 		// Before creating the relation user <-> target,
@@ -110,29 +107,31 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 			response.Keyword.CreateKeyword()
 		}
 
-		// Get target's detail based on
 		targets, err := data.TargetsByUrls(response.SelectedTargets)
 		if err != nil {
 			panic(err.Error())
 		}
 
-		utks, err = data.SetUserTargetKeyword(user, targets, response.Keyword)
+		err = data.SetUserTargetKeyword(user, targets, response.Keyword)
 		if err != nil {
 			panic(err.Error())
 		}
-
-		temp_message := `<p style="color:green">Keyword successfully added</p>`
+		temp_message := `<p style="color:green">Successfully added</p>`
 		messages = append(messages, temp_message)
-		added = true
+	}
+
+	var utks []data.UserTargetKeyword
+	utks, err = user.GetUserTargetKeyword()
+	if err != nil {
+		panic(err.Error())
 	}
 
 	type TempStruct struct {
 		Messages []string
-		Added    bool
 		Utks     []data.UserTargetKeyword
 	}
 
-	infos := TempStruct{messages, added, utks}
+	infos := TempStruct{messages, utks}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(infos)
@@ -172,7 +171,7 @@ func removeKeyword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type TempStruct struct{ Message string }
-	infos := TempStruct{"Target successfully removed"}
+	infos := TempStruct{"Successfully removed"}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(infos)

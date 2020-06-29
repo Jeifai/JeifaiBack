@@ -12,13 +12,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting index...")
 	sess, err := session(r)
 	if err != nil {
-        fmt.Println("Generating HTML for index, user not logged in...")
-        /**
-		templates := template.Must(
-			template.ParseFiles(
-				"templates/layout.html",
-				"templates/public.navigation.html",
-                "templates/index.html"))*/
+		fmt.Println("Generating HTML for index, user not logged in...")
+		/**
+				templates := template.Must(
+					template.ParseFiles(
+						"templates/layout.html",
+						"templates/public.navigation.html",
+		                "templates/index.html"))*/
 		templates := template.Must(template.ParseFiles("templates/tempIndex.html"))
 		templates.ExecuteTemplate(w, "layout", nil)
 	} else {
@@ -30,8 +30,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 		templates := template.Must(
 			template.ParseFiles(
 				"templates/layout.html",
-                "templates/topbar.html",
-                "templates/sidebar.html",
+				"templates/topbar.html",
+				"templates/sidebar.html",
 				"templates/index.html"))
 		type TempStruct struct {
 			User data.User

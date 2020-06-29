@@ -72,16 +72,7 @@
                         "newKeyword": this.newKeyword
                         }).then(function(response) {
                             this.messages = response.data.Messages
-                            if(response.data.Added){
-                                temp_utks = response.data.Utks
-                                for (var i = 0; i < temp_utks.length; i++) {
-                                    if (this.utks == null){
-                                        this.utks = [temp_utks[i]]
-                                    } else {
-                                        this.utks.push(temp_utks[i])
-                                    }
-                                }
-                            }
+                            this.utks = response.data.Utks;
                     }).catch(function(error) {
                         console.log(error)
                     });
