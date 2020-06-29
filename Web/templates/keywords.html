@@ -47,7 +47,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(row, index) in filteredRows">
-                            <td v-html="row.CreatedAt"></td>
+                            <td v-html="row.CreatedDate"></td>
                             <td v-html="row.KeywordText"></td>
                             <td v-html="row.TargetUrl"></td>
                             <td>
@@ -104,12 +104,12 @@
             computed: {
                 filteredRows() {
                     return this.utks.filter(row => {
-                        const CreatedAt = row.CreatedAt.toString().toLowerCase();
+                        const CreatedDate = row.CreatedDate.toString().toLowerCase();
                         const KeywordText = row.KeywordText.toString().toLowerCase();
                         const TargetUrl = row.TargetUrl.toString().toLowerCase();
                         const searchTerm = this.filter.toLowerCase();
                         return (
-                            CreatedAt.includes(searchTerm) || KeywordText.includes(searchTerm) || TargetUrl.includes(searchTerm)
+                            CreatedDate.includes(searchTerm) || KeywordText.includes(searchTerm) || TargetUrl.includes(searchTerm)
                         );
                     });
                 }

@@ -21,7 +21,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="(row, index) in filteredRows">
-                        <td v-html="row.CreatedAt"></td>
+                        <td v-html="row.CreatedDate"></td>
                         <td v-html="row.Target"></td>
                         <td v-html="row.Title"></td>
                         <td>
@@ -52,12 +52,12 @@
             computed: {
                 filteredRows() {
                     return this.results.filter(row => {
-                        const CreatedAt = row.CreatedAt.toString().toLowerCase();
+                        const CreatedDate = row.CreatedDate.toString().toLowerCase();
                         const Target = row.Target.toString().toLowerCase();
                         const Title = row.Title.toString().toLowerCase();
                         const searchTerm = this.filter.toLowerCase();
                         return (
-                            CreatedAt.includes(searchTerm) || Target.includes(searchTerm) || Title.includes(searchTerm)
+                            CreatedDate.includes(searchTerm) || Target.includes(searchTerm) || Title.includes(searchTerm)
                         );
                     });
                 }

@@ -8,7 +8,7 @@ import (
 type Keyword struct {
 	Id        int
 	Text      string `validate:"required,max=30,min=3"`
-	CreatedAt string
+	CreatedAt time.Time
 }
 
 type UserTargetKeyword struct {
@@ -17,6 +17,7 @@ type UserTargetKeyword struct {
 	TargetId    int
 	KeywordId   int
 	CreatedAt   time.Time
+	CreatedDate string
 	UpdatedAt   time.Time
 	KeywordText string
 	TargetUrl   string
@@ -60,6 +61,7 @@ func (user *User) GetUserTargetKeyword() (
                                 utk.targetid,
                                 utk.keywordid,
                                 utk.createdat,
+                                TO_CHAR(utk.createdat, 'YYYY-MM-DD'),
                                 utk.updatedat,
                                 k.text,
                                 t.url
@@ -67,7 +69,8 @@ func (user *User) GetUserTargetKeyword() (
                             LEFT JOIN keywords k ON(utk.keywordid = k.id)
                             LEFT JOIN targets t ON(utk.targetid = t.id)
                             WHERE utk.userid = $1
-                            AND utk.deletedat IS NULL`, user.Id)
+                            AND utk.deletedat IS NULL
+                            ORDER BY utk.updatedat DESC`, user.Id)
 	if err != nil {
 		return
 	}
@@ -79,6 +82,7 @@ func (user *User) GetUserTargetKeyword() (
 			&utk.TargetId,
 			&utk.KeywordId,
 			&utk.CreatedAt,
+			&utk.CreatedDate,
 			&utk.UpdatedAt,
 			&utk.KeywordText,
 			&utk.TargetUrl); err != nil {

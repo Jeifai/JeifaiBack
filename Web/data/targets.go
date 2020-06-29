@@ -8,10 +8,11 @@ import (
 )
 
 type Target struct {
-	Id        int
-	Url       string `validate:"url"`
-	Host      string
-	CreatedAt string
+	Id          int
+	Url         string `validate:"url"`
+	Host        string
+	CreatedAt   time.Time
+	CreatedDate string
 }
 
 // Add a new target
@@ -57,18 +58,24 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 	rows, err := Db.Query(`SELECT
                             t.id,
                             t.url,
-                            TO_CHAR(t.createdat, 'DD/MM/YYYY') 
+                            t.createdat,
+                            TO_CHAR(t.createdat, 'YYYY-MM-DD')
                            FROM users u
                            INNER JOIN userstargets ut ON(u.id = ut.userid) 
                            INNER JOIN targets t ON(ut.targetid = t.id)
                            WHERE ut.deletedat IS NULL
-                           AND u.id=$1`, user.Id)
+                           AND u.id=$1
+                           ORDER BY t.createdat DESC`, user.Id)
 	if err != nil {
 		panic(err.Error())
 	}
 	for rows.Next() {
 		target := Target{}
-		if err = rows.Scan(&target.Id, &target.Url, &target.CreatedAt); err != nil {
+		if err = rows.Scan(
+			&target.Id,
+			&target.Url,
+			&target.CreatedAt,
+			&target.CreatedDate); err != nil {
 			panic(err.Error())
 		}
 		targets = append(targets, target)
