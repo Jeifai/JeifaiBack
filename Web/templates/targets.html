@@ -4,12 +4,14 @@
             <h1>
                 Add a new target
             </h1>
-            <span v-html="message"></span>
+            <p v-for="(message, index) in messages">
+                <span v-html="message"></span>
+            </p>
             <div class="addtarget">
                 <input type="text" 
                     placeholder="New Target" 
                     v-on:keyup.enter="createTarget"
-                    v-model="newTarget.Url">
+                    v-model="newTarget.Name">
                 <span>
                     <button v-on:click="createTarget" class="buttonCreate">Create</button>
                 </span>
@@ -25,7 +27,7 @@
                     </tr>
                     <tr v-for="(target, index) in targets">
                         <td>[[ target.CreatedDate ]]</td>
-                        <td>[[ target.Url ]]</td>
+                        <td>[[ target.Name ]]</td>
                         <td>
                             <span>
                                 <button v-on:click="deleteTarget(index)" class="buttonDelete">
@@ -43,32 +45,24 @@
             el: '#app',
             delimiters: ["[[","]]"],
             data: {
-                    message: '',
-                    targets: {{.Data}},
+                    messages: '',
+                    targets: {{.Targets}},
                     newTarget: {}
                 },
             methods: {
                 createTarget: function() {
                     this.$http.put('/targets', this.newTarget).then(function(response) {
-                        this.message = response.data.Message
-                        if(response.data.Added){
-
-                            if (this.targets == null){
-                                this.targets = [this.newTarget]
-                            } else {
-                                this.targets.push(this.newTarget)
-                            }
-
-                        }
+                        this.messages = response.data.Messages
+                        this.targets = response.data.Targets
                         this.newTarget = {}
                     }).catch(function(error) {
                         console.log(error)
                     });
                 },
                 deleteTarget: function(index) {
-                    payload = {"Url": this.targets[index].Url}
+                    payload = {"Name": this.targets[index].Name}
                     this.$http.put('/targets/remove', payload).then(function(response) {
-                        this.message = response.data.Message
+                        this.messages = response.data.Messages
                         this.targets.splice(index, 1)
                     }).catch(function(error) {
                         console.log(error)

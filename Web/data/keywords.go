@@ -21,6 +21,7 @@ type UserTargetKeyword struct {
 	UpdatedAt   time.Time
 	KeywordText string
 	TargetUrl   string
+	TargetName  string
 }
 
 func (keyword *Keyword) CreateKeyword() (err error) {
@@ -64,7 +65,7 @@ func (user *User) GetUserTargetKeyword() (
                                 TO_CHAR(utk.createdat, 'YYYY-MM-DD'),
                                 utk.updatedat,
                                 k.text,
-                                t.url
+                                t.name
                             FROM userstargetskeywords utk
                             LEFT JOIN keywords k ON(utk.keywordid = k.id)
                             LEFT JOIN targets t ON(utk.targetid = t.id)
@@ -85,7 +86,7 @@ func (user *User) GetUserTargetKeyword() (
 			&utk.CreatedDate,
 			&utk.UpdatedAt,
 			&utk.KeywordText,
-			&utk.TargetUrl); err != nil {
+			&utk.TargetName); err != nil {
 			return
 		}
 		utks = append(utks, utk)

@@ -30,7 +30,7 @@ func keywords(w http.ResponseWriter, r *http.Request) {
 
 	var arr_targets []string
 	for _, v := range struct_targets {
-		arr_targets = append(arr_targets, v.Url)
+		arr_targets = append(arr_targets, v.Name)
 	}
 
 	utks, err := user.GetUserTargetKeyword()
@@ -107,7 +107,7 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 			response.Keyword.CreateKeyword()
 		}
 
-		targets, err := data.TargetsByUrls(response.SelectedTargets)
+		targets, err := data.TargetsByNames(response.SelectedTargets)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -149,8 +149,8 @@ func removeKeyword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	target := data.Target{}
-	target.Url = utk.TargetUrl
-	err = target.TargetByUrl()
+	target.Name = utk.TargetName
+	err = target.TargetByName()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -169,8 +169,8 @@ func removeKeyword(w http.ResponseWriter, r *http.Request) {
 	err = utk.SetDeletedAtIntUserTargetKeyword()
 	if err != nil {
 		panic(err.Error())
-    }
-    
+	}
+
 	var utks []data.UserTargetKeyword
 	utks, err = user.GetUserTargetKeyword()
 	if err != nil {
@@ -180,10 +180,10 @@ func removeKeyword(w http.ResponseWriter, r *http.Request) {
 	type TempStruct struct {
 		Messages []string
 		Utks     []data.UserTargetKeyword
-    }
-    
-    var messages []string
-    messages = append(messages, `<p style="color:green">Successfully removed</p>`)
+	}
+
+	var messages []string
+	messages = append(messages, `<p style="color:green">Successfully removed</p>`)
 
 	infos := TempStruct{messages, utks}
 	w.Header().Set("Content-Type", "application/json")

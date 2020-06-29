@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"net/url"
 
 	"github.com/go-playground/validator"
 
@@ -29,8 +28,8 @@ func targets(w http.ResponseWriter, r *http.Request) {
 	targets, err := user.UsersTargetsByUser()
 
 	type TempStruct struct {
-		User data.User
-		Data []data.Target
+		User    data.User
+		Targets []data.Target
 	}
 
 	infos := TempStruct{user, targets}
@@ -47,42 +46,43 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 
-	url_parsed, err := url.Parse(target.Url)
-	target.Host = url_parsed.Host
-
 	validate := validator.New()
 	err = validate.Struct(target)
 
-	var message string
-	added := false
+	var messages []string
 
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			red_1 := `<p style="color:red">`
 			red_2 := `</p>`
 			var temp_message string
-			if err.Field() == "Url" {
-				if err.Tag() == "url" {
-					temp_message = `The URL inserted is not valid`
+			if err.Field() == "Name" {
+				if err.Tag() == "required" {
+					temp_message = `Name cannot be empty`
 				}
-				message = red_1 + temp_message + red_2
+				if err.Tag() == "min" {
+					temp_message = `Name inserted is too short`
+				}
+				if err.Tag() == "max" {
+					temp_message = `Name inserted is too long`
+				}
+				messages = append(messages, red_1+temp_message+red_2)
 			}
 		}
 	}
 
-	if len(message) == 0 {
-
+	if len(messages) == 0 {
 		// Try to create a target
 		if err := target.CreateTarget(); err != nil {
 			// If already exists, get its url
-			err := target.TargetByUrl()
+			err := target.TargetByName()
 			if err != nil {
 				panic(err.Error())
 			}
 		}
 
 		// Before creating the relation user <-> target, check if it is not already present
-		_, err := user.UsersTargetsByUserAndUrl(target.Url)
+		_, err := user.UsersTargetsByUserAndName(target.Name)
 
 		if err != nil {
 
@@ -91,21 +91,25 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 
 			green_1 := `<p style="color:green">`
 			green_2 := `</p>`
-			message = green_1 + "Target successfully added" + green_2
-			added = true
+			messages = append(messages, green_1+"Target successfully added"+green_2)
 		} else {
 			red_1 := `<p style="color:red">`
 			red_2 := `</p>`
-			message = red_1 + "Target already exists" + red_2
+			messages = append(messages, red_1+"Target already exists"+red_2)
 		}
 	}
 
-	type TempStruct struct {
-		Message string
-		Added   bool
+	targets, err := user.UsersTargetsByUser()
+	if err != nil {
+		panic(err.Error())
 	}
 
-	infos := TempStruct{message, added}
+	type TempStruct struct {
+		Messages []string
+		Targets  []data.Target
+	}
+
+	infos := TempStruct{messages, targets}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(infos)
@@ -121,11 +125,8 @@ func removeTarget(w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 
-	url_parsed, err := url.Parse(target.Url)
-	target.Host = url_parsed.Host
-
 	// Get the target to delete
-	target, err = user.UsersTargetsByUserAndUrl(target.Url)
+	target, err = user.UsersTargetsByUserAndName(target.Name)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -136,8 +137,10 @@ func removeTarget(w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 
-	type TempStruct struct{ Message string }
-	infos := TempStruct{"Target successfully removed"}
+	type TempStruct struct{ Messages []string }
+	var messages []string
+	messages = append(messages, "Target successfully removed")
+	infos := TempStruct{messages}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(infos)

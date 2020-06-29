@@ -49,7 +49,7 @@
                         <tr v-for="(row, index) in filteredRows">
                             <td v-html="row.CreatedDate"></td>
                             <td v-html="row.KeywordText"></td>
-                            <td v-html="row.TargetUrl"></td>
+                            <td v-html="row.TargetName"></td>
                             <td>
                                 <span>
                                     <button v-on:click="deleteUtk(index)" class="buttonDelete">
@@ -90,7 +90,7 @@
                 },
                 deleteUtk: function(index) {
                     payload = {
-                        "TargetUrl": this.utks[index].TargetUrl,
+                        "TargetName": this.utks[index].TargetName,
                         "KeywordText": this.utks[index].KeywordText
                         }
                     this.$http.put('/keywords/remove', payload).then(function(response) {
@@ -106,10 +106,10 @@
                     return this.utks.filter(row => {
                         const CreatedDate = row.CreatedDate.toString().toLowerCase();
                         const KeywordText = row.KeywordText.toString().toLowerCase();
-                        const TargetUrl = row.TargetUrl.toString().toLowerCase();
+                        const TargetName = row.TargetName.toString().toLowerCase();
                         const searchTerm = this.filter.toLowerCase();
                         return (
-                            CreatedDate.includes(searchTerm) || KeywordText.includes(searchTerm) || TargetUrl.includes(searchTerm)
+                            CreatedDate.includes(searchTerm) || KeywordText.includes(searchTerm) || TargetName.includes(searchTerm)
                         );
                     });
                 }

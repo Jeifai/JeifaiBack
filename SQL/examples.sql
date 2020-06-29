@@ -31,6 +31,7 @@ ALTER TABLE userstargets DROP COLUMN uuid;
 ALTER TABLE results ADD COLUMN updatedat timestamp NOT NULL DEFAULT current_timestamp;
 ALTER TABLE userstargetskeywords ADD COLUMN updatedat timestamp NOT NULL DEFAULT current_timestamp;
 ALTER TABLE jobs ADD COLUMN scrapingid integer references scraping(id);
+ALTER TABLE targets ALTER COLUMN name SET NOT NULL;
 
 /* Update value in column based on condition */
 UPDATE targets SET name = 'Kununu' WHERE id = 45;

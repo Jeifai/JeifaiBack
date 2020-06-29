@@ -9,8 +9,9 @@ import (
 
 type Target struct {
 	Id          int
-	Url         string `validate:"url"`
+	Url         string
 	Host        string
+	Name        string `validate:"required,max=30,min=3"`
 	CreatedAt   time.Time
 	CreatedDate string
 }
@@ -18,22 +19,20 @@ type Target struct {
 // Add a new target
 func (target *Target) CreateTarget() (err error) {
 	fmt.Println("Starting CreateTarget...")
-	statement := `INSERT INTO targets (url, host, createdat)
-                  VALUES ($1, $2, $3)
-                  RETURNING id, url, host, createdat`
+	statement := `INSERT INTO targets (name, createdat)
+                  VALUES ($1, $2)
+                  RETURNING id, name, createdat`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer stmt.Close()
 	err = stmt.QueryRow(
-		target.Url,
-		target.Host,
+		target.Name,
 		time.Now(),
 	).Scan(
 		&target.Id,
-		&target.Url,
-		&target.Host,
+		&target.Name,
 		&target.CreatedAt,
 	)
 	return err
@@ -57,7 +56,7 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 	fmt.Println("Starting UsersTargetsByUser...")
 	rows, err := Db.Query(`SELECT
                             t.id,
-                            t.url,
+                            t.name,
                             t.createdat,
                             TO_CHAR(t.createdat, 'YYYY-MM-DD')
                            FROM users u
@@ -73,7 +72,7 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 		target := Target{}
 		if err = rows.Scan(
 			&target.Id,
-			&target.Url,
+			&target.Name,
 			&target.CreatedAt,
 			&target.CreatedDate); err != nil {
 			panic(err.Error())
@@ -84,31 +83,31 @@ func (user *User) UsersTargetsByUser() (targets []Target, err error) {
 	return
 }
 
-// Get the target for a specific url
-func (target *Target) TargetByUrl() (err error) {
-	fmt.Println("Starting TargetByUrl...")
+// Get the target for a specific name
+func (target *Target) TargetByName() (err error) {
+	fmt.Println("Starting TargetByName...")
 	err = Db.QueryRow(`SELECT
                          t.id
                        FROM targets t
-                       WHERE t.url=$1`, target.Url).Scan(&target.Id)
+                       WHERE t.name=$1`, target.Name).Scan(&target.Id)
 	return
 }
 
-// Get all the targets based on a list of urls
-func TargetsByUrls(targetUrls []string) (targets []Target, err error) {
-	fmt.Println("Starting TargetsByUrls...")
+// Get all the targets based on a list of names
+func TargetsByNames(targetNames []string) (targets []Target, err error) {
+	fmt.Println("Starting TargetsByNames...")
 
 	rows, err := Db.Query(`SELECT
                                 t.id,
-                                t.url
+                                t.name
                             FROM targets t
-                            WHERE t.url LIKE ANY($1)`, pq.Array(targetUrls))
+                            WHERE t.name LIKE ANY($1)`, pq.Array(targetNames))
 	if err != nil {
 		return
 	}
 	for rows.Next() {
 		target := Target{}
-		if err = rows.Scan(&target.Id, &target.Url); err != nil {
+		if err = rows.Scan(&target.Id, &target.Name); err != nil {
 			return
 		}
 		targets = append(targets, target)
@@ -117,19 +116,19 @@ func TargetsByUrls(targetUrls []string) (targets []Target, err error) {
 	return
 }
 
-// Get the target for a specific user and url, must return a unique value
-func (user *User) UsersTargetsByUserAndUrl(url string) (target Target, err error) {
-	fmt.Println("Starting UsersTargetsByUserAndUrl...")
+// Get the target for a specific user and name, must return a unique value
+func (user *User) UsersTargetsByUserAndName(name string) (target Target, err error) {
+	fmt.Println("Starting UsersTargetsByUserAndName...")
 	err = Db.QueryRow(`SELECT
                          t.id, 
-                         t.url, 
+                         t.name, 
                          t.createdat 
                        FROM users u
                        INNER JOIN userstargets ut ON(u.id = ut.userid) 
                        INNER JOIN targets t ON(ut.targetid = t.id)
                        WHERE u.id=$1
-                       AND t.url=$2
-                       AND ut.deletedat IS NULL`, user.Id, url).Scan(&target.Id, &target.Url, &target.CreatedAt)
+                       AND t.name=$2
+                       AND ut.deletedat IS NULL`, user.Id, name).Scan(&target.Id, &target.Name, &target.CreatedAt)
 	return
 }
 
