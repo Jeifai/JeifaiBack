@@ -97,6 +97,8 @@ func SetUserTargetKeyword(
 		statement := `INSERT INTO userstargetskeywords (
                         userid, targetid, keywordid, createdat)
                         VALUES ($1, $2, $3, $4)
+                        ON CONFLICT (userid, targetid, keywordid) 
+                        DO UPDATE SET deletedat = NULL
                         RETURNING id, userid, targetid, keywordid, createdat`
 		stmt, err := Db.Prepare(statement)
 		if err != nil {

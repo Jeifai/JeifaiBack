@@ -10,6 +10,7 @@ CREATE INDEX idxresultsurl ON results(url);
 
 /* Add constraint */
 ALTER TABLE results ADD CONSTRAINT id_unique UNIQUE (id);
+ALTER TABLE userstargetskeywords ADD UNIQUE (userid, targetid, keywordid);
 
 /* Rename table's name */
 ALTER TABLE userstargets RENAME TO userstargets;
