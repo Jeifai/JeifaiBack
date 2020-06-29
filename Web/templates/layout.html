@@ -5,6 +5,9 @@
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <meta name="JeiFai" content="Know first when your favourite companies publish new offers.">
             <link rel="stylesheet" href="/static/oldCss/style.css"/>
+            <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+            <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
             <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.7.0/vue-resource.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/2.1.1/vuex.min.js"></script>
@@ -13,7 +16,33 @@
         <body>
             {{ template "topbar" . }}
             {{ template "sidebar" . }}
-            {{ template "content" . }}
+            <div class="mdc-drawer-app-content mdc-top-app-bar--fixed-adjust">
+                <main class="main-content" id="main-content">
+                    {{ template "content" . }}
+                </main>
+            </div>
+            <style>
+                body {
+                    display: flex;
+                    height: 100vh;
+                }
+                .mdc-drawer-app-content {
+                    flex: auto;
+                    overflow: auto;
+                    position: relative;
+                    margin-left: 2%;
+                }
+                .main-content {
+                    overflow: auto;
+                    height: 100%;
+                }
+                .app-bar {
+                    position: absolute;
+                }
+                .mdc-top-app-bar {
+                    z-index: 7;
+                }
+            </style>
         </body>
     </html>
 {{ end }}

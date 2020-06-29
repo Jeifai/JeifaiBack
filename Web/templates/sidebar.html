@@ -1,36 +1,29 @@
 {{ define "sidebar" }}
-    <div class="sidebar">
-        <p>
-            <a href="/targets" class="sidebarbutton">Targets</a>
-        </p>
-        <p>
-            <a href="/keywords" class="sidebarbutton">Keywords</a>
-        </p>
-        <p>
-            <a href="/results" class="sidebarbutton">Results</a>
-        </p>
-    </div>
-    <style scoped>
-        .sidebar {
-            background-color: #4287f5;
-            position: fixed;
-            text-align: center;
-            font-size:20px;
-            height: 100%;
-            width: 15%;
-            top: 6vh;
-        }
-        a.sidebarbutton:link, a.sidebarbutton:visited {
-            background-color: #76bbdb;
-            color: black;
-            padding: 14px 25px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        a.sidebarbutton:hover, a.sidebarbutton:active {
-            background-color: #267cad;
-        }
+    <aside class="mdc-drawer mdc-top-app-bar--fixed-adjust">
+        <div class="mdc-drawer__content">
+            <nav class="mdc-list" role="listbox">
+                <a class="mdc-list-item mdc-list-item--selected" role="option" tabindex="0" href="/targets">
+                    <i class="material-icons mdc-list-item__graphic">gps_fixed</i>
+                    <span class="mdc-list-item__text">Targets</span>
+                </a>
+                <a class="mdc-list-item" role="option" href="/keywords">
+                    <i class="material-icons mdc-list-item__graphic">text_fields</i>
+                    <span class="mdc-list-item__text">Keywords</span>
+                </a>
+                <a class="mdc-list-item" role="option" href="/results">
+                    <i class="material-icons mdc-list-item__graphic">local_fire_department</i>
+                    <span class="mdc-list-item__text">Results</span>
+                </a>
+            </nav>
+        </div>
+    </aside>
+    <script type="module">
+        const list = mdc.list.MDCList.attachTo(document.querySelector('.mdc-list'));
+        list.singleSelection = true;
+    </script>
+    <style>
+        @use "@material/drawer/mdc-drawer";
+        @use "@material/list/mdc-list"
+        @include icon-button.core-styles;
     </style>
 {{ end }}

@@ -1,33 +1,30 @@
 {{ define "topbar" }}
-    <header class="topbar">
-        <a>HI {{.User.UserName}}</a>
-        <a href="/" class="topbarbutton">Home</a>
-        <a href="/profile" class="topbarbutton">Profile</a>
-        <a href="/logout" class="topbarbutton topnav-right">Logout</a>
+    <header class="mdc-top-app-bar">
+        <div class="mdc-top-app-bar__row">
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                <span class="mdc-top-app-bar__title">Hi {{.User.UserName}}</span>
+            </section>
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
+                <button 
+                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
+                    aria-label="Person"
+                    onclick="location.href='/profile';">person
+                </button>
+                <button 
+                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
+                    aria-label="Login" 
+                    onclick="location.href='/logout';">logout
+                </button>
+            </section>
+        </div>
     </header>
-    <style scoped>
-        .topbar {
-            background-color: #1C83C1;
-            position: fixed;
-            z-index: 1;
-            top: 0;
-            width: 100%;
-            height: 6vh;
-        }
-        .topnav-right {
-            float: right;
-        }
-        a.topbarbutton:link, a.topbarbutton:visited {
-            background-color: #76bbdb;
-            color: black;
-            padding: 13px 25px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-        }
+    <script type="module">
+        const topAppBarElement = mdc.topAppBar.MDCTopAppBar.attachTo(document.querySelector('.mdc-top-app-bar'));
+    </script>
+    <style>
+        @use "@material/icon-button";
+        @use "@material/top-app-bar/mdc-top-app-bar";
 
-        a.topbarbutton:hover, a.topbarbutton:active {
-            background-color: #267cad;
-        }
+        @include icon-button.core-styles;
     </style>
 {{ end }}
