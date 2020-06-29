@@ -127,12 +127,12 @@ func PrepareNotifications(scrapers []Scraper) (notifications []Notification, err
                                 r.title,
                                 r.url
                             FROM results r
-                            INNER JOIN matches m ON(r.id = m.resultid)
+                            LEFT JOIN matches m ON(r.id = m.resultid)
                             LEFT JOIN scrapers s ON(r.scraperid = s.id)
-                            LEFT JOIN notifications n ON(m.id = n.matchid)
                             LEFT JOIN userstargetskeywords utk ON(m.keywordid = utk.keywordid)
                             LEFT JOIN users u ON(utk.userid = u.id)
-                            WHERE m.createdat > current_date - interval '1' day
+                            LEFT JOIN notifications n ON(m.id = n.matchid)
+                            WHERE m.createdat > current_date - interval '0' day
                             AND s.id = $1
                             AND n.id IS NULL
                             AND u.id = 1
