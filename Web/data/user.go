@@ -168,7 +168,7 @@ func UserByEmail(email string) (user User, err error) {
                         updatedat,
                         firstname,
                         lastname,
-                        TO_CHAR(dateofbirth, 'YYYY-MM-DD'),
+                        dateofbirth,
                         country,
                         city,
                         gender
@@ -205,7 +205,7 @@ func UserById(id int) (user User, err error) {
                         updatedat,
                         firstname,
                         lastname,
-                        TO_CHAR(dateofbirth, 'YYYY-MM-DD'),
+                        dateofbirth,
                         country,
                         city,
                         gender
@@ -231,7 +231,8 @@ func UserById(id int) (user User, err error) {
 }
 
 func (user User) UpdateUser() {
-	fmt.Println("Starting UpdateUser...")
+    fmt.Println("Starting UpdateUser...")
+
 	statement := `UPDATE users SET 
                     username=$2,
                     email=$3,
@@ -248,7 +249,7 @@ func (user User) UpdateUser() {
 	if err != nil {
 		panic(err.Error())
 	}
-	defer stmt.Close()
+    defer stmt.Close()
 
 	_, err = stmt.Exec(
 		user.Id,
@@ -261,7 +262,11 @@ func (user User) UpdateUser() {
 		user.City.String,
 		user.Gender.String,
 		user.DateOfBirth.String,
-		time.Now())
+        time.Now())
+        
+    if err != nil {
+        panic(err.Error())
+    }
 }
 
 func (user User) UpdateUserUpdates() {
