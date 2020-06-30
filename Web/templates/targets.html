@@ -20,23 +20,31 @@
                 <h1>
                     My targets
                 </h1>
-                <table v-if="targets">
-                    <tr>
-                        <th>CreatedAt</th>
-                        <th>Target</th>
-                    </tr>
-                    <tr v-for="(target, index) in targets">
-                        <td>[[ target.CreatedDate ]]</td>
-                        <td>[[ target.Name ]]</td>
-                        <td>
-                            <span>
-                                <button v-on:click="deleteTarget(index)" class="buttonDelete">
-                                    <i>Delete</i>
-                                </button>
-                            </span>
-                        </td>
-                    </tr>
-                </table>
+                <div class="mdc-data-table">
+                    <table class="mdc-data-table__table" aria-label="Created Targets">
+                        <thead>
+                            <tr class="mdc-data-table__header-row">
+                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">CreatedAt</th>
+                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Target</th>
+                            </tr>
+                        </thead>
+                        <tbody class="mdc-data-table__content">
+                            <tr v-for="(target, index) in targets" class="mdc-data-table__row">
+                                <td class="mdc-data-table__cell">[[ target.CreatedDate ]]</td>
+                                <td class="mdc-data-table__cell">[[ target.Name ]]</td>
+                                <td class="mdc-data-table__cell">
+                                    <span>
+                                        <button 
+                                            class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
+                                            aria-label="Clear" 
+                                            v-on:click="deleteTarget(index)">clear
+                                        </button>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -71,54 +79,13 @@
             }
         })
     </script>
-    <style>  }
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-        }
-        td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-        tr:nth-child(even) {
-            background-color: #dddddd;
-        }
-        input[type=text], select {
-            width: 50%;
-            padding: 12px 20px;
-            margin: 8px 0;
-            display: inline-block;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .buttonCreate {
-            background-color: #A9A9A9;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 16px;
-        }
-        .buttonCreate:hover {
-            background-color: #666363;
-        }
-        .buttonDelete {
-            background-color: #FF9999;
-            border: none;
-            color: white;
-            padding: 8px 32px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 12px;
-        }
-        .buttonDelete:hover {
-            background-color: #e3291b;
-        }
-        .addtarget {
-            margin-bottom: 25px;
-        }
+    <script type="module">
+        const topAppBarElement = mdc.dataTable.MDCDataTable.attachTo(document.querySelector('.mdc-data-table'));
+    </script>
+    <style>
+        @use "@material/checkbox"; // Required only for data table with row selection.
+        @use "@material/data-table";
+        @include checkbox.core-styles;
+        @include data-table.core-styles;
     </style>
 {{ end }}
