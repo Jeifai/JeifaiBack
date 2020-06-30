@@ -56,19 +56,19 @@
                 <div class="mdc-line-ripple"></div>
             </div>
             <div class="mdc-select__menu mdc-menu mdc-menu-surface">
-            <ul class="mdc-list">
-                <li class="mdc-list-item mdc-list-item--selected" data-value="" aria-selected="true"></li>
-                <li class="mdc-list-item" data-value="grains">
-                    <span class="mdc-list-item__text">
-                        Female
-                    </span>
-                </li>
-                <li class="mdc-list-item" data-value="vegetables">
-                    <span class="mdc-list-item__text">
-                        Male
-                    </span>
-                </li>
-            </ul>
+                <ul class="mdc-list">
+                    <li class="mdc-list-item mdc-list-item--selected" data-value="" aria-selected="true"></li>
+                    <li class="mdc-list-item" data-value="female">
+                        <span class="mdc-list-item__text">
+                            Female
+                        </span>
+                    </li>
+                    <li class="mdc-list-item" data-value="male">
+                        <span class="mdc-list-item__text">
+                            Male
+                        </span>
+                    </li>
+                </ul>
             </div>
         </div>
         <p></p>
@@ -100,7 +100,7 @@
         </button>
     </div>
     <script>
-        new Vue({
+        var profileApp = new Vue({
             el: '#app',
             delimiters: ["[[","]]"],
             data: {
@@ -114,6 +114,12 @@
                     }).catch(function(error) {
                         console.log(error)
                     });
+                },
+                setSelect: function(value) {
+                    this.fields.Gender.String = value;
+                },
+                getSelect: function() {
+                    return this.fields.Gender.String;
                 }
             }
         })
@@ -131,6 +137,12 @@
         const textCurrentPassword = mdc.textField.MDCTextField.attachTo(document.getElementById("CurrentPassword"));
         const select = mdc.select.MDCSelect.attachTo(document.querySelector('.mdc-select'));
         const button = mdc.ripple.MDCRipple.attachTo(document.querySelector('.mdc-fab'));
+
+        select.listen('MDCSelect:change', () => {
+            profileApp.setSelect(select.value);
+        });
+
+        select.value = profileApp.getSelect();
     </script>
     <style>
         @use "@material/textfield";
