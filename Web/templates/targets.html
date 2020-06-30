@@ -1,48 +1,46 @@
 {{ define "content" }}
     <div id="app">
-        <div class="content">
+        <h1>
+            Add a new target
+        </h1>
+        <p v-for="(message, index) in messages">
+            <span v-html="message"></span>
+        </p>
+        <div class="addtarget">
+            <input type="text" 
+                placeholder="New Target" 
+                v-on:keyup.enter="createTarget"
+                v-model="newTarget.Name">
+            <span>
+                <button v-on:click="createTarget" class="buttonCreate">Create</button>
+            </span>
+        </div>
+        <div>
             <h1>
-                Add a new target
+                My targets
             </h1>
-            <p v-for="(message, index) in messages">
-                <span v-html="message"></span>
-            </p>
-            <div class="addtarget">
-                <input type="text" 
-                    placeholder="New Target" 
-                    v-on:keyup.enter="createTarget"
-                    v-model="newTarget.Name">
-                <span>
-                    <button v-on:click="createTarget" class="buttonCreate">Create</button>
-                </span>
-            </div>
-            <div>
-                <h1>
-                    My targets
-                </h1>
-                <div class="mdc-data-table">
-                    <table class="mdc-data-table__table" aria-label="Created Targets">
-                        <thead>
-                            <tr class="mdc-data-table__header-row">
-                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">CreatedAt</th>
-                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Target</th>
-                            </tr>
-                        </thead>
-                        <tbody class="mdc-data-table__content">
-                            <tr v-for="(target, index) in targets" class="mdc-data-table__row">
-                                <td class="mdc-data-table__cell">[[ target.CreatedDate ]]</td>
-                                <td class="mdc-data-table__cell">[[ target.Name ]]</td>
-                                <td class="mdc-data-table__cell">
-                                    <button 
-                                        class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
-                                        aria-label="Clear" 
-                                        v-on:click="deleteTarget(index)">clear
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="mdc-data-table">
+                <table class="mdc-data-table__table" aria-label="Created Targets">
+                    <thead>
+                        <tr class="mdc-data-table__header-row">
+                            <th class="mdc-data-table__header-cell" role="columnheader" scope="col">CreatedAt</th>
+                            <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Target</th>
+                        </tr>
+                    </thead>
+                    <tbody class="mdc-data-table__content">
+                        <tr v-for="(target, index) in targets" class="mdc-data-table__row">
+                            <td class="mdc-data-table__cell">[[ target.CreatedDate ]]</td>
+                            <td class="mdc-data-table__cell">[[ target.Name ]]</td>
+                            <td class="mdc-data-table__cell">
+                                <button 
+                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
+                                    aria-label="Clear" 
+                                    v-on:click="deleteTarget(index)">clear
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

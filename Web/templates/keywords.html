@@ -1,67 +1,65 @@
 {{ define "content" }}
     <div id="app">
-        <div class="content">
-            <div class="addkeyword"> 
-                <h1>
-                    Add a new keyword
-                </h1>
-                <p v-for="(message, index) in messages">
-                    <span v-html="message"></span>
-                </p>
-                <div>
-                    <span>Keyword's targets</span>
-                    <vue-multi-select
-                        v-model="selectedTargets"
-                        :options="targets"
-                        class="multiselect"
-                    ></vue-multi-select>
-                </div>
-                <div>
-                    <span>Keyword's text</span>
-                    <input type="text" 
-                        placeholder="New Keyword" 
-                        v-on:keyup.enter="createKeyword"
-                        v-model="newKeyword.Text">
-                    <span>
-                        <button v-on:click="createKeyword" class="buttonCreate">Create</button>
-                    </span>
-                </div>
+        <div class="addkeyword"> 
+            <h1>
+                Add a new keyword
+            </h1>
+            <p v-for="(message, index) in messages">
+                <span v-html="message"></span>
+            </p>
+            <div>
+                <span>Keyword's targets</span>
+                <vue-multi-select
+                    v-model="selectedTargets"
+                    :options="targets"
+                    class="multiselect"
+                ></vue-multi-select>
             </div>
             <div>
-                <h1>
-                    My keywords
-                </h1>
-                <div>
-                    <input
-                        type="text" 
-                        placeholder="Filter by any field" 
-                        v-model="filter"/>
-                </div>
-                <div class="mdc-data-table">
-                    <table class="mdc-data-table__table" aria-label="Created Keywords">
-                        <thead>
-                            <tr class="mdc-data-table__header-row">
-                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">CreatedAt</th>
-                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Keyword</th>
-                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Target</th>
-                            </tr>
-                        </thead>
-                        <tbody class="mdc-data-table__content">
-                            <tr v-for="(row, index) in filteredRows" class="mdc-data-table__row">
-                                <td class="mdc-data-table__cell" v-html="row.CreatedDate"></td>
-                                <td class="mdc-data-table__cell" v-html="row.KeywordText"></td>
-                                <td class="mdc-data-table__cell" v-html="row.TargetName"></td>
-                                <td class="mdc-data-table__cell">
-                                    <button 
-                                        class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
-                                        aria-label="Clear" 
-                                        v-on:click="deleteUtk(index)">clear
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <span>Keyword's text</span>
+                <input type="text" 
+                    placeholder="New Keyword" 
+                    v-on:keyup.enter="createKeyword"
+                    v-model="newKeyword.Text">
+                <span>
+                    <button v-on:click="createKeyword" class="buttonCreate">Create</button>
+                </span>
+            </div>
+        </div>
+        <div>
+            <h1>
+                My keywords
+            </h1>
+            <div>
+                <input
+                    type="text" 
+                    placeholder="Filter by any field" 
+                    v-model="filter"/>
+            </div>
+            <div class="mdc-data-table">
+                <table class="mdc-data-table__table" aria-label="Created Keywords">
+                    <thead>
+                        <tr class="mdc-data-table__header-row">
+                            <th class="mdc-data-table__header-cell" role="columnheader" scope="col">CreatedAt</th>
+                            <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Keyword</th>
+                            <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Target</th>
+                        </tr>
+                    </thead>
+                    <tbody class="mdc-data-table__content">
+                        <tr v-for="(row, index) in filteredRows" class="mdc-data-table__row">
+                            <td class="mdc-data-table__cell" v-html="row.CreatedDate"></td>
+                            <td class="mdc-data-table__cell" v-html="row.KeywordText"></td>
+                            <td class="mdc-data-table__cell" v-html="row.TargetName"></td>
+                            <td class="mdc-data-table__cell">
+                                <button 
+                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
+                                    aria-label="Clear" 
+                                    v-on:click="deleteUtk(index)">clear
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

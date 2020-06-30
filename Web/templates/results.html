@@ -1,43 +1,41 @@
 {{ define "content" }}
     <div id="app">
-        <div class="content">
-            <h1>
-                Your matches
-            </h1>
-            <div>
-                <input
-                    type="text" 
-                    placeholder="Filter by any field" 
-                    v-model="filter"/>
-            </div>
-            <div class="mdc-data-table">
-                <table class="mdc-data-table__table" aria-label="Created Keywords">
-                    <thead>
-                        <tr class="mdc-data-table__header-row">
-                            <th class="mdc-data-table__header-cell" role="columnheader" scope="col">CreatedAt</th>
-                            <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Target</th>
-                            <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Job Title</th>
-                            <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Job Url</th>
-                        </tr>
-                    </thead>
-                    <tbody class="mdc-data-table__content">
-                        <tr v-for="(row, index) in filteredRows" class="mdc-data-table__row">
-                            <td class="mdc-data-table__cell" v-html="row.CreatedDate"></td>
-                            <td class="mdc-data-table__cell" v-html="row.Target"></td>
-                            <td class="mdc-data-table__cell" v-html="row.Title"></td>
-                            <td class="mdc-data-table__cell">
-                                <button 
-                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
-                                    aria-label="Open"
-                                    target="_blank" 
-                                    rel="noopener"
-                                    v-on:click="select(row)">open_in_new
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <h1>
+            Your matches
+        </h1>
+        <div>
+            <input
+                type="text" 
+                placeholder="Filter by any field" 
+                v-model="filter"/>
+        </div>
+        <div class="mdc-data-table">
+            <table class="mdc-data-table__table" aria-label="Created Keywords">
+                <thead>
+                    <tr class="mdc-data-table__header-row">
+                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">CreatedAt</th>
+                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Target</th>
+                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Job Title</th>
+                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Job Url</th>
+                    </tr>
+                </thead>
+                <tbody class="mdc-data-table__content">
+                    <tr v-for="(row, index) in filteredRows" class="mdc-data-table__row">
+                        <td class="mdc-data-table__cell" v-html="row.CreatedDate"></td>
+                        <td class="mdc-data-table__cell" v-html="row.Target"></td>
+                        <td class="mdc-data-table__cell" v-html="row.Title"></td>
+                        <td class="mdc-data-table__cell">
+                            <button 
+                                class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
+                                aria-label="Open"
+                                target="_blank" 
+                                rel="noopener"
+                                v-on:click="select(row)">open_in_new
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
     <script>
