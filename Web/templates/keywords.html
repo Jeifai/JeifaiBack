@@ -37,29 +37,33 @@
                         placeholder="Filter by any field" 
                         v-model="filter"/>
                 </div>
-                <table v-if="utks">
-                    <thead>
-                        <tr>
-                            <th>CreatedAt</th>
-                            <th>Keyword</th>
-                            <th>Target</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(row, index) in filteredRows">
-                            <td v-html="row.CreatedDate"></td>
-                            <td v-html="row.KeywordText"></td>
-                            <td v-html="row.TargetName"></td>
-                            <td>
-                                <span>
-                                    <button v-on:click="deleteUtk(index)" class="buttonDelete">
-                                        <i>Delete</i>
-                                    </button>
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="mdc-data-table">
+                    <table class="mdc-data-table__table" aria-label="Created Keywords">
+                        <thead>
+                            <tr class="mdc-data-table__header-row">
+                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">CreatedAt</th>
+                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Keyword</th>
+                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Target</th>
+                            </tr>
+                        </thead>
+                        <tbody class="mdc-data-table__content">
+                            <tr v-for="(row, index) in filteredRows" class="mdc-data-table__row">
+                                <td class="mdc-data-table__cell" v-html="row.CreatedDate"></td>
+                                <td class="mdc-data-table__cell" v-html="row.KeywordText"></td>
+                                <td class="mdc-data-table__cell" v-html="row.TargetName"></td>
+                                <td class="mdc-data-table__cell">
+                                    <span>
+                                        <button 
+                                            class="material-icons mdc-top-app-bar__action-item mdc-icon-button" 
+                                            aria-label="Clear" 
+                                            v-on:click="deleteUtk(index)">clear
+                                        </button>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -116,58 +120,13 @@
             }
         })
     </script>
+    <script type="module">
+        const topAppBarElement = mdc.dataTable.MDCDataTable.attachTo(document.querySelector('.mdc-data-table'));
+    </script>
     <style>
-        input[type=text], select {
-            width: 50%;
-            padding: 12px 20px;
-            margin: 8px 0;
-            display: inline-block;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .multiselect {
-            width: 50%;
-            display: inline-block;
-        }
-        .addkeyword {
-            margin-bottom: 25px;
-        }
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-        }
-        td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-        tr:nth-child(even) {
-            background-color: #dddddd;
-        }
-        .buttonCreate {
-            background-color: #A9A9A9;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 16px;
-        }
-        .buttonCreate:hover {
-            background-color: #666363;
-        }
-        .buttonDelete {
-            background-color: #FF9999;
-            border: none;
-            color: white;
-            padding: 8px 32px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 12px;
-        }
-        .buttonDelete:hover {
-            background-color: #e3291b;
-        }
+        @use "@material/checkbox"; // Required only for data table with row selection.
+        @use "@material/data-table";
+        @include checkbox.core-styles;
+        @include data-table.core-styles;
     </style>
 {{ end }}
