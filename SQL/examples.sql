@@ -19,6 +19,7 @@ ALTER TABLE results DROP CONSTRAINT resultspkey;
 CREATE INDEX idxresultsurl ON results(url);
 
 /* Add constraint */
+ALTER TABLE targets ADD UNIQUE (name);
 ALTER TABLE results ADD CONSTRAINT id_unique UNIQUE (id);
 ALTER TABLE userstargetskeywords ADD UNIQUE (userid, targetid, keywordid);
 
