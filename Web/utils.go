@@ -22,11 +22,13 @@ var (
 
 func init() {
 	loadConfig()
+    /**
 	file, err := os.OpenFile("jeifai.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o666)
 	if err != nil {
 		log.Fatalln("Failed to open log file", err)
 	}
-	logger = log.New(file, "INFO ", log.Ldate|log.Ltime|log.Lshortfile)
+    logger = log.New(file, "INFO ", log.Ldate|log.Ltime|log.Lshortfile)
+    */
 }
 
 func loadConfig() {
