@@ -65,7 +65,7 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&response)
 	if err != nil {
 		panic(err.Error())
-	}
+    }
 
 	validate := validator.New()
 	err = validate.Struct(response)
