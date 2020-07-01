@@ -6,7 +6,7 @@ import (
 	. "github.com/logrusorgru/aurora"
 )
 
-func main() {
+func mainLocal() {
 	DbConnect()
 	scraper_name := "Shopify"
 	fmt.Println(BrightBlue("Scraping Locally -->"), Bold(BrightBlue(scraper_name)))
