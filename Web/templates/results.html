@@ -4,10 +4,12 @@
             Your matches
         </h1>
         <div>
-            <input
-                type="text" 
-                placeholder="Filter by any field" 
-                v-model="filter"/>
+            <label id="Filter" for="Filter" class="mdc-text-field mdc-text-field--filled mdc-text-field--with-leading-icon">
+                <i class="material-icons mdc-text-field__icon mdc-text-field__icon--leading" tabindex="0" role="button">text_fields</i>
+                <input class="mdc-text-field__input" type="text" aria-labelledby="Filter" v-model="filter">
+                <span class="mdc-floating-label" id="Filter">Filter by any field</span>
+                <div class="mdc-line-ripple"></div>
+            </label>
         </div>
         <div class="mdc-data-table">
             <table class="mdc-data-table__table" aria-label="Created Keywords">
@@ -68,6 +70,7 @@
     </script>
     <script type="module">
         const dataTable = mdc.dataTable.MDCDataTable.attachTo(document.querySelector('.mdc-data-table'));
+        const textFilter= mdc.textField.MDCTextField.attachTo(document.getElementById("Filter"));
     </script>
     <style>
         @use "@material/checkbox"; // Required only for data table with row selection.

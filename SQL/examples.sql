@@ -1,3 +1,13 @@
+SELECT
+    s.name AS company_name, 
+    TO_CHAR(r.createdat, 'YYYY-MM-DD')AS job_created_at, 
+    COUNT(r.id) AS new_jobs
+FROM results r 
+LEFT JOIN scrapers s ON(r.scraperid = s.id) 
+WHERE s.name IN('Twitter', 'Google', 'Zalando') 
+GROUP BY 1, 2 
+ORDER BY 1, 2 DESC;
+
 /* HERE A LIST OF EXAMPLE QUERIES */
 
 /* Make a table empty and reset id */

@@ -13,17 +13,17 @@
                     v-model="selectedTargets"
                     :options="targets"
                     class="multiselect"
-                ></vue-multi-select>
+                >
+                </vue-multi-select>
             </div>
             <div>
-                <span>Keyword's text</span>
-                <input type="text" 
-                    placeholder="New Keyword" 
-                    v-on:keyup.enter="createKeyword"
-                    v-model="newKeyword.Text">
-                <span>
-                    <button v-on:click="createKeyword" class="buttonCreate">Create</button>
-                </span>
+                <label id="Keyword" for="Keyword" class="mdc-text-field mdc-text-field--filled mdc-text-field--with-leading-icon">
+                    <i class="material-icons mdc-text-field__icon mdc-text-field__icon--leading" tabindex="0" role="button">text_fields</i>
+                    <input class="mdc-text-field__input" type="text" aria-labelledby="Keyword" v-model="newKeyword.Name">
+                    <span class="mdc-floating-label" id="Keyword">Keyword</span>
+                    <div class="mdc-line-ripple"></div>
+                </label>
+                <button class="mdc-icon-button material-icons" aria-label="Check" v-on:click="createKeyword">check</button>
             </div>
         </div>
         <div>
@@ -31,10 +31,12 @@
                 My keywords
             </h1>
             <div>
-                <input
-                    type="text" 
-                    placeholder="Filter by any field" 
-                    v-model="filter"/>
+                <label id="Filter" for="Filter" class="mdc-text-field mdc-text-field--filled mdc-text-field--with-leading-icon">
+                    <i class="material-icons mdc-text-field__icon mdc-text-field__icon--leading" tabindex="0" role="button">text_fields</i>
+                    <input class="mdc-text-field__input" type="text" aria-labelledby="Filter" v-model="filter">
+                    <span class="mdc-floating-label" id="Filter">Filter by any field</span>
+                    <div class="mdc-line-ripple"></div>
+                </label>
             </div>
             <div class="mdc-data-table">
                 <table class="mdc-data-table__table" aria-label="Created Keywords">
@@ -118,11 +120,20 @@
     </script>
     <script type="module">
         const topAppBarElement = mdc.dataTable.MDCDataTable.attachTo(document.querySelector('.mdc-data-table'));
+        const textKeyword = mdc.textField.MDCTextField.attachTo(document.getElementById("Keyword"));
+        const textFilter= mdc.textField.MDCTextField.attachTo(document.getElementById("Filter"));
+        const button = mdc.ripple.MDCRipple.attachTo(document.querySelector('.mdc-icon-button'));
     </script>
     <style>
         @use "@material/checkbox"; // Required only for data table with row selection.
         @use "@material/data-table";
         @include checkbox.core-styles;
         @include data-table.core-styles;
+
+        @use "@material/fab/mdc-fab";
+
+        .multiselect {
+        }
+
     </style>
 {{ end }}
