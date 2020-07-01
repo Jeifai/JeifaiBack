@@ -2627,3 +2627,99 @@ func (runtime Runtime) Revolut(
 	}
 	return
 }
+
+func (runtime Runtime) Mollie(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	if version == 1 {
+
+		c_start_url := "https://api.lever.co/v0/postings/mollie?mode=json"
+
+		type Jobs []struct {
+			AdditionalPlain string `json:"additionalPlain"`
+			Additional      string `json:"additional"`
+			Categories      struct {
+				Commitment string `json:"commitment"`
+				Department string `json:"department"`
+				Location   string `json:"location"`
+				Team       string `json:"team"`
+			} `json:"categories"`
+			CreatedAt        int64  `json:"createdAt"`
+			DescriptionPlain string `json:"descriptionPlain"`
+			Description      string `json:"description"`
+			ID               string `json:"id"`
+			Lists            []struct {
+				Text    string `json:"text"`
+				Content string `json:"content"`
+			} `json:"lists"`
+			Text      string `json:"text"`
+			HostedURL string `json:"hostedUrl"`
+			ApplyURL  string `json:"applyUrl"`
+		}
+
+		var jsonJobs Jobs
+
+		c := colly.NewCollector()
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson Jobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson {
+
+				result_title := elem.Text
+				result_url := elem.HostedURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs = append(jsonJobs, tempJson...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(c_start_url)
+		}
+	}
+	return
+}
