@@ -6,15 +6,13 @@
         <p v-for="(message, index) in messages">
             <span v-html="message"></span>
         </p>
-        <div class="addtarget">
-            <input type="text" 
-                placeholder="New Target" 
-                v-on:keyup.enter="createTarget"
-                v-model="newTarget.Name">
-            <span>
-                <button v-on:click="createTarget" class="buttonCreate">Create</button>
-            </span>
-        </div>
+        <label id="Target" for="Target" class="mdc-text-field mdc-text-field--filled mdc-text-field--with-leading-icon">
+            <i class="material-icons mdc-text-field__icon mdc-text-field__icon--leading" tabindex="0" role="button">gps_fixed</i>
+            <input class="mdc-text-field__input" type="text" aria-labelledby="Target" v-model="newTarget.Name">
+            <span class="mdc-floating-label" id="Target">Target</span>
+            <div class="mdc-line-ripple"></div>
+        </label>
+        <button class="mdc-icon-button material-icons" aria-label="Check" v-on:click="createTarget">check</button>
         <div>
             <h1>
                 My targets
@@ -77,11 +75,20 @@
     </script>
     <script type="module">
         const topAppBarElement = mdc.dataTable.MDCDataTable.attachTo(document.querySelector('.mdc-data-table'));
+        const textTarget = mdc.textField.MDCTextField.attachTo(document.getElementById("Target"));
+        const button = mdc.ripple.MDCRipple.attachTo(document.querySelector('.mdc-fab'));
     </script>
     <style>
         @use "@material/checkbox"; // Required only for data table with row selection.
         @use "@material/data-table";
         @include checkbox.core-styles;
         @include data-table.core-styles;
+
+        @use "@material/textfield";
+        @include textfield.core-styles;
+        @use "@material/textfield/icon";
+        @include icon.icon-core-styles;
+
+        @use "@material/fab/mdc-fab";
     </style>
 {{ end }}
