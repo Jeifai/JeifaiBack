@@ -18,11 +18,12 @@ func main() {
     
 	want_scrapers := []string{
 		"Blinkist", "Urbansport", "Babelforce",
-		"Kununu", "IMusician", "Mitte",
+		"Kununu", "IMusician", "Mitte", "Revolut",
 		"Soundcloud", "Penta", "Celo", "N26",
 		"Shopify", "Twitter", "Zalando", "Slack",
 		"Google", "Hometogo", "Contentful", "Gympass", "Lanalabs", "Dreamingjobs",
     }
+
 
 	scrapers, err := GetScrapers()
 	if err != nil {
