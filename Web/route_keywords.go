@@ -7,14 +7,12 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator"
-
-	"./data"
 )
 
 func keywords(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Generating HTML for keywords...")
 	sess, err := session(r)
-	user, err := data.UserById(sess.UserId)
+	user, err := UserById(sess.UserId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -36,9 +34,9 @@ func keywords(w http.ResponseWriter, r *http.Request) {
 	utks, err := user.GetUserTargetKeyword()
 
 	type TempStruct struct {
-		User    data.User
+		User    User
 		Targets []string
-		Utks    []data.UserTargetKeyword
+		Utks    []UserTargetKeyword
 	}
 
 	infos := TempStruct{user, arr_targets, utks}
@@ -50,14 +48,14 @@ func keywords(w http.ResponseWriter, r *http.Request) {
 func putKeyword(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting putKeyword...")
 	sess, err := session(r)
-	user, err := data.UserById(sess.UserId)
+	user, err := UserById(sess.UserId)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	type TempResponse struct {
 		SelectedTargets []string     `json:"selectedTargets" validate:"required"`
-		Keyword         data.Keyword `json:"newKeyword"`
+		Keyword         Keyword `json:"newKeyword"`
 	}
 
 	response := TempResponse{}
@@ -107,12 +105,12 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 			response.Keyword.CreateKeyword()
 		}
 
-		targets, err := data.TargetsByNames(response.SelectedTargets)
+		targets, err := TargetsByNames(response.SelectedTargets)
 		if err != nil {
 			panic(err.Error())
 		}
 
-		err = data.SetUserTargetKeyword(user, targets, response.Keyword)
+		err = SetUserTargetKeyword(user, targets, response.Keyword)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -120,7 +118,7 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 		messages = append(messages, temp_message)
 	}
 
-	var utks []data.UserTargetKeyword
+	var utks []UserTargetKeyword
 	utks, err = user.GetUserTargetKeyword()
 	if err != nil {
 		panic(err.Error())
@@ -128,7 +126,7 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 
 	type TempStruct struct {
 		Messages []string
-		Utks     []data.UserTargetKeyword
+		Utks     []UserTargetKeyword
 	}
 
 	infos := TempStruct{messages, utks}
@@ -139,23 +137,23 @@ func putKeyword(w http.ResponseWriter, r *http.Request) {
 
 func removeKeyword(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting removeKeyword...")
-	var utk data.UserTargetKeyword
+	var utk UserTargetKeyword
 	err := json.NewDecoder(r.Body).Decode(&utk)
 
 	sess, err := session(r)
-	user, err := data.UserByEmail(sess.Email)
+	user, err := UserByEmail(sess.Email)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	target := data.Target{}
+	target := Target{}
 	target.Name = utk.TargetName
 	err = target.TargetByName()
 	if err != nil {
 		panic(err.Error())
 	}
 
-	keyword := data.Keyword{}
+	keyword := Keyword{}
 	keyword.Text = utk.KeywordText
 	err = keyword.KeywordByText()
 	if err != nil {
@@ -171,7 +169,7 @@ func removeKeyword(w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 
-	var utks []data.UserTargetKeyword
+	var utks []UserTargetKeyword
 	utks, err = user.GetUserTargetKeyword()
 	if err != nil {
 		panic(err.Error())
@@ -179,7 +177,7 @@ func removeKeyword(w http.ResponseWriter, r *http.Request) {
 
 	type TempStruct struct {
 		Messages []string
-		Utks     []data.UserTargetKeyword
+		Utks     []UserTargetKeyword
 	}
 
 	var messages []string

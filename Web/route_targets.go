@@ -7,8 +7,6 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator"
-
-	"./data"
 )
 
 func targets(w http.ResponseWriter, r *http.Request) {
@@ -21,15 +19,15 @@ func targets(w http.ResponseWriter, r *http.Request) {
 			"templates/targets.html"))
 
 	sess, err := session(r)
-	user, err := data.UserById(sess.UserId)
+	user, err := UserById(sess.UserId)
 	if err != nil {
 		panic(err.Error())
 	}
 	targets, err := user.UsersTargetsByUser()
 
 	type TempStruct struct {
-		User    data.User
-		Targets []data.Target
+		User    User
+		Targets []Target
 	}
 
 	infos := TempStruct{user, targets}
@@ -37,11 +35,11 @@ func targets(w http.ResponseWriter, r *http.Request) {
 }
 
 func putTarget(w http.ResponseWriter, r *http.Request) {
-	var target data.Target
+	var target Target
 	err := json.NewDecoder(r.Body).Decode(&target)
 
 	sess, err := session(r)
-	user, err := data.UserById(sess.UserId)
+	user, err := UserById(sess.UserId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -106,7 +104,7 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 
 	type TempStruct struct {
 		Messages []string
-		Targets  []data.Target
+		Targets  []Target
 	}
 
 	infos := TempStruct{messages, targets}
@@ -116,11 +114,11 @@ func putTarget(w http.ResponseWriter, r *http.Request) {
 }
 
 func removeTarget(w http.ResponseWriter, r *http.Request) {
-	var target data.Target
+	var target Target
 	err := json.NewDecoder(r.Body).Decode(&target)
 
 	sess, err := session(r)
-	user, err := data.UserByEmail(sess.Email)
+	user, err := UserByEmail(sess.Email)
 	if err != nil {
 		panic(err.Error())
 	}

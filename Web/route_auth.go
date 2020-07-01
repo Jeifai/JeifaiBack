@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"net/http"
 
-	"./data"
 )
 
 func login(w http.ResponseWriter, r *http.Request) {
@@ -18,12 +17,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 func authenticate(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting authenticate...")
 	err := r.ParseForm()
-	user, err := data.UserByEmail(r.PostFormValue("email"))
+	user, err := UserByEmail(r.PostFormValue("email"))
 	if err != nil {
 		danger(err, "Cannot find user")
 	}
 
-	if user.Password == data.Encrypt(r.PostFormValue("password")) {
+	if user.Password == Encrypt(r.PostFormValue("password")) {
 		session, err := user.CreateSession()
 		if err != nil {
 			danger(err, "Cannot create session")
@@ -48,7 +47,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("_cookie")
 	if err != http.ErrNoCookie {
 		warning(err, "Failed to get cookie")
-		session := data.Session{Uuid: cookie.Value}
+		session := Session{Uuid: cookie.Value}
 		session.DeleteByUUID()
 	}
 	fmt.Println("Closing logout...")
@@ -68,7 +67,7 @@ func signupAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		danger(err, "Cannot parse form")
 	}
-	user := data.User{
+	user := User{
 		UserName: r.PostFormValue("username"),
 		Email:    r.PostFormValue("email"),
 		Password: r.PostFormValue("password"),

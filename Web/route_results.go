@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-
-	"./data"
 )
 
 func results(w http.ResponseWriter, r *http.Request) {
@@ -19,15 +17,15 @@ func results(w http.ResponseWriter, r *http.Request) {
 			"templates/results.html"))
 
 	sess, err := session(r)
-	user, err := data.UserById(sess.UserId)
+	user, err := UserById(sess.UserId)
 	if err != nil {
 		danger(err, "Cannot find user")
 	}
 	results, err := user.ResultsByUser()
 
 	type TempStruct struct {
-		User data.User
-		Data []data.Result
+		User User
+		Data []Result
 	}
 
 	infos := TempStruct{user, results}

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-
-	"./data"
 )
 
 func index(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +20,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		templates := template.Must(template.ParseFiles("templates/tempIndex.html"))
 		templates.ExecuteTemplate(w, "layout", nil)
 	} else {
-		user, err := data.UserById(sess.UserId)
+		user, err := UserById(sess.UserId)
 		if err != nil {
 			danger(err, "Cannot find user")
 		}
@@ -34,7 +32,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 				"templates/sidebar.html",
 				"templates/index.html"))
 		type TempStruct struct {
-			User data.User
+			User User
 		}
 		infos := TempStruct{user}
 		templates.ExecuteTemplate(w, "layout", infos)

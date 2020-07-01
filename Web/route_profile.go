@@ -8,8 +8,6 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator"
-
-	"./data"
 )
 
 func profile(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +20,7 @@ func profile(w http.ResponseWriter, r *http.Request) {
 			"templates/profile.html"))
 
 	sess, err := session(r)
-	user, err := data.UserById(sess.UserId)
+	user, err := UserById(sess.UserId)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -60,12 +58,12 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting updateProfile...")
 
 	sess, err := session(r)
-	user, err := data.UserById(sess.UserId)
+	user, err := UserById(sess.UserId)
 
 	err = json.NewDecoder(r.Body).Decode(&user)
 
 	if user.CurrentPassword != "" {
-		user.CurrentPassword = data.Encrypt(user.CurrentPassword)
+		user.CurrentPassword = Encrypt(user.CurrentPassword)
 	}
 
 	validate := validator.New()
@@ -104,7 +102,7 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 	if len(messages) == 0 {
 		// Query will always update the password
 		if user.NewPassword != "" { // User wants to change password
-			user.NewPassword = data.Encrypt(user.NewPassword)
+			user.NewPassword = Encrypt(user.NewPassword)
 		} else { // User does not want to change the password
 			user.NewPassword = user.CurrentPassword
 		}
