@@ -3,7 +3,8 @@ create table sessions (
   uuid          varchar(64) not null unique,
   email         varchar(255),
   userid        integer references users(id),
-  createdat     timestamp not null   
+  createdat     timestamp not null,
+  deletedat     timestamp
 );
 
 create table users (
