@@ -1,15 +1,15 @@
 # Scrapers
 
-This is the core of the backend, because here happens the extraction of data from the different career's pages.
+This is Jeifai's core. Here happens the extraction of data from career's pages.
 
-Here the flows of the program:
+How the program flows:
 
 * Start main function
 * Connect to the database
 * Extract all the targets
 * For each target
-    * Start a scraping session
-    * Scrape the target
+    * Start scraping session
+    * Scrape
     * Save results to the database
     * Save response to Cloud Storage
 
@@ -42,30 +42,30 @@ The creation of a new scraper is divided in two different part:
 ## **How to format and write the code for the scraper?**
 Here all the rules created to make *scrapers.go* looking uniformed and standard.
 ```golang
-func(runtime Runtime) ScraperName(version int, isLocal bool) (response Response, results []Result) {
-	switch version {
-	case n:
-        c := colly.NewCollector()   // define Collector
-        url := "https://robimalco.github.io/dreamingjobs.github.io/" // define url
-        tag_department := "li[class=department]" // define variables
-        type Job struct {       // define Struct
-            Title      string
-            Url        string
-            ...
-        }
-        // Write scraper logic
-        c.OnHTML() {}
-        c.OnResponse() {}
-        c.OnRequest() {}
-        c.OnScraped() {}
-        c.OnError() {}
+    func(runtime Runtime) ScraperName(version int, isLocal bool) (response Response, results []Result) {
+        switch version {
+        case n:
+            c := colly.NewCollector()   // define Collector
+            url := "https://robimalco.github.io/dreamingjobs.github.io/" // define url
+            tag_department := "li[class=department]" // define variables
+            type Job struct {       // define Struct
+                Title      string
+                Url        string
+                ...
+            }
+            // Write scraper logic
+            c.OnHTML() {}
+            c.OnResponse() {}
+            c.OnRequest() {}
+            c.OnScraped() {}
+            c.OnError() {}
 
-        //Define how to get response, if local or not
-		if isLocal {
-			c.Visit("localFile.html")
-		} else {
-			c.Visit(url)
-		}
+            //Define how to get response, if local or not
+            if isLocal {
+                c.Visit("localFile.html")
+            } else {
+                c.Visit(url)
+            }
+        }
     }
-}
 ```
