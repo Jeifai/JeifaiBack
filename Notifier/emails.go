@@ -78,11 +78,7 @@ func SendEmails(emails []Email) {
 			panic(err.Error())
 		}
 
-		for _, company := range email.Company {
-			for _, job := range company.Job {
-				SaveNotification(notifier, job.MatchId)
-			}
-		}
+		SaveNotification(notifier, email)
 
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, email); err != nil {
