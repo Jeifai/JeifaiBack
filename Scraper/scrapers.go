@@ -48,7 +48,6 @@ func Scrape(
 	response = function_output[0].Interface().(Response)
 	results = function_output[1].Interface().([]Result)
 	results = Unique(results)
-	fmt.Println(Green("Number of results scraped: "), Bold(Green(strconv.Itoa(len(results)))))
 	return
 }
 

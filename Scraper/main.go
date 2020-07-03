@@ -33,7 +33,9 @@ func main() {
 		if Contains(want_scrapers, elem.Name) {
 			fmt.Println(BrightBlue("Scraping -->"), Bold(BrightBlue(elem.Name)))
 			response, results := Scrape(elem.Name, elem.Version, false)
-			if len(results) > 0 {
+			n_results := len(results)
+			if n_results > 0 {
+				fmt.Println(Green("Number of results scraped: "), Bold(Green(n_results)))
 				scraping, err := elem.StartScrapingSession()
 				if err != nil {
 					panic(err.Error())
@@ -44,6 +46,8 @@ func main() {
 				if err != nil {
 					panic(err.Error())
 				}
+			} else {
+				fmt.Println(Bold(Red("DANGER, NO RESULTS FOUND")))
 			}
 		}
 	}
