@@ -16,4 +16,5 @@ require (
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	mvdan.cc/gofumpt v0.0.0-20200627213337-90206bd98491 // indirect
+	mvdan.cc/unparam v0.0.0-20200501210554-b37ab49443f7 // indirect
 )

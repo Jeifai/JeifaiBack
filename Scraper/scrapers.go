@@ -234,6 +234,8 @@ func (runtime Runtime) Mitte(
 	switch version {
 	case 1:
 
+		c := colly.NewCollector()
+
 		s_start_url := "https://api.lever.co/v0/postings/mitte?&mode=json"
 
 		type Jobs []struct {
@@ -259,8 +261,6 @@ func (runtime Runtime) Mitte(
 		}
 
 		var jsonJobs Jobs
-
-		c := colly.NewCollector()
 
 		c.OnResponse(func(r *colly.Response) {
 			var tempJson Jobs
@@ -294,19 +294,19 @@ func (runtime Runtime) Mitte(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -495,6 +495,8 @@ func (runtime Runtime) Zalando(
 	switch version {
 	case 1:
 
+		c := colly.NewCollector()
+
 		z_start_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset=0"
 		z_base_url := "https://jobs.zalando.com"
 		z_base_result_url := "https://jobs.zalando.com/de/jobs/"
@@ -522,8 +524,6 @@ func (runtime Runtime) Zalando(
 		}
 
 		var jsonJobs Jobs
-
-		c := colly.NewCollector()
 
 		c.OnResponse(func(r *colly.Response) {
 			var tempJsonJobs Jobs
@@ -562,19 +562,19 @@ func (runtime Runtime) Zalando(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -598,10 +598,11 @@ func (runtime Runtime) Google(
 	switch version {
 	case 1:
 
+		c := colly.NewCollector()
+
 		g_start_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page=1"
 		g_base_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page="
 		g_base_result_url := "https://careers.google.com/jobs/results/"
-
 		number_results_per_page := 100
 
 		type JsonJobs struct {
@@ -622,8 +623,6 @@ func (runtime Runtime) Google(
 		}
 
 		var jsonJobs JsonJobs
-
-		c := colly.NewCollector()
 
 		c.OnResponse(func(r *colly.Response) {
 			var tempJsonJobs JsonJobs
@@ -690,19 +689,19 @@ func (runtime Runtime) Google(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -817,15 +816,14 @@ func (runtime Runtime) Microsoft(
 	switch version {
 	case 1:
 
+		c := colly.NewCollector()
+
 		m_start_url := "https://careers.microsoft.com/us/en/search-results?s=1&from=1"
 		m_base_url := "https://careers.microsoft.com/us/en/search-results?s=1&from="
 		m_base_result_url := "https://careers.microsoft.com/us/en/job/"
-
 		first_part_json := `"eagerLoadRefineSearch":`
 		second_part_json := `}; phApp.sessionParams`
-
 		counter := 0
-
 		number_results_per_page := 10 // len(jsonJobs.Data.Jobs)
 
 		type JsonJobs struct {
@@ -869,8 +867,6 @@ func (runtime Runtime) Microsoft(
 		}
 
 		var jsonJobs JsonJobs
-
-		c := colly.NewCollector()
 
 		c.OnResponse(func(r *colly.Response) {
 			var resultsJson []byte
@@ -928,19 +924,19 @@ func (runtime Runtime) Microsoft(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -964,11 +960,11 @@ func (runtime Runtime) Twitter(
 	switch version {
 	case 1:
 
+		c := colly.NewCollector()
+
 		t_start_url := "https://careers.twitter.com/content/careers-twitter/en/jobs.careers.search.json?limit=100&offset=0"
 		t_base_url := "https://careers.twitter.com/content/careers-twitter/en/jobs.careers.search.json?limit=100&offset="
-
 		counter := 0
-
 		number_results_per_page := 100
 
 		type Jobs struct {
@@ -992,8 +988,6 @@ func (runtime Runtime) Twitter(
 		}
 
 		var jsonJobs Jobs
-
-		c := colly.NewCollector()
 
 		c.OnResponse(func(r *colly.Response) {
 			var tempJsonJobs Jobs
@@ -1042,19 +1036,19 @@ func (runtime Runtime) Twitter(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -1078,6 +1072,8 @@ func (runtime Runtime) Shopify(
 	response Response, results []Result) {
 	switch version {
 	case 1:
+
+		c := colly.NewCollector()
 
 		s_start_url := "https://api.lever.co/v0/postings/shopify?mode=json"
 
@@ -1104,8 +1100,6 @@ func (runtime Runtime) Shopify(
 		}
 
 		var jsonJobs Jobs
-
-		c := colly.NewCollector()
 
 		c.OnResponse(func(r *colly.Response) {
 			var tempJson Jobs
@@ -1139,19 +1133,19 @@ func (runtime Runtime) Shopify(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -1271,14 +1265,20 @@ func (runtime Runtime) N26(
 
 		n_start_url := "https://n26.com/en/careers"
 		n_base_url := "https://www.n26.com/"
-
 		main_tag := "a"
 		main_attr := "href"
 		string_location_url := "locations"
 		string_result_url := "positions"
-
 		tag_title := "div"
 		tag_details := "dd"
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_attr), string_location_url) {
+				temp_location_url := e.Attr(main_attr)
+				location_url := n_base_url + temp_location_url
+				l.Visit(location_url)
+			}
+		})
 
 		c.OnResponse(func(r *colly.Response) {
 			if isLocal {
@@ -1303,12 +1303,23 @@ func (runtime Runtime) N26(
 			}
 		})
 
-		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
-			if strings.Contains(e.Attr(main_attr), string_location_url) {
-				temp_location_url := e.Attr(main_attr)
-				location_url := n_base_url + temp_location_url
-				l.Visit(location_url)
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			response_json, err := json.Marshal(results)
+			if err != nil {
+				panic(err.Error())
 			}
+			response = Response{[]byte(response_json)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		l.OnHTML(main_tag, func(e *colly.HTMLElement) {
@@ -1354,27 +1365,8 @@ func (runtime Runtime) N26(
 			}
 		})
 
-		c.OnRequest(func(r *colly.Request) {
-			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
 		l.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			response_json, err := json.Marshal(results)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(response_json)}
-		})
-
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
 		})
 
 		l.OnError(func(r *colly.Response, err error) {
@@ -1406,6 +1398,8 @@ func (runtime Runtime) Blinkist(
 	switch version {
 	case 1:
 
+		c := colly.NewCollector()
+
 		s_start_url := "https://api.lever.co/v0/postings/blinkist?&mode=json"
 
 		type Jobs []struct {
@@ -1431,8 +1425,6 @@ func (runtime Runtime) Blinkist(
 		}
 
 		var jsonJobs Jobs
-
-		c := colly.NewCollector()
 
 		c.OnResponse(func(r *colly.Response) {
 			var tempJson Jobs
@@ -1466,19 +1458,19 @@ func (runtime Runtime) Blinkist(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -1503,19 +1495,14 @@ func (runtime Runtime) Deutschebahn(
 	switch version {
 	case 1:
 
-		start := 301
-		end := 400
-
-		counter := start
-
 		c := colly.NewCollector()
 
-		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum=" + strconv.Itoa(
-			start,
-		)
+		start := 301
+		end := 400
+		counter := start
+		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum=" + strconv.Itoa(start)
 		d_base_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum="
 		d_job_url := "https://karriere.deutschebahn.com/"
-
 		main_section_tag := "ul"
 		main_section_attr := "class"
 		main_section_value := "result-items"
@@ -1528,30 +1515,6 @@ func (runtime Runtime) Deutschebahn(
 			Publication string
 			Description string
 		}
-
-		c.OnResponse(func(r *colly.Response) {
-			if isLocal {
-
-				type JsonJob struct {
-					CompanyName string
-					Title       string
-					Url         string
-					Data        json.RawMessage
-				}
-
-				jobs := make([]JsonJob, 0)
-				json.Unmarshal(r.Body, &jobs)
-
-				for _, elem := range jobs {
-					results = append(results, Result{
-						runtime.Name,
-						elem.Title,
-						elem.Url,
-						elem.Data,
-					})
-				}
-			}
-		})
 
 		c.OnHTML(main_section_tag, func(e *colly.HTMLElement) {
 			if strings.Contains(e.Attr(main_section_attr), main_section_value) {
@@ -1613,15 +1576,32 @@ func (runtime Runtime) Deutschebahn(
 			}
 		})
 
-		c.OnRequest(func(r *colly.Request) {
-			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		c.OnResponse(func(r *colly.Response) {
+			if isLocal {
+
+				type JsonJob struct {
+					CompanyName string
+					Title       string
+					Url         string
+					Data        json.RawMessage
+				}
+
+				jobs := make([]JsonJob, 0)
+				json.Unmarshal(r.Body, &jobs)
+
+				for _, elem := range jobs {
+					results = append(results, Result{
+						runtime.Name,
+						elem.Title,
+						elem.Url,
+						elem.Data,
+					})
+				}
+			}
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnScraped(func(r *colly.Response) {
@@ -1630,6 +1610,13 @@ func (runtime Runtime) Deutschebahn(
 				panic(err.Error())
 			}
 			response = Response{[]byte(response_json)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -1653,6 +1640,8 @@ func (runtime Runtime) Celo(
 	response Response, results []Result) {
 	switch version {
 	case 1:
+
+		c := colly.NewCollector()
 
 		c_start_url := "https://api.lever.co/v0/postings/celo?mode=json"
 
@@ -1679,8 +1668,6 @@ func (runtime Runtime) Celo(
 		}
 
 		var jsonJobs Jobs
-
-		c := colly.NewCollector()
 
 		c.OnResponse(func(r *colly.Response) {
 			var tempJson Jobs
@@ -1714,19 +1701,19 @@ func (runtime Runtime) Celo(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -1749,8 +1736,9 @@ func (runtime Runtime) Penta(
 	version int, isLocal bool) (
 	response Response, results []Result) {
 	switch version {
-
 	case 1:
+
+		c := colly.NewCollector()
 
 		p_start_url := "https://penta.recruitee.com/api/offers"
 
@@ -1800,8 +1788,6 @@ func (runtime Runtime) Penta(
 
 		var jsonJobs Jobs
 
-		c := colly.NewCollector()
-
 		c.OnResponse(func(r *colly.Response) {
 			var tempJson Jobs
 			err := json.Unmarshal(r.Body, &tempJson)
@@ -1834,19 +1820,19 @@ func (runtime Runtime) Penta(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -2134,6 +2120,8 @@ func (runtime Runtime) Hometogo(
 	switch version {
 	case 1:
 
+		c := colly.NewCollector()
+
 		h_start_url := "https://api.heavenhr.com/api/v1/positions/public/vacancies/?companyId=_VBAnjTs72rz0J-zBe1sYtA_"
 		h_job_url := "https://hometogo.heavenhr.com/jobs/"
 
@@ -2168,8 +2156,6 @@ func (runtime Runtime) Hometogo(
 
 		var jsonJobs Jobs
 
-		c := colly.NewCollector()
-
 		c.OnResponse(func(r *colly.Response) {
 			var tempJson Jobs
 			err := json.Unmarshal(r.Body, &tempJson)
@@ -2202,19 +2188,19 @@ func (runtime Runtime) Hometogo(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -2238,11 +2224,11 @@ func (runtime Runtime) Amazon(
 	switch version {
 	case 1:
 
+		c := colly.NewCollector()
+
 		a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Belgium&country=BEL&result_limit=1000&offset="
 		a_job_url := "https://www.amazon.jobs"
-
 		number_results_per_page := 1000
-
 		counter := 0
 
 		type JsonJobs struct {
@@ -2302,8 +2288,6 @@ func (runtime Runtime) Amazon(
 
 		var jsonJobs JsonJobs
 
-		c := colly.NewCollector()
-
 		c.OnResponse(func(r *colly.Response) {
 			var tempJsonJobs JsonJobs
 			err := json.Unmarshal(r.Body, &tempJsonJobs)
@@ -2348,19 +2332,19 @@ func (runtime Runtime) Amazon(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -2566,6 +2550,8 @@ func (runtime Runtime) Revolut(
 	switch version {
 	case 1:
 
+		c := colly.NewCollector()
+
 		c_start_url := "https://api.lever.co/v0/postings/revolut?mode=json"
 
 		type Jobs []struct {
@@ -2591,8 +2577,6 @@ func (runtime Runtime) Revolut(
 		}
 
 		var jsonJobs Jobs
-
-		c := colly.NewCollector()
 
 		c.OnResponse(func(r *colly.Response) {
 			var tempJson Jobs
@@ -2626,19 +2610,19 @@ func (runtime Runtime) Revolut(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
@@ -2662,6 +2646,8 @@ func (runtime Runtime) Mollie(
 	response Response, results []Result) {
 	switch version {
 	case 1:
+
+		c := colly.NewCollector()
 
 		c_start_url := "https://api.lever.co/v0/postings/mollie?mode=json"
 
@@ -2689,8 +2675,6 @@ func (runtime Runtime) Mollie(
 
 		var jsonJobs Jobs
 
-		c := colly.NewCollector()
-
 		c.OnResponse(func(r *colly.Response) {
 			var tempJson Jobs
 			err := json.Unmarshal(r.Body, &tempJson)
@@ -2723,19 +2707,19 @@ func (runtime Runtime) Mollie(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
 		c.OnScraped(func(r *colly.Response) {
 			jsonJobs_marshal, err := json.Marshal(jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
 		})
 
 		if isLocal {
