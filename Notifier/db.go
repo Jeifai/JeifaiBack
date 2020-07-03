@@ -190,5 +190,33 @@ func SaveNotification(notifier Notifier, match_id int) {
 		panic(err.Error())
 	}
 	defer stmt.Close()
-	stmt.QueryRow(notifier.Id, match_id, time.Now())
+    stmt.QueryRow(notifier.Id, match_id, time.Now())
+    
+
+
+    /**
+	fmt.Println(Gray(8-1, "Starting SaveNotification..."))
+    time_now := time.Now()
+    valueStrings := []string{}
+    valueArgs := []interface{}{}
+    for _, company := range email.Company {
+        for _, job := range company.Job {
+		    str1 := "$" + strconv.Itoa(1+i*3) + ","
+		    str2 := "$" + strconv.Itoa(2+i*3) + ","
+		    str3 := "$" + strconv.Itoa(3+i*3)
+		    str_n := "(" + str1 + str2 + str3 + ")"
+            valueStrings = append(valueStrings, str_n)
+            valueArgs = append(valueArgs, notifier)
+            valueArgs = append(valueArgs, job.MatchId)
+            valueArgs = append(valueArgs, time_now)
+        }
+    }
+	smt := `INSERT INTO notifications(notifierid, matchid, createdat) VALUES %s`
+	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
+
+	_, err := Db.Exec(smt, valueArgs...)
+	if err != nil {
+		panic(err.Error())
+	}
+    */
 }
