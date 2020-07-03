@@ -55,7 +55,8 @@ func Scrape(
 func (runtime Runtime) Dreamingjobs(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
@@ -147,7 +148,8 @@ func (runtime Runtime) Dreamingjobs(
 func (runtime Runtime) Kununu(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
@@ -229,7 +231,8 @@ func (runtime Runtime) Kununu(
 func (runtime Runtime) Mitte(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		s_start_url := "https://api.lever.co/v0/postings/mitte?&mode=json"
 
@@ -325,7 +328,9 @@ func (runtime Runtime) Mitte(
 func (runtime Runtime) IMusician(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
+
 		c := colly.NewCollector()
 
 		url := "https://imusician-digital-jobs.personio.de/"
@@ -409,7 +414,8 @@ func (runtime Runtime) IMusician(
 func (runtime Runtime) Babelforce(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
@@ -486,7 +492,8 @@ func (runtime Runtime) Babelforce(
 
 func (runtime Runtime) Zalando(
 	version int, isLocal bool) (response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		z_start_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset=0"
 		z_base_url := "https://jobs.zalando.com"
@@ -588,7 +595,8 @@ func (runtime Runtime) Zalando(
 
 func (runtime Runtime) Google(
 	version int, isLocal bool) (response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		g_start_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page=1"
 		g_base_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page="
@@ -716,7 +724,8 @@ func (runtime Runtime) Google(
 func (runtime Runtime) Soundcloud(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
@@ -805,7 +814,8 @@ func (runtime Runtime) Soundcloud(
 func (runtime Runtime) Microsoft(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		m_start_url := "https://careers.microsoft.com/us/en/search-results?s=1&from=1"
 		m_base_url := "https://careers.microsoft.com/us/en/search-results?s=1&from="
@@ -951,7 +961,8 @@ func (runtime Runtime) Microsoft(
 
 func (runtime Runtime) Twitter(
 	version int, isLocal bool) (response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		t_start_url := "https://careers.twitter.com/content/careers-twitter/en/jobs.careers.search.json?limit=100&offset=0"
 		t_base_url := "https://careers.twitter.com/content/careers-twitter/en/jobs.careers.search.json?limit=100&offset="
@@ -1065,7 +1076,8 @@ func (runtime Runtime) Twitter(
 func (runtime Runtime) Shopify(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		s_start_url := "https://api.lever.co/v0/postings/shopify?mode=json"
 
@@ -1161,7 +1173,8 @@ func (runtime Runtime) Shopify(
 func (runtime Runtime) Urbansport(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
@@ -1247,8 +1260,11 @@ func (runtime Runtime) Urbansport(
 	return
 }
 
-func (runtime Runtime) N26(version int, isLocal bool) (response Response, results []Result) {
-	if version == 1 {
+func (runtime Runtime) N26(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 		l := c.Clone()
@@ -1387,7 +1403,8 @@ func (runtime Runtime) N26(version int, isLocal bool) (response Response, result
 func (runtime Runtime) Blinkist(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		s_start_url := "https://api.lever.co/v0/postings/blinkist?&mode=json"
 
@@ -1483,7 +1500,8 @@ func (runtime Runtime) Blinkist(
 func (runtime Runtime) Deutschebahn(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		start := 301
 		end := 400
@@ -1626,7 +1644,6 @@ func (runtime Runtime) Deutschebahn(
 		} else {
 			c.Visit(d_start_url)
 		}
-
 	}
 	return
 }
@@ -1634,7 +1651,8 @@ func (runtime Runtime) Deutschebahn(
 func (runtime Runtime) Celo(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c_start_url := "https://api.lever.co/v0/postings/celo?mode=json"
 
@@ -1730,7 +1748,9 @@ func (runtime Runtime) Celo(
 func (runtime Runtime) Penta(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+
+	case 1:
 
 		p_start_url := "https://penta.recruitee.com/api/offers"
 
@@ -1841,7 +1861,9 @@ func (runtime Runtime) Penta(
 		} else {
 			c.Visit(p_start_url)
 		}
-	} else if version == 2 {
+
+	case 2:
+
 		c := colly.NewCollector()
 
 		url := "https://boards.greenhouse.io/embed/job_board?for=penta"
@@ -1929,7 +1951,8 @@ func (runtime Runtime) Penta(
 func (runtime Runtime) Contentful(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
@@ -2018,7 +2041,8 @@ func (runtime Runtime) Contentful(
 func (runtime Runtime) Gympass(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
@@ -2107,7 +2131,8 @@ func (runtime Runtime) Gympass(
 func (runtime Runtime) Hometogo(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		h_start_url := "https://api.heavenhr.com/api/v1/positions/public/vacancies/?companyId=_VBAnjTs72rz0J-zBe1sYtA_"
 		h_job_url := "https://hometogo.heavenhr.com/jobs/"
@@ -2210,7 +2235,8 @@ func (runtime Runtime) Hometogo(
 
 func (runtime Runtime) Amazon(
 	version int, isLocal bool) (response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Belgium&country=BEL&result_limit=1000&offset="
 		a_job_url := "https://www.amazon.jobs"
@@ -2356,7 +2382,8 @@ func (runtime Runtime) Amazon(
 func (runtime Runtime) Lanalabs(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
@@ -2448,7 +2475,8 @@ func (runtime Runtime) Lanalabs(
 func (runtime Runtime) Slack(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
@@ -2535,7 +2563,8 @@ func (runtime Runtime) Slack(
 func (runtime Runtime) Revolut(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c_start_url := "https://api.lever.co/v0/postings/revolut?mode=json"
 
@@ -2631,7 +2660,8 @@ func (runtime Runtime) Revolut(
 func (runtime Runtime) Mollie(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c_start_url := "https://api.lever.co/v0/postings/mollie?mode=json"
 
@@ -2727,12 +2757,13 @@ func (runtime Runtime) Mollie(
 func (runtime Runtime) Circleci(
 	version int, isLocal bool) (
 	response Response, results []Result) {
-	if version == 1 {
+	switch version {
+	case 1:
 
 		c := colly.NewCollector()
 
-        url := "https://boards.greenhouse.io/embed/job_board?for=circleci"
-        base_url := "https://boards.greenhouse.io/circleci/jobs/"
+		url := "https://boards.greenhouse.io/embed/job_board?for=circleci"
+		base_url := "https://boards.greenhouse.io/circleci/jobs/"
 		main_tag := "section"
 		main_tag_attr := "class"
 		main_tag_value := "level-0"
@@ -2753,29 +2784,29 @@ func (runtime Runtime) Circleci(
 				result_department := e.ChildText(tag_department)
 
 				e.ForEach("div", func(_ int, el *colly.HTMLElement) {
-                    result_title := el.ChildText(tag_title)
-                    t_j_url := strings.Split(el.ChildAttr(tag_url, "href"), "=")[1]
+					result_title := el.ChildText(tag_title)
+					t_j_url := strings.Split(el.ChildAttr(tag_url, "href"), "=")[1]
 					result_url := base_url + t_j_url
 					result_location := el.ChildText(tag_location)
 
-                    temp_elem_json := Job{
-                        result_title,
-                        result_url,
-                        result_department,
-                        result_location,
-                    }
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_department,
+						result_location,
+					}
 
-                    elem_json, err := json.Marshal(temp_elem_json)
-                    if err != nil {
-                        panic(err.Error())
-                    }
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
 
-                    results = append(results, Result{
-                        runtime.Name,
-                        result_title,
-                        result_url,
-                        elem_json,
-                    })
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
 				})
 			}
 		})
