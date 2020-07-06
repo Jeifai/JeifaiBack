@@ -82,7 +82,7 @@ func SendEmails(emails []Email) {
 
 		var tpl bytes.Buffer
 		if err := t.Execute(&tpl, email); err != nil {
-			fmt.Println(err)
+			panic(err.Error())
 		}
 
 		result := tpl.String()
