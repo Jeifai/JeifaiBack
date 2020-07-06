@@ -68,21 +68,21 @@ func (scraper Scraper) CreateScraper() {
                     VALUES ($1, $2, $3, $4) RETURNING id`
 	stmt_1, err := Db.Prepare(statement_1)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	defer stmt_1.Close()
 	var target_id int
 	err = stmt_1.QueryRow(
 		scraper.Name, scraper.JobsUrl, scraper.HostUrl, time.Now()).Scan(&target_id)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	statement_2 := `INSERT INTO scrapers (name, version, targetid, createdat)
                     VALUES ($1, $2, $3, $4) RETURNING id`
 	stmt_2, err := Db.Prepare(statement_2)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	defer stmt_2.Close()
 	stmt_2.QueryRow(scraper.Name, scraper.Version, target_id, time.Now())

@@ -13,6 +13,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344 // indirect
 	golang.org/x/text v0.3.3 // indirect
+	google.golang.org/api v0.28.0
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	mvdan.cc/gofumpt v0.0.0-20200627213337-90206bd98491 // indirect

@@ -96,7 +96,7 @@ func SendEmails(emails []Email) {
 		d := gomail.NewDialer("smtp.gmail.com", 587, "robimalco@gmail.com", password)
 
 		if err := d.DialAndSend(m); err != nil {
-			panic(err)
+			panic(err.Error())
 		}
 	}
 }
