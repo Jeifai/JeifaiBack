@@ -119,3 +119,13 @@ create table notifications (
   notifierid    integer references notifiers(id),
   createdat     timestamp not null
 )
+
+create table invitations (
+  id               serial primary key,
+  uuid             varchar(64) not null unique,
+  email            varchar(255) not null unique,
+  whyjoin          varchar(1000),
+  whichcompanies   varchar(1000),
+  anythingelse     varchar(1000),
+  createdat        timestamp not null
+)
