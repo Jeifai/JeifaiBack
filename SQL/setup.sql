@@ -127,5 +127,15 @@ create table invitations (
   whyjoin          varchar(1000),
   whichcompanies   varchar(1000),
   anythingelse     varchar(1000),
-  createdat        timestamp not null
+  createdat        timestamp not null,
+  usedat           timestamp
+)
+
+create table resetpasswords (
+  id              serial primary key,
+  userid          integer references users(id),
+  token           varchar(40) not null unique,
+  createdat       timestamp not null,
+  expiredat       timestamp,
+  consumedat      timestamp
 )
