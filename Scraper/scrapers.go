@@ -3346,3 +3346,80 @@ func (runtime Runtime) Greenhouse(
 	}
 	return
 }
+
+func (runtime Runtime) Docker(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        d_start_url := "https://newton.newtonsoftware.com/career/CareerHome.action?clientId=8a7883c6708df1d40170a6df29950b39"
+		main_tag := ".gnewtonCareerGroupRowClass"
+		tag_title := "a"
+		tag_location := ".gnewtonCareerGroupJobDescriptionClass"
+    
+		type Job struct {
+			Title       string
+            Url         string
+			Location    string
+		}
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+            result_title := e.ChildText(tag_title)
+            result_url := e.ChildAttr(tag_title, "href")
+            result_location := e.ChildText(tag_location)
+
+            _, err := netUrl.ParseRequestURI(result_url)
+            if err == nil {
+
+                temp_elem_json := Job{
+                    result_title,
+                    result_url,
+                    result_location,
+                }
+                elem_json, err := json.Marshal(temp_elem_json)
+                if err != nil {
+                    panic(err.Error())
+                }
+
+                results = append(results, Result{
+                    runtime.Name,
+                    result_title,
+                    result_url,
+                    elem_json,
+                })
+            }
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(d_start_url)
+		}
+	}
+	return
+}
