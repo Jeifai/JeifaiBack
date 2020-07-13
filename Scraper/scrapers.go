@@ -2914,3 +2914,139 @@ func (runtime Runtime) Blacklane(
 	}
 	return
 }
+
+func (runtime Runtime) Auto1(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		a_base_url := "https://www.auto1-group.com/smart-recruiters/jobs/search/?page="
+        a_base_job_url := "https://www.auto1-group.com/de/jobs/"
+        current_page := 1
+        number_results_per_page := 15
+
+        type Auto1Jobs struct {
+            Jobs struct {
+                Hits struct {
+                    Total    int         `json:"total"`
+                    MaxScore interface{} `json:"max_score"`
+                    Hits     []struct {
+                        Index  string      `json:"_index"`
+                        Type   string      `json:"_type"`
+                        ID     string      `json:"_id"`
+                        Score  interface{} `json:"_score"`
+                        Source struct {
+                            Title string `json:"title"`
+                            JobAd struct {
+                                Sections struct {
+                                    CompanyDescription struct {
+                                        Title string `json:"title"`
+                                        Text  string `json:"text"`
+                                    } `json:"companyDescription"`
+                                    JobDescription struct {
+                                        Title string `json:"title"`
+                                        Text  string `json:"text"`
+                                    } `json:"jobDescription"`
+                                    Qualifications struct {
+                                        Title string `json:"title"`
+                                        Text  string `json:"text"`
+                                    } `json:"qualifications"`
+                                    AdditionalInformation struct {
+                                        Title string `json:"title"`
+                                        Text  string `json:"text"`
+                                    } `json:"additionalInformation"`
+                                } `json:"Jobssections"`
+                            } `json:"jobAd"`
+                            LocationCity     string    `json:"locationCity"`
+                            LocationCountry  string    `json:"locationCountry"`
+                            Brand            string    `json:"brand"`
+                            Company          string    `json:"company"`
+                            ExperienceLevel  string    `json:"experienceLevel"`
+                            Department       string    `json:"department"`
+                            TypeOfEmployment string    `json:"typeOfEmployment"`
+                            CreatedOn        time.Time `json:"createdOn"`
+                            IsActive         int       `json:"isActive"`
+                            URL              string    `json:"url"`
+                        } `json:"_source"`
+                        Sort []int64 `json:"sort"`
+                    } `json:"hits"`
+                } `json:"hits"`
+            } `json:"jobs"`
+        }
+
+		var jsonJobs Auto1Jobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJsonJobs Auto1Jobs
+			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJsonJobs.Jobs.Hits.Hits {
+
+                result_title := elem.Source.Title
+                result_url := a_base_job_url + elem.Source.URL
+                
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+                })
+            }
+        
+            jsonJobs.Jobs.Hits.Hits = append(jsonJobs.Jobs.Hits.Hits, tempJsonJobs.Jobs.Hits.Hits...)
+            
+            total_pages := tempJsonJobs.Jobs.Hits.Total/number_results_per_page + 2
+
+			if current_page > total_pages {
+				return
+			} else {
+                time.Sleep(SecondsSleep * time.Second)
+                current_page++
+				c.Visit(a_base_url + strconv.Itoa(current_page))
+            }
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(a_base_url + strconv.Itoa(current_page))
+		}
+	}
+	return
+}
