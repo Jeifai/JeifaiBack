@@ -10,18 +10,12 @@ func main() {
 	DbConnect()
 	defer Db.Close()
 
-	/**
-		want_scrapers := []string{"Amazon"}
-	    // want_scrapers := []string{"Deutschebahn"}
-	    // want_scrapers := []string{"Microsoft"}
-	*/
-
 	want_scrapers := []string{
         "Blinkist", "Urbansport", "Babelforce", "Blacklane", "Kununu", "Docker",
-        "IMusician", "Mitte", "Revolut", "Auto1", "Soundcloud", "Penta", 
+        "IMusician", "Mitte", "Revolut", "Auto1", "Soundcloud", "Penta", "Zapier",
         "Celo", "N26", "Mollie", "Flixbus", "Shopify", "Twitter", "Zalando",
         "Slack", "Circleci", "Quora", "Google", "Hometogo", "Contentful", 
-        "Gympass", "Lanalabs", "Dreamingjobs", "Greenhouse"
+        "Gympass", "Lanalabs", "Dreamingjobs", "Greenhouse",
     }
     
     scrapers, err := GetScrapers()
