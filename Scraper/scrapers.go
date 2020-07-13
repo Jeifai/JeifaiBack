@@ -2824,3 +2824,93 @@ func (runtime Runtime) Circleci(
 	}
 	return
 }
+
+func (runtime Runtime) Blacklane(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		url := "https://boards.greenhouse.io/blacklane"
+		base_url := "https://boards.greenhouse.io"
+		main_tag := "section"
+		main_tag_attr := "class"
+		main_tag_value := "level-0"
+		tag_title := "a"
+		tag_url := "a"
+		tag_department := "h3"
+		tag_location := "span"
+
+		type Job struct {
+			Title      string
+			Url        string
+			Department string
+			Location   string
+		}
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+
+				result_department := e.ChildText(tag_department)
+
+				e.ForEach("div", func(_ int, el *colly.HTMLElement) {
+                    result_title := el.ChildText(tag_title)
+                    t_j_url := el.ChildAttr(tag_url, "href")
+					result_url := base_url + t_j_url
+                    result_location := el.ChildText(tag_location)
+                    
+
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_department,
+						result_location,
+					}
+
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
+				})
+			}
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
+	return
+}
