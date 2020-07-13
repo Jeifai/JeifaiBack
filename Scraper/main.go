@@ -17,14 +17,16 @@ func main() {
 	*/
 
 	want_scrapers := []string{
-		"Blinkist", "Urbansport", "Babelforce",
-		"Kununu", "IMusician", "Mitte", "Revolut",
-		"Soundcloud", "Penta", "Celo", "N26", "Mollie",
-		"Shopify", "Twitter", "Zalando", "Slack", "Circleci",
-		"Google", "Hometogo", "Contentful", "Gympass", "Lanalabs", "Dreamingjobs",
-	}
+        "Blinkist", "Urbansport", "Babelforce", "Blacklane", "Kununu", 
+        "IMusician", "Mitte", "Revolut", "Auto1", "Soundcloud", "Penta", 
+        "Celo", "N26", "Mollie", "Flixbus", "Shopify", "Twitter", "Zalando",
+        "Slack", "Circleci", "Quora", "Google", "Hometogo", "Contentful", 
+        "Gympass", "Lanalabs", "Dreamingjobs",
+    }
 
-	scrapers, err := GetScrapers()
+    want_scrapers := []string{"Quora"}
+    
+    scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
 	}
