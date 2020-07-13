@@ -3050,3 +3050,119 @@ func (runtime Runtime) Auto1(
 	}
 	return
 }
+
+func (runtime Runtime) Flixbus(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		c_start_url := "https://flix.careers/api/jobs"
+
+        type FlixbusJobs struct {
+            Jobs []struct {
+                AbsoluteURL    string `json:"absolute_url"`
+                DataCompliance []struct {
+                    Type            string      `json:"type"`
+                    RequiresConsent bool        `json:"requires_consent"`
+                    RetentionPeriod interface{} `json:"retention_period"`
+                } `json:"data_compliance"`
+                InternalJobID int64 `json:"internal_job_id"`
+                Location      struct {
+                    Name string `json:"name"`
+                } `json:"location"`
+                Metadata []struct {
+                    ID        int64  `json:"id"`
+                    Name      string `json:"name"`
+                    Value     string `json:"value"`
+                    ValueType string `json:"value_type"`
+                } `json:"metadata"`
+                ID            int64  `json:"id"`
+                UpdatedAt     string `json:"updated_at"`
+                RequisitionID string `json:"requisition_id"`
+                Title         string `json:"title"`
+                Departments   []struct {
+                    ID       int64         `json:"id"`
+                    Name     string        `json:"name"`
+                    ChildIds []interface{} `json:"child_ids"`
+                    ParentID interface{}   `json:"parent_id"`
+                } `json:"departments"`
+                Offices []struct {
+                    ID       int64         `json:"id"`
+                    Name     string        `json:"name"`
+                    Location interface{}   `json:"location"`
+                    ChildIds []interface{} `json:"child_ids"`
+                    ParentID int64         `json:"parent_id"`
+                } `json:"offices"`
+            } `json:"jobs"`
+            Meta struct {
+                Total int `json:"total"`
+            } `json:"meta"`
+        }
+
+		var jsonJobs FlixbusJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson FlixbusJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Jobs {
+
+				result_title := elem.Title
+				result_url := elem.AbsoluteURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(c_start_url)
+		}
+	}
+	return
+}
