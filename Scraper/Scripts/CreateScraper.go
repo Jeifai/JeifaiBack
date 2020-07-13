@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Circleci"
+	scraper_name := "Docker"
 	scraper_version := 1
-	jobs_url := "https://boards.greenhouse.io/embed/job_board?for=circleci"
-	host_url := "https://www.circleci.com"
+	jobs_url := "https://www.docker.com/career-openings"
+	host_url := "https://www.docker.com"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }

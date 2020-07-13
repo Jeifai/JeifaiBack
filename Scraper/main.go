@@ -17,14 +17,12 @@ func main() {
 	*/
 
 	want_scrapers := []string{
-        "Blinkist", "Urbansport", "Babelforce", "Blacklane", "Kununu", 
+        "Blinkist", "Urbansport", "Babelforce", "Blacklane", "Kununu", "Docker",
         "IMusician", "Mitte", "Revolut", "Auto1", "Soundcloud", "Penta", 
         "Celo", "N26", "Mollie", "Flixbus", "Shopify", "Twitter", "Zalando",
         "Slack", "Circleci", "Quora", "Google", "Hometogo", "Contentful", 
-        "Gympass", "Lanalabs", "Dreamingjobs",
+        "Gympass", "Lanalabs", "Dreamingjobs", "Greenhouse"
     }
-
-    want_scrapers := []string{"Quora"}
     
     scrapers, err := GetScrapers()
 	if err != nil {
