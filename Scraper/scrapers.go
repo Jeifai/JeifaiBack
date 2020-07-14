@@ -3267,8 +3267,6 @@ func (runtime Runtime) Greenhouse(
 		c := colly.NewCollector()
 
 		url := "https://boards.greenhouse.io/embed/job_board?for=greenhouse"
-        base_url := "https://boards.greenhouse.io/circleci/jobs/"
-        _ = base_url
 		main_tag := "section"
 		main_tag_attr := "class"
 		main_tag_value := "level-0"
@@ -3508,6 +3506,110 @@ func (runtime Runtime) Zapier(
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(z_start_url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Datadog(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://api.greenhouse.io/v1/boards/datadog/jobs/"
+
+        type JsonJobs struct {
+            Jobs []struct {
+                AbsoluteURL    string `json:"absolute_url"`
+                DataCompliance []struct {
+                    Type            string      `json:"type"`
+                    RequiresConsent bool        `json:"requires_consent"`
+                    RetentionPeriod interface{} `json:"retention_period"`
+                } `json:"data_compliance"`
+                InternalJobID int `json:"internal_job_id"`
+                Location      struct {
+                    Name string `json:"name"`
+                } `json:"location"`
+                Metadata []struct {
+                    ID        int    `json:"id"`
+                    Name      string `json:"name"`
+                    Value     string `json:"value"`
+                    ValueType string `json:"value_type"`
+                } `json:"metadata"`
+                ID            int    `json:"id"`
+                UpdatedAt     string `json:"updated_at"`
+                RequisitionID string `json:"requisition_id"`
+                Title         string `json:"title"`
+                Education     string `json:"education,omitempty"`
+            } `json:"jobs"`
+            Meta struct {
+                Total int `json:"total"`
+            } `json:"meta"`
+        }
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Jobs {
+
+				result_title := elem.Title
+				result_url := elem.AbsoluteURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
 		}
 	}
 	return
