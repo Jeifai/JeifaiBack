@@ -10,6 +10,7 @@ func main() {
 	DbConnect()
 	defer Db.Close()
 
+    // Microsoft, Deutschebahn, Amazon
 	want_scrapers := []string{
         "Blinkist", "Urbansport", "Babelforce", "Blacklane", "Kununu", "Docker",
         "IMusician", "Mitte", "Revolut", "Auto1", "Soundcloud", "Penta", "Zapier",
