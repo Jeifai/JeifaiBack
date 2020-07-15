@@ -15,7 +15,7 @@ func main() {
         "Blinkist", "Urbansport", "Babelforce", "Blacklane", "Kununu", "Docker",
         "IMusician", "Mitte", "Revolut", "Auto1", "Soundcloud", "Penta", "Zapier",
         "Celo", "N26", "Mollie", "Flixbus", "Shopify", "Twitter", "Zalando",
-        "Slack", "Circleci", "Quora", "Google", "Hometogo", "Contentful", 
+        "Slack", "Circleci", "Quora", "Google", "Hometogo", "Contentful", "Github",
         "Gympass", "Lanalabs", "Dreamingjobs", "Greenhouse", "Datadog", "Stripe",
     }
     
