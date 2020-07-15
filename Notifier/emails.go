@@ -11,6 +11,22 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+func SaveEmailIntoDb(email string, action string) {
+	fmt.Println(Gray(8-1, "Starting SaveEmailIntoDb..."))
+	statement := `INSERT INTO sentemails (email, action, sentat)
+                  VALUES ($1, $2, $3)`
+	stmt, err := Db.Prepare(statement)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer stmt.Close()
+	stmt.QueryRow(
+		email,
+		action,
+		time.Now(),
+	)
+}
+
 func CreateEmailsStruct(notifications []Notification) (emails []Email) {
 	fmt.Println(Gray(8-1, "Starting CreateEmailsStruct..."))
 	var users []string
@@ -98,5 +114,7 @@ func SendEmails(emails []Email) {
 		if err := d.DialAndSend(m); err != nil {
 			panic(err.Error())
 		}
+
+		SaveEmailIntoDb(email.UserEmail, "SendEmailNotifier")
 	}
 }

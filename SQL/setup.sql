@@ -139,3 +139,10 @@ create table resetpasswords (
   expiredat       timestamp,
   consumedat      timestamp
 )
+
+create table sentemails (
+  id              serial primary key,
+  email           varchar(255),
+  action          varchar(255),
+  sentat          timestamp not null
+)
