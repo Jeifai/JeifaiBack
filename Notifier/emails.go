@@ -3,7 +3,8 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"html/template"
+    "html/template"
+    "time"
 	"os"
 
 	"github.com/joho/godotenv"
