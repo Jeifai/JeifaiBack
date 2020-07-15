@@ -2856,11 +2856,10 @@ func (runtime Runtime) Blacklane(
 				result_department := e.ChildText(tag_department)
 
 				e.ForEach("div", func(_ int, el *colly.HTMLElement) {
-                    result_title := el.ChildText(tag_title)
-                    t_j_url := el.ChildAttr(tag_url, "href")
+					result_title := el.ChildText(tag_title)
+					t_j_url := el.ChildAttr(tag_url, "href")
 					result_url := base_url + t_j_url
-                    result_location := el.ChildText(tag_location)
-                    
+					result_location := el.ChildText(tag_location)
 
 					temp_elem_json := Job{
 						result_title,
@@ -2923,58 +2922,58 @@ func (runtime Runtime) Auto1(
 		c := colly.NewCollector()
 
 		a_base_url := "https://www.auto1-group.com/smart-recruiters/jobs/search/?page="
-        a_base_job_url := "https://www.auto1-group.com/de/jobs/"
-        current_page := 1
-        number_results_per_page := 15
+		a_base_job_url := "https://www.auto1-group.com/de/jobs/"
+		current_page := 1
+		number_results_per_page := 15
 
-        type Auto1Jobs struct {
-            Jobs struct {
-                Hits struct {
-                    Total    int         `json:"total"`
-                    MaxScore interface{} `json:"max_score"`
-                    Hits     []struct {
-                        Index  string      `json:"_index"`
-                        Type   string      `json:"_type"`
-                        ID     string      `json:"_id"`
-                        Score  interface{} `json:"_score"`
-                        Source struct {
-                            Title string `json:"title"`
-                            JobAd struct {
-                                Sections struct {
-                                    CompanyDescription struct {
-                                        Title string `json:"title"`
-                                        Text  string `json:"text"`
-                                    } `json:"companyDescription"`
-                                    JobDescription struct {
-                                        Title string `json:"title"`
-                                        Text  string `json:"text"`
-                                    } `json:"jobDescription"`
-                                    Qualifications struct {
-                                        Title string `json:"title"`
-                                        Text  string `json:"text"`
-                                    } `json:"qualifications"`
-                                    AdditionalInformation struct {
-                                        Title string `json:"title"`
-                                        Text  string `json:"text"`
-                                    } `json:"additionalInformation"`
-                                } `json:"Jobssections"`
-                            } `json:"jobAd"`
-                            LocationCity     string    `json:"locationCity"`
-                            LocationCountry  string    `json:"locationCountry"`
-                            Brand            string    `json:"brand"`
-                            Company          string    `json:"company"`
-                            ExperienceLevel  string    `json:"experienceLevel"`
-                            Department       string    `json:"department"`
-                            TypeOfEmployment string    `json:"typeOfEmployment"`
-                            CreatedOn        time.Time `json:"createdOn"`
-                            IsActive         int       `json:"isActive"`
-                            URL              string    `json:"url"`
-                        } `json:"_source"`
-                        Sort []int64 `json:"sort"`
-                    } `json:"hits"`
-                } `json:"hits"`
-            } `json:"jobs"`
-        }
+		type Auto1Jobs struct {
+			Jobs struct {
+				Hits struct {
+					Total    int         `json:"total"`
+					MaxScore interface{} `json:"max_score"`
+					Hits     []struct {
+						Index  string      `json:"_index"`
+						Type   string      `json:"_type"`
+						ID     string      `json:"_id"`
+						Score  interface{} `json:"_score"`
+						Source struct {
+							Title string `json:"title"`
+							JobAd struct {
+								Sections struct {
+									CompanyDescription struct {
+										Title string `json:"title"`
+										Text  string `json:"text"`
+									} `json:"companyDescription"`
+									JobDescription struct {
+										Title string `json:"title"`
+										Text  string `json:"text"`
+									} `json:"jobDescription"`
+									Qualifications struct {
+										Title string `json:"title"`
+										Text  string `json:"text"`
+									} `json:"qualifications"`
+									AdditionalInformation struct {
+										Title string `json:"title"`
+										Text  string `json:"text"`
+									} `json:"additionalInformation"`
+								} `json:"Jobssections"`
+							} `json:"jobAd"`
+							LocationCity     string    `json:"locationCity"`
+							LocationCountry  string    `json:"locationCountry"`
+							Brand            string    `json:"brand"`
+							Company          string    `json:"company"`
+							ExperienceLevel  string    `json:"experienceLevel"`
+							Department       string    `json:"department"`
+							TypeOfEmployment string    `json:"typeOfEmployment"`
+							CreatedOn        time.Time `json:"createdOn"`
+							IsActive         int       `json:"isActive"`
+							URL              string    `json:"url"`
+						} `json:"_source"`
+						Sort []int64 `json:"sort"`
+					} `json:"hits"`
+				} `json:"hits"`
+			} `json:"jobs"`
+		}
 
 		var jsonJobs Auto1Jobs
 
@@ -2987,9 +2986,9 @@ func (runtime Runtime) Auto1(
 
 			for _, elem := range tempJsonJobs.Jobs.Hits.Hits {
 
-                result_title := elem.Source.Title
-                result_url := a_base_job_url + elem.Source.URL
-                
+				result_title := elem.Source.Title
+				result_url := a_base_job_url + elem.Source.URL
+
 				elem_json, err := json.Marshal(elem)
 				if err != nil {
 					panic(err.Error())
@@ -3000,20 +2999,20 @@ func (runtime Runtime) Auto1(
 					result_title,
 					result_url,
 					elem_json,
-                })
-            }
-        
-            jsonJobs.Jobs.Hits.Hits = append(jsonJobs.Jobs.Hits.Hits, tempJsonJobs.Jobs.Hits.Hits...)
-            
-            total_pages := tempJsonJobs.Jobs.Hits.Total/number_results_per_page + 2
+				})
+			}
+
+			jsonJobs.Jobs.Hits.Hits = append(jsonJobs.Jobs.Hits.Hits, tempJsonJobs.Jobs.Hits.Hits...)
+
+			total_pages := tempJsonJobs.Jobs.Hits.Total/number_results_per_page + 2
 
 			if current_page > total_pages {
 				return
 			} else {
-                time.Sleep(SecondsSleep * time.Second)
-                current_page++
+				time.Sleep(SecondsSleep * time.Second)
+				current_page++
 				c.Visit(a_base_url + strconv.Itoa(current_page))
-            }
+			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
@@ -3061,46 +3060,46 @@ func (runtime Runtime) Flixbus(
 
 		c_start_url := "https://flix.careers/api/jobs"
 
-        type FlixbusJobs struct {
-            Jobs []struct {
-                AbsoluteURL    string `json:"absolute_url"`
-                DataCompliance []struct {
-                    Type            string      `json:"type"`
-                    RequiresConsent bool        `json:"requires_consent"`
-                    RetentionPeriod interface{} `json:"retention_period"`
-                } `json:"data_compliance"`
-                InternalJobID int64 `json:"internal_job_id"`
-                Location      struct {
-                    Name string `json:"name"`
-                } `json:"location"`
-                Metadata []struct {
-                    ID        int64  `json:"id"`
-                    Name      string `json:"name"`
-                    Value     string `json:"value"`
-                    ValueType string `json:"value_type"`
-                } `json:"metadata"`
-                ID            int64  `json:"id"`
-                UpdatedAt     string `json:"updated_at"`
-                RequisitionID string `json:"requisition_id"`
-                Title         string `json:"title"`
-                Departments   []struct {
-                    ID       int64         `json:"id"`
-                    Name     string        `json:"name"`
-                    ChildIds []interface{} `json:"child_ids"`
-                    ParentID interface{}   `json:"parent_id"`
-                } `json:"departments"`
-                Offices []struct {
-                    ID       int64         `json:"id"`
-                    Name     string        `json:"name"`
-                    Location interface{}   `json:"location"`
-                    ChildIds []interface{} `json:"child_ids"`
-                    ParentID int64         `json:"parent_id"`
-                } `json:"offices"`
-            } `json:"jobs"`
-            Meta struct {
-                Total int `json:"total"`
-            } `json:"meta"`
-        }
+		type FlixbusJobs struct {
+			Jobs []struct {
+				AbsoluteURL    string `json:"absolute_url"`
+				DataCompliance []struct {
+					Type            string      `json:"type"`
+					RequiresConsent bool        `json:"requires_consent"`
+					RetentionPeriod interface{} `json:"retention_period"`
+				} `json:"data_compliance"`
+				InternalJobID int64 `json:"internal_job_id"`
+				Location      struct {
+					Name string `json:"name"`
+				} `json:"location"`
+				Metadata []struct {
+					ID        int64  `json:"id"`
+					Name      string `json:"name"`
+					Value     string `json:"value"`
+					ValueType string `json:"value_type"`
+				} `json:"metadata"`
+				ID            int64  `json:"id"`
+				UpdatedAt     string `json:"updated_at"`
+				RequisitionID string `json:"requisition_id"`
+				Title         string `json:"title"`
+				Departments   []struct {
+					ID       int64         `json:"id"`
+					Name     string        `json:"name"`
+					ChildIds []interface{} `json:"child_ids"`
+					ParentID interface{}   `json:"parent_id"`
+				} `json:"departments"`
+				Offices []struct {
+					ID       int64         `json:"id"`
+					Name     string        `json:"name"`
+					Location interface{}   `json:"location"`
+					ChildIds []interface{} `json:"child_ids"`
+					ParentID int64         `json:"parent_id"`
+				} `json:"offices"`
+			} `json:"jobs"`
+			Meta struct {
+				Total int `json:"total"`
+			} `json:"meta"`
+		}
 
 		var jsonJobs FlixbusJobs
 
@@ -3175,8 +3174,8 @@ func (runtime Runtime) Quora(
 
 		c := colly.NewCollector()
 
-        url := "https://boards.greenhouse.io/quora"
-        q_base_job_url := "https://boards.greenhouse.io/"
+		url := "https://boards.greenhouse.io/quora"
+		q_base_job_url := "https://boards.greenhouse.io/"
 		main_tag := "section"
 		main_tag_attr := "class"
 		main_tag_value := "level-0"
@@ -3353,42 +3352,42 @@ func (runtime Runtime) Docker(
 
 		c := colly.NewCollector()
 
-        d_start_url := "https://newton.newtonsoftware.com/career/CareerHome.action?clientId=8a7883c6708df1d40170a6df29950b39"
+		d_start_url := "https://newton.newtonsoftware.com/career/CareerHome.action?clientId=8a7883c6708df1d40170a6df29950b39"
 		main_tag := ".gnewtonCareerGroupRowClass"
 		tag_title := "a"
 		tag_location := ".gnewtonCareerGroupJobDescriptionClass"
-    
+
 		type Job struct {
-			Title       string
-            Url         string
-			Location    string
+			Title    string
+			Url      string
+			Location string
 		}
 
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
-            result_title := e.ChildText(tag_title)
-            result_url := e.ChildAttr(tag_title, "href")
-            result_location := e.ChildText(tag_location)
+			result_title := e.ChildText(tag_title)
+			result_url := e.ChildAttr(tag_title, "href")
+			result_location := e.ChildText(tag_location)
 
-            _, err := netUrl.ParseRequestURI(result_url)
-            if err == nil {
+			_, err := netUrl.ParseRequestURI(result_url)
+			if err == nil {
 
-                temp_elem_json := Job{
-                    result_title,
-                    result_url,
-                    result_location,
-                }
-                elem_json, err := json.Marshal(temp_elem_json)
-                if err != nil {
-                    panic(err.Error())
-                }
+				temp_elem_json := Job{
+					result_title,
+					result_url,
+					result_location,
+				}
+				elem_json, err := json.Marshal(temp_elem_json)
+				if err != nil {
+					panic(err.Error())
+				}
 
-                results = append(results, Result{
-                    runtime.Name,
-                    result_title,
-                    result_url,
-                    elem_json,
-                })
-            }
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
 		})
 
 		c.OnResponse(func(r *colly.Response) {
@@ -3430,54 +3429,53 @@ func (runtime Runtime) Zapier(
 
 		c := colly.NewCollector()
 
-        z_start_url := "https://zapier.com/jobs"
-        z_base_url := "https://zapier.com"
-        main_tag := "section"
-        main_tag_attr := "id"
-        main_tag_value := "job-openings"
-        tag_section_job := "li"
-        tag_info := "a"
-    
+		z_start_url := "https://zapier.com/jobs"
+		z_base_url := "https://zapier.com"
+		main_tag := "section"
+		main_tag_attr := "id"
+		main_tag_value := "job-openings"
+		tag_section_job := "li"
+		tag_info := "a"
+
 		type Job struct {
-			Title           string
-            Url             string
-            Department      string
+			Title      string
+			Url        string
+			Department string
 		}
 
 		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
-            if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
 				e.ForEach(tag_section_job, func(_ int, el *colly.HTMLElement) {
+					result_info := el.ChildText(tag_info)
+					result_temp_url := el.ChildAttr(tag_info, "href")
 
-                    result_info := el.ChildText(tag_info)
-                    result_temp_url := el.ChildAttr(tag_info, "href")
+					if !strings.Contains(result_temp_url, "https") {
 
-                    if !strings.Contains(result_temp_url, "https") {
+						result_url := z_base_url + result_temp_url
 
-                        result_url := z_base_url + result_temp_url
+						info_split := strings.Split(result_info, " - ")
+						result_department := info_split[0]
+						result_title := info_split[1]
 
-                        info_split := strings.Split(result_info, " - ")
-                        result_department := info_split[0]
-                        result_title := info_split[1]
+						temp_elem_json := Job{
+							result_title,
+							result_url,
+							result_department,
+						}
+						elem_json, err := json.Marshal(temp_elem_json)
+						if err != nil {
+							panic(err.Error())
+						}
 
-                        temp_elem_json := Job{
-                            result_title,
-                            result_url,
-                            result_department,
-                        }
-                        elem_json, err := json.Marshal(temp_elem_json)
-                        if err != nil {
-                            panic(err.Error())
-                        }
-
-                        results = append(results, Result{
-                            runtime.Name,
-                            result_title,
-                            result_url,
-                            elem_json,
-                        })
-                    }
-                })
-            }
+						results = append(results, Result{
+							runtime.Name,
+							result_title,
+							result_url,
+							elem_json,
+						})
+					}
+				})
+			}
 		})
 
 		c.OnResponse(func(r *colly.Response) {
@@ -3521,34 +3519,34 @@ func (runtime Runtime) Datadog(
 
 		start_url := "https://api.greenhouse.io/v1/boards/datadog/jobs/"
 
-        type JsonJobs struct {
-            Jobs []struct {
-                AbsoluteURL    string `json:"absolute_url"`
-                DataCompliance []struct {
-                    Type            string      `json:"type"`
-                    RequiresConsent bool        `json:"requires_consent"`
-                    RetentionPeriod interface{} `json:"retention_period"`
-                } `json:"data_compliance"`
-                InternalJobID int `json:"internal_job_id"`
-                Location      struct {
-                    Name string `json:"name"`
-                } `json:"location"`
-                Metadata []struct {
-                    ID        int    `json:"id"`
-                    Name      string `json:"name"`
-                    Value     string `json:"value"`
-                    ValueType string `json:"value_type"`
-                } `json:"metadata"`
-                ID            int    `json:"id"`
-                UpdatedAt     string `json:"updated_at"`
-                RequisitionID string `json:"requisition_id"`
-                Title         string `json:"title"`
-                Education     string `json:"education,omitempty"`
-            } `json:"jobs"`
-            Meta struct {
-                Total int `json:"total"`
-            } `json:"meta"`
-        }
+		type JsonJobs struct {
+			Jobs []struct {
+				AbsoluteURL    string `json:"absolute_url"`
+				DataCompliance []struct {
+					Type            string      `json:"type"`
+					RequiresConsent bool        `json:"requires_consent"`
+					RetentionPeriod interface{} `json:"retention_period"`
+				} `json:"data_compliance"`
+				InternalJobID int `json:"internal_job_id"`
+				Location      struct {
+					Name string `json:"name"`
+				} `json:"location"`
+				Metadata []struct {
+					ID        int    `json:"id"`
+					Name      string `json:"name"`
+					Value     string `json:"value"`
+					ValueType string `json:"value_type"`
+				} `json:"metadata"`
+				ID            int    `json:"id"`
+				UpdatedAt     string `json:"updated_at"`
+				RequisitionID string `json:"requisition_id"`
+				Title         string `json:"title"`
+				Education     string `json:"education,omitempty"`
+			} `json:"jobs"`
+			Meta struct {
+				Total int `json:"total"`
+			} `json:"meta"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -3625,34 +3623,34 @@ func (runtime Runtime) Stripe(
 
 		start_url := "https://api.greenhouse.io/v1/boards/stripe/jobs/"
 
-        type JsonJobs struct {
-            Jobs []struct {
-                AbsoluteURL    string `json:"absolute_url"`
-                DataCompliance []struct {
-                    Type            string      `json:"type"`
-                    RequiresConsent bool        `json:"requires_consent"`
-                    RetentionPeriod interface{} `json:"retention_period"`
-                } `json:"data_compliance"`
-                InternalJobID int `json:"internal_job_id"`
-                Location      struct {
-                    Name string `json:"name"`
-                } `json:"location"`
-                Metadata []struct {
-                    ID        int    `json:"id"`
-                    Name      string `json:"name"`
-                    Value     string `json:"value"`
-                    ValueType string `json:"value_type"`
-                } `json:"metadata"`
-                ID            int    `json:"id"`
-                UpdatedAt     string `json:"updated_at"`
-                RequisitionID string `json:"requisition_id"`
-                Title         string `json:"title"`
-                Education     string `json:"education,omitempty"`
-            } `json:"jobs"`
-            Meta struct {
-                Total int `json:"total"`
-            } `json:"meta"`
-        }
+		type JsonJobs struct {
+			Jobs []struct {
+				AbsoluteURL    string `json:"absolute_url"`
+				DataCompliance []struct {
+					Type            string      `json:"type"`
+					RequiresConsent bool        `json:"requires_consent"`
+					RetentionPeriod interface{} `json:"retention_period"`
+				} `json:"data_compliance"`
+				InternalJobID int `json:"internal_job_id"`
+				Location      struct {
+					Name string `json:"name"`
+				} `json:"location"`
+				Metadata []struct {
+					ID        int    `json:"id"`
+					Name      string `json:"name"`
+					Value     string `json:"value"`
+					ValueType string `json:"value_type"`
+				} `json:"metadata"`
+				ID            int    `json:"id"`
+				UpdatedAt     string `json:"updated_at"`
+				RequisitionID string `json:"requisition_id"`
+				Title         string `json:"title"`
+				Education     string `json:"education,omitempty"`
+			} `json:"jobs"`
+			Meta struct {
+				Total int `json:"total"`
+			} `json:"meta"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -3729,34 +3727,34 @@ func (runtime Runtime) Github(
 
 		start_url := "https://api.greenhouse.io/v1/boards/github/jobs/"
 
-        type JsonJobs struct {
-            Jobs []struct {
-                AbsoluteURL    string `json:"absolute_url"`
-                DataCompliance []struct {
-                    Type            string      `json:"type"`
-                    RequiresConsent bool        `json:"requires_consent"`
-                    RetentionPeriod interface{} `json:"retention_period"`
-                } `json:"data_compliance"`
-                InternalJobID int `json:"internal_job_id"`
-                Location      struct {
-                    Name string `json:"name"`
-                } `json:"location"`
-                Metadata []struct {
-                    ID        int    `json:"id"`
-                    Name      string `json:"name"`
-                    Value     string `json:"value"`
-                    ValueType string `json:"value_type"`
-                } `json:"metadata"`
-                ID            int    `json:"id"`
-                UpdatedAt     string `json:"updated_at"`
-                RequisitionID string `json:"requisition_id"`
-                Title         string `json:"title"`
-                Education     string `json:"education,omitempty"`
-            } `json:"jobs"`
-            Meta struct {
-                Total int `json:"total"`
-            } `json:"meta"`
-        }
+		type JsonJobs struct {
+			Jobs []struct {
+				AbsoluteURL    string `json:"absolute_url"`
+				DataCompliance []struct {
+					Type            string      `json:"type"`
+					RequiresConsent bool        `json:"requires_consent"`
+					RetentionPeriod interface{} `json:"retention_period"`
+				} `json:"data_compliance"`
+				InternalJobID int `json:"internal_job_id"`
+				Location      struct {
+					Name string `json:"name"`
+				} `json:"location"`
+				Metadata []struct {
+					ID        int    `json:"id"`
+					Name      string `json:"name"`
+					Value     string `json:"value"`
+					ValueType string `json:"value_type"`
+				} `json:"metadata"`
+				ID            int    `json:"id"`
+				UpdatedAt     string `json:"updated_at"`
+				RequisitionID string `json:"requisition_id"`
+				Title         string `json:"title"`
+				Education     string `json:"education,omitempty"`
+			} `json:"jobs"`
+			Meta struct {
+				Total int `json:"total"`
+			} `json:"meta"`
+		}
 
 		var jsonJobs JsonJobs
 

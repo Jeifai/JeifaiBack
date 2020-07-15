@@ -10,16 +10,16 @@ func main() {
 	DbConnect()
 	defer Db.Close()
 
-    // Microsoft, Deutschebahn, Amazon
+	// Microsoft, Deutschebahn, Amazon
 	want_scrapers := []string{
-        "Blinkist", "Urbansport", "Babelforce", "Blacklane", "Kununu", "Docker",
-        "IMusician", "Mitte", "Revolut", "Auto1", "Soundcloud", "Penta", "Zapier",
-        "Celo", "N26", "Mollie", "Flixbus", "Shopify", "Twitter", "Zalando",
-        "Slack", "Circleci", "Quora", "Google", "Hometogo", "Contentful", "Github",
-        "Gympass", "Lanalabs", "Dreamingjobs", "Greenhouse", "Datadog", "Stripe",
-    }
-    
-    scrapers, err := GetScrapers()
+		"Blinkist", "Urbansport", "Babelforce", "Blacklane", "Kununu", "Docker",
+		"IMusician", "Mitte", "Revolut", "Auto1", "Soundcloud", "Penta", "Zapier",
+		"Celo", "N26", "Mollie", "Flixbus", "Shopify", "Twitter", "Zalando",
+		"Slack", "Circleci", "Quora", "Google", "Hometogo", "Contentful", "Github",
+		"Gympass", "Lanalabs", "Dreamingjobs", "Greenhouse", "Datadog", "Stripe",
+	}
+
+	scrapers, err := GetScrapers()
 	if err != nil {
 		panic(err.Error())
 	}

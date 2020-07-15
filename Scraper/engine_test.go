@@ -26,8 +26,8 @@ func TestUnique(t *testing.T) {
 	fmt.Println(Blue("Running --> "), Bold(Blue("TestUnique")))
 	testJson, err := json.Marshal("test")
 	if err != nil {
-        panic(err.Error())
-    }
+		panic(err.Error())
+	}
 	result_1 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
 	result_2 := Result{"Test_2", "https://www.g_2.com", "Title_2", testJson}
 	result_3 := Result{"Test_1", "https://www.g_1.com", "Title_1", testJson}
@@ -153,9 +153,9 @@ func TestScrape(t *testing.T) {
 			httpResponse, want := Scrape(elem.Name, elem.Version, isLocal)
 			RemoveFile()
 			_ = httpResponse
-            if err != nil {
-                fmt.Println(err.Error())
-            }
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 			sort.Slice(got, func(i, j int) bool {
 				return got[i].ResultUrl < got[j].ResultUrl
 			})
