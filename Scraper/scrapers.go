@@ -1263,7 +1263,7 @@ func (runtime Runtime) N26(
 		l := c.Clone()
 
 		n_start_url := "https://n26.com/en/careers"
-		n_base_url := "https://www.n26.com/"
+		n_base_url := "https://www.n26.com"
 		main_tag := "a"
 		main_attr := "href"
 		string_location_url := "locations"
