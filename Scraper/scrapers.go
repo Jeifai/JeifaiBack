@@ -4132,3 +4132,138 @@ func (runtime Runtime) Celonis(
 	}
 	return
 }
+
+func (runtime Runtime) Omio(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://api.smartrecruiters.com/v1/companies/Omio1/postings"
+		base_job_url := "https://www.omio.com/jobs/#"
+
+		type JsonJobs struct {
+			Offset     int `json:"offset"`
+			Limit      int `json:"limit"`
+			TotalFound int `json:"totalFound"`
+			Content    []struct {
+				ID        string `json:"id"`
+				Name      string `json:"name"`
+				UUID      string `json:"uuid"`
+				RefNumber string `json:"refNumber"`
+				Company   struct {
+					Identifier string `json:"identifier"`
+					Name       string `json:"name"`
+				} `json:"company"`
+				ReleasedDate time.Time `json:"releasedDate"`
+				Location     struct {
+					City       string `json:"city"`
+					Region     string `json:"region"`
+					Country    string `json:"country"`
+					Address    string `json:"address"`
+					PostalCode string `json:"postalCode"`
+					Remote     bool   `json:"remote"`
+				} `json:"location,omitempty"`
+				Industry struct {
+					ID    string `json:"id"`
+					Label string `json:"label"`
+				} `json:"industry"`
+				Department struct {
+					ID    string `json:"id"`
+					Label string `json:"label"`
+				} `json:"department,omitempty"`
+				Function struct {
+					ID    string `json:"id"`
+					Label string `json:"label"`
+				} `json:"function"`
+				TypeOfEmployment struct {
+					Label string `json:"label"`
+				} `json:"typeOfEmployment"`
+				ExperienceLevel struct {
+					ID    string `json:"id"`
+					Label string `json:"label"`
+				} `json:"experienceLevel"`
+				CustomField []struct {
+					FieldID    string `json:"fieldId"`
+					FieldLabel string `json:"fieldLabel"`
+					ValueID    string `json:"valueId"`
+					ValueLabel string `json:"valueLabel"`
+				} `json:"customField"`
+				Ref     string `json:"ref"`
+				Creator struct {
+					Name string `json:"name"`
+				} `json:"creator"`
+				Language struct {
+					Code        string `json:"code"`
+					Label       string `json:"label"`
+					LabelNative string `json:"labelNative"`
+				} `json:"language"`
+			} `json:"content"`
+		}
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Content {
+
+				result_title := elem.Name
+				result_url := base_job_url + elem.ID
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Content = append(jsonJobs.Content, tempJson.Content...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}

@@ -17,7 +17,7 @@ func main() {
 		"Celo", "N26", "Mollie", "Flixbus", "Shopify", "Twitter", "Zalando",
 		"Slack", "Circleci", "Quora", "Google", "Hometogo", "Contentful", "Github",
 		"Gympass", "Lanalabs", "Dreamingjobs", "Greenhouse", "Datadog", "Stripe",
-		"Getyourguide", "Wefox", "Celonis",
+		"Getyourguide", "Wefox", "Celonis", "Omio",
 	}
 
 	scrapers, err := GetScrapers()
