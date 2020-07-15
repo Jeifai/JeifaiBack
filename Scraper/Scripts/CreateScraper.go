@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Github"
+	scraper_name := "Celonis"
 	scraper_version := 1
-	jobs_url := "https://github.com/about/careers"
-	host_url := "https://www.github.com"
+	jobs_url := "https://www.celonis.com/careers"
+	host_url := "https://www.celonis.com"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }
