@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Aboutyou"
+	scraper_name := "Depositsolutions"
 	scraper_version := 1
-	jobs_url := "https://corporate.aboutyou.de/de/career"
-	host_url := "https://www.aboutyou.de"
+	jobs_url := "https://apply.workable.com/deposit-solutions"
+	host_url := "https://www.deposit-solutions.com"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }

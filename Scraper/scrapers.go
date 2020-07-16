@@ -3046,7 +3046,7 @@ func (runtime Runtime) Auto1(
 		} else {
 			c.Visit(a_base_url + strconv.Itoa(current_page))
 		}
-    }
+	}
 	return
 }
 
@@ -4141,67 +4141,67 @@ func (runtime Runtime) Omio(
 
 		c := colly.NewCollector()
 
-        start_url := "https://api.smartrecruiters.com/v1/companies/Omio1/postings"
-        base_job_url := "https://www.omio.com/jobs/#"
+		start_url := "https://api.smartrecruiters.com/v1/companies/Omio1/postings"
+		base_job_url := "https://www.omio.com/jobs/#"
 
-        type JsonJobs struct {
-            Offset     int `json:"offset"`
-            Limit      int `json:"limit"`
-            TotalFound int `json:"totalFound"`
-            Content    []struct {
-                ID        string `json:"id"`
-                Name      string `json:"name"`
-                UUID      string `json:"uuid"`
-                RefNumber string `json:"refNumber"`
-                Company   struct {
-                    Identifier string `json:"identifier"`
-                    Name       string `json:"name"`
-                } `json:"company"`
-                ReleasedDate time.Time `json:"releasedDate"`
-                Location     struct {
-                    City       string `json:"city"`
-                    Region     string `json:"region"`
-                    Country    string `json:"country"`
-                    Address    string `json:"address"`
-                    PostalCode string `json:"postalCode"`
-                    Remote     bool   `json:"remote"`
-                } `json:"location,omitempty"`
-                Industry struct {
-                    ID    string `json:"id"`
-                    Label string `json:"label"`
-                } `json:"industry"`
-                Department struct {
-                    ID    string `json:"id"`
-                    Label string `json:"label"`
-                } `json:"department,omitempty"`
-                Function struct {
-                    ID    string `json:"id"`
-                    Label string `json:"label"`
-                } `json:"function"`
-                TypeOfEmployment struct {
-                    Label string `json:"label"`
-                } `json:"typeOfEmployment"`
-                ExperienceLevel struct {
-                    ID    string `json:"id"`
-                    Label string `json:"label"`
-                } `json:"experienceLevel"`
-                CustomField []struct {
-                    FieldID    string `json:"fieldId"`
-                    FieldLabel string `json:"fieldLabel"`
-                    ValueID    string `json:"valueId"`
-                    ValueLabel string `json:"valueLabel"`
-                } `json:"customField"`
-                Ref     string `json:"ref"`
-                Creator struct {
-                    Name string `json:"name"`
-                } `json:"creator"`
-                Language struct {
-                    Code        string `json:"code"`
-                    Label       string `json:"label"`
-                    LabelNative string `json:"labelNative"`
-                } `json:"language"`
-            } `json:"content"`
-        }  
+		type JsonJobs struct {
+			Offset     int `json:"offset"`
+			Limit      int `json:"limit"`
+			TotalFound int `json:"totalFound"`
+			Content    []struct {
+				ID        string `json:"id"`
+				Name      string `json:"name"`
+				UUID      string `json:"uuid"`
+				RefNumber string `json:"refNumber"`
+				Company   struct {
+					Identifier string `json:"identifier"`
+					Name       string `json:"name"`
+				} `json:"company"`
+				ReleasedDate time.Time `json:"releasedDate"`
+				Location     struct {
+					City       string `json:"city"`
+					Region     string `json:"region"`
+					Country    string `json:"country"`
+					Address    string `json:"address"`
+					PostalCode string `json:"postalCode"`
+					Remote     bool   `json:"remote"`
+				} `json:"location,omitempty"`
+				Industry struct {
+					ID    string `json:"id"`
+					Label string `json:"label"`
+				} `json:"industry"`
+				Department struct {
+					ID    string `json:"id"`
+					Label string `json:"label"`
+				} `json:"department,omitempty"`
+				Function struct {
+					ID    string `json:"id"`
+					Label string `json:"label"`
+				} `json:"function"`
+				TypeOfEmployment struct {
+					Label string `json:"label"`
+				} `json:"typeOfEmployment"`
+				ExperienceLevel struct {
+					ID    string `json:"id"`
+					Label string `json:"label"`
+				} `json:"experienceLevel"`
+				CustomField []struct {
+					FieldID    string `json:"fieldId"`
+					FieldLabel string `json:"fieldLabel"`
+					ValueID    string `json:"valueId"`
+					ValueLabel string `json:"valueLabel"`
+				} `json:"customField"`
+				Ref     string `json:"ref"`
+				Creator struct {
+					Name string `json:"name"`
+				} `json:"creator"`
+				Language struct {
+					Code        string `json:"code"`
+					Label       string `json:"label"`
+					LabelNative string `json:"labelNative"`
+				} `json:"language"`
+			} `json:"content"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -4276,22 +4276,22 @@ func (runtime Runtime) Aboutyou(
 
 		c := colly.NewCollector()
 
-        start_url := "https://corporate.aboutyou.de/app/api/openpositions.php?posts_per_page=500"
+		start_url := "https://corporate.aboutyou.de/app/api/openpositions.php?posts_per_page=500"
 
-        type JsonJobs struct {
-            Posts []struct {
-                ID         int    `json:"id"`
-                Title      string `json:"title"`
-                Department string `json:"department"`
-                Location   string `json:"location"`
-                URL        string `json:"url"`
-                Type       struct {
-                    ID   int    `json:"id"`
-                    Name string `json:"name"`
-                } `json:"type"`
-            } `json:"posts"`
-            TotalCount int `json:"totalCount"`
-        }
+		type JsonJobs struct {
+			Posts []struct {
+				ID         int    `json:"id"`
+				Title      string `json:"title"`
+				Department string `json:"department"`
+				Location   string `json:"location"`
+				URL        string `json:"url"`
+				Type       struct {
+					ID   int    `json:"id"`
+					Name string `json:"name"`
+				} `json:"type"`
+			} `json:"posts"`
+			TotalCount int `json:"totalCount"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -4353,6 +4353,116 @@ func (runtime Runtime) Aboutyou(
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(start_url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Depositsolutions(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://careers-page.workable.com/api/v3/accounts/deposit-solutions/jobs"
+		base_job_url := "https://apply.workable.com/deposit-solutions/j/"
+
+		type JsonJobs struct {
+			Total   int `json:"total"`
+			Results []struct {
+				ID           int    `json:"id"`
+				Shortcode    string `json:"shortcode"`
+				Title        string `json:"title"`
+				Description  string `json:"description"`
+				Requirements string `json:"requirements"`
+				Benefits     string `json:"benefits"`
+				Remote       bool   `json:"remote"`
+				Location     struct {
+					Country     string `json:"country"`
+					CountryCode string `json:"countryCode"`
+					City        string `json:"city"`
+					Region      string `json:"region"`
+				} `json:"location"`
+				State          string      `json:"state"`
+				IsInternal     bool        `json:"isInternal"`
+				Code           interface{} `json:"code"`
+				Published      time.Time   `json:"published"`
+				Type           string      `json:"type"`
+				Language       string      `json:"language"`
+				Department     []string    `json:"department"`
+				AccountUID     string      `json:"accountUid"`
+				ApprovalStatus string      `json:"approvalStatus"`
+			} `json:"results"`
+		}
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Results {
+
+				result_title := elem.Title
+				result_url := base_job_url + elem.Shortcode
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Results = append(jsonJobs.Results, tempJson.Results...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Request(
+				"POST",
+				start_url,
+				strings.NewReader(""),
+				nil,
+				http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
+			)
 		}
 	}
 	return
