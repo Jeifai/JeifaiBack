@@ -12,14 +12,7 @@ func main() {
 
 	// Microsoft, Deutschebahn, Amazon
 	want_scrapers := []string{
-		"Blinkist", "Urbansport", "Babelforce", "Blacklane", "Kununu", "Docker",
-		"IMusician", "Mitte", "Revolut", "Auto1", "Soundcloud", "Penta", "Zapier",
-		"Celo", "N26", "Mollie", "Flixbus", "Shopify", "Twitter", "Zalando",
-		"Slack", "Circleci", "Quora", "Google", "Hometogo", "Contentful", "Github",
-		"Gympass", "Lanalabs", "Dreamingjobs", "Greenhouse", "Datadog", "Stripe",
-		"Getyourguide", "Wefox", "Celonis", "Omio", "Aboutyou", "Depositsolutions",
-        "Taxfix", "Moonfare", "Fincompare", "Billie", "Pairfinance", "Getsafe",
-        "Liqid",
+		"Elementinsurance",
 	}
 
 	scrapers, err := GetScrapers()
