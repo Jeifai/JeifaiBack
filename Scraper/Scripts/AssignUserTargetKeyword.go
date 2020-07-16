@@ -14,7 +14,7 @@ var Db *sql.DB
 
 func main() {
 	users := []int{1, 2, 17}
-	targets := []int{176}
+	targets := []int{177}
 	CreateUserTarget(users, targets)
 	CreateUserTargetKeywords(users, targets)
 }
