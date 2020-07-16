@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Depositsolutions"
+	scraper_name := "Taxfix"
 	scraper_version := 1
-	jobs_url := "https://apply.workable.com/deposit-solutions"
-	host_url := "https://www.deposit-solutions.com"
+	jobs_url := "https://taxfix.de/en/careers"
+	host_url := "https://taxfix.de"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }
