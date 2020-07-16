@@ -135,6 +135,7 @@ func PrepareNotifications(scrapers []Scraper) (notifications []Notification, err
                             LEFT JOIN users u ON(utk.userid = u.id)
                             LEFT JOIN notifications n ON(m.id = n.matchid)
                             WHERE m.createdat > current_date - interval '0' day
+                            AND utk.deletedat IS NULL
                             AND s.id = $1
                             AND n.id IS NULL
                             AND u.id = 1
