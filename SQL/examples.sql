@@ -1,5 +1,5 @@
 /* Export as CSV */
-\copy (SELECT * FROM results r LEFT JOIN scrapers s ON(r.scraperid = s.id) WHERE s.name='Soundcloud') to '/home/robimalco/output.csv' with csv
+\COPY (SELECT * FROM results r LEFT JOIN scrapers s ON(r.scraperid = s.id) WHERE s.name='Soundcloud') TO '/home/robimalco/output.csv' WITH csv header
 
 SELECT
     s.name AS company_name, 
