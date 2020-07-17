@@ -26,13 +26,13 @@ type Notifier struct {
 }
 
 type Notification struct {
-	MatchId   int
-	UserId    int
-	UserName  string
-	UserEmail string
-	Name      string
-	Title     string
-	Url       string
+	MatchId     int
+	UserId      int
+	UserName    string
+	UserEmail   string
+	CompanyName string
+	Title       string
+	Url         string
 }
 
 type Email struct {
@@ -49,9 +49,8 @@ type Company struct {
 }
 
 type Job struct {
-	MatchId int
-	Title   string
-	Url     string
+	Title string
+	Url   string
 }
 
 var Db *sql.DB
@@ -112,7 +111,7 @@ func GetScrapers() (scrapers []Scraper, err error) {
 	return
 }
 
-func PrepareNotifications(scrapers []Scraper) (notifications []Notification, err error) {
+func GetNotifications(scrapers []Scraper) (notifications []Notification, err error) {
 	fmt.Println(Gray(8-1, "Starting GetNotifications..."))
 
 	for _, elem := range scrapers {
@@ -152,7 +151,7 @@ func PrepareNotifications(scrapers []Scraper) (notifications []Notification, err
 				&notification.UserId,
 				&notification.UserName,
 				&notification.UserEmail,
-				&notification.Name,
+				&notification.CompanyName,
 				&notification.Title,
 				&notification.Url)
 			counter++
@@ -183,21 +182,22 @@ func (notifier *Notifier) StartNotifierSession(user_id int) (err error) {
 	return
 }
 
-func SaveNotification(notifier Notifier, email Email) {
-	fmt.Println(Gray(8-1, "Starting SaveNotification..."))
+func SaveUserNotifications(
+	notifications []Notification, email Email, notifier Notifier) (err error) {
+	fmt.Println(Gray(8-1, "Starting SaveUserNotifications..."))
 	time_now := time.Now()
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
 	var counter int
-	for _, company := range email.Company {
-		for _, job := range company.Job {
+	for _, notification := range notifications {
+		if notification.UserId == email.UserId {
 			str1 := "$" + strconv.Itoa(1+counter*3) + ","
 			str2 := "$" + strconv.Itoa(2+counter*3) + ","
 			str3 := "$" + strconv.Itoa(3+counter*3)
 			str_n := "(" + str1 + str2 + str3 + ")"
 			valueStrings = append(valueStrings, str_n)
 			valueArgs = append(valueArgs, notifier.Id)
-			valueArgs = append(valueArgs, job.MatchId)
+			valueArgs = append(valueArgs, notification.MatchId)
 			valueArgs = append(valueArgs, time_now)
 			counter++
 		}
@@ -205,8 +205,22 @@ func SaveNotification(notifier Notifier, email Email) {
 	smt := `INSERT INTO notifications(notifierid, matchid, createdat) VALUES %s`
 	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
 
-	_, err := Db.Exec(smt, valueArgs...)
+	_, err = Db.Exec(smt, valueArgs...)
+	return
+}
+
+func SaveEmail(email string, action string) {
+	fmt.Println(Gray(8-1, "Starting SaveEmail..."))
+	statement := `INSERT INTO sentemails (email, action, sentat)
+                  VALUES ($1, $2, $3)`
+	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		panic(err.Error())
 	}
+	defer stmt.Close()
+	stmt.QueryRow(
+		email,
+		action,
+		time.Now(),
+	)
 }

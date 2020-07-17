@@ -3,8 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-    "html/template"
-    "time"
+	"html/template"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -12,24 +11,9 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func SaveEmailIntoDb(email string, action string) {
-	fmt.Println(Gray(8-1, "Starting SaveEmailIntoDb..."))
-	statement := `INSERT INTO sentemails (email, action, sentat)
-                  VALUES ($1, $2, $3)`
-	stmt, err := Db.Prepare(statement)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer stmt.Close()
-	stmt.QueryRow(
-		email,
-		action,
-		time.Now(),
-	)
-}
+func CreateEmails(notifications []Notification) (emails []Email) {
+	fmt.Println(Gray(8-1, "Starting CreateEmails..."))
 
-func CreateEmailsStruct(notifications []Notification) (emails []Email) {
-	fmt.Println(Gray(8-1, "Starting CreateEmailsStruct..."))
 	var users []string
 	for _, notif_1 := range notifications {
 		if !Contains(users, notif_1.UserName) {
@@ -38,20 +22,21 @@ func CreateEmailsStruct(notifications []Notification) (emails []Email) {
 			email.UserName = notif_1.UserName
 			email.UserEmail = notif_1.UserEmail
 			users = append(users, notif_1.UserName)
+
 			var companies []string
 			for _, notif_2 := range notifications {
 				if notif_1.UserName == notif_2.UserName {
-					if !Contains(companies, notif_2.Name) {
+					if !Contains(companies, notif_2.CompanyName) {
 						var company Company
-						company.Name = notif_2.Name
-						companies = append(companies, notif_2.Name)
+						company.Name = notif_2.CompanyName
+						companies = append(companies, notif_2.CompanyName)
+
 						var jobs []string
 						for _, notif_3 := range notifications {
 							if notif_1.UserName == notif_2.UserName {
-								if notif_2.Name == notif_3.Name {
+								if notif_2.CompanyName == notif_3.CompanyName {
 									if !Contains(jobs, notif_3.Title) {
 										var job Job
-										job.MatchId = notif_3.MatchId
 										job.Title = notif_3.Title
 										job.Url = notif_3.Url
 										company.Job = append(company.Job, job)
@@ -70,8 +55,8 @@ func CreateEmailsStruct(notifications []Notification) (emails []Email) {
 	return
 }
 
-func SendEmails(emails []Email) {
-	fmt.Println(Gray(8-1, "Starting SendEmails..."))
+func SendMatches(email Email) {
+	fmt.Println(Gray(8-1, "Starting SendMatches..."))
 	err := godotenv.Load()
 	if err != nil {
 		panic(err.Error())
@@ -85,37 +70,24 @@ func SendEmails(emails []Email) {
 		panic(err.Error())
 	}
 
-	for _, email := range emails {
+	fmt.Println(Blue("Sending email to -->"), Bold(Blue(email.UserEmail)))
 
-		fmt.Println(Blue("Sending email to -->"), Bold(Blue(email.UserEmail)))
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, email); err != nil {
+		panic(err.Error())
+	}
 
-		var notifier Notifier
-		err := notifier.StartNotifierSession(email.UserId)
-		if err != nil {
-			panic(err.Error())
-		}
+	result := tpl.String()
 
-		SaveNotification(notifier, email)
+	m := gomail.NewMessage()
+	m.SetHeader("From", "robimalco@gmail.com")
+	m.SetHeader("To", email.UserEmail)
+	m.SetHeader("Subject", "Hello! There are new matches!")
+	m.SetBody("text/html", result)
 
-		var tpl bytes.Buffer
-		if err := t.Execute(&tpl, email); err != nil {
-			panic(err.Error())
-		}
+	d := gomail.NewDialer("smtp.gmail.com", 587, "robimalco@gmail.com", password)
 
-		result := tpl.String()
-
-		m := gomail.NewMessage()
-		m.SetHeader("From", "robimalco@gmail.com")
-		m.SetHeader("To", email.UserEmail)
-		m.SetHeader("Subject", "Hello! There are new matches!")
-		m.SetBody("text/html", result)
-
-		d := gomail.NewDialer("smtp.gmail.com", 587, "robimalco@gmail.com", password)
-
-		if err := d.DialAndSend(m); err != nil {
-			panic(err.Error())
-		}
-
-		SaveEmailIntoDb(email.UserEmail, "SendEmailNotifier")
+	if err := d.DialAndSend(m); err != nil {
+		panic(err.Error())
 	}
 }
