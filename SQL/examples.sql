@@ -1,3 +1,6 @@
+/* Export as CSV */
+\copy (SELECT * FROM results r LEFT JOIN scrapers s ON(r.scraperid = s.id) WHERE s.name='Soundcloud') to '/home/robimalco/output.csv' with csv
+
 SELECT
     s.name AS company_name, 
     TO_CHAR(r.createdat, 'YYYY-MM-DD')AS job_created_at, 
