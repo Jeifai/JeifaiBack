@@ -10,6 +10,9 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.7.0
 	github.com/logrusorgru/aurora v2.0.2+incompatible
+	github.com/mitchellh/go-homedir v1.1.0
+	github.com/spf13/cobra v1.0.0
+	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344 // indirect
 	golang.org/x/text v0.3.3 // indirect
