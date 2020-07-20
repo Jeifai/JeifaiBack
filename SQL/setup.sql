@@ -124,6 +124,8 @@ create table invitations (
   id               serial primary key,
   uuid             varchar(64) not null unique,
   email            varchar(255) not null unique,
+  whoareyou        varchar(100),
+  specifywhoareyou varchar(1000),
   whyjoin          varchar(1000),
   whichcompanies   varchar(1000),
   anythingelse     varchar(1000),
