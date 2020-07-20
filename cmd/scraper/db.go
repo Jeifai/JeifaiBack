@@ -76,6 +76,7 @@ func GetScraper(company string) (scraper Scraper) {
 	}
 	return
 }
+
 func GetScrapers() (scrapers []Scraper) {
 	fmt.Println(Gray(8-1, "Starting GetScrapers..."))
 	rows, err := Db.Query(`SELECT

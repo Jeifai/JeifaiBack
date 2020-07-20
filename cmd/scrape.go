@@ -19,5 +19,5 @@ var scrapeCmd = &cobra.Command{
 
 func init() {
     rootCmd.AddCommand(scrapeCmd)
-	scrapeCmd.Flags().StringVarP(&company, "company", "c", "", "Specify a company or all of them")
+	scrapeCmd.Flags().StringVarP(&company, "scrapecompany", "s", "", "Specify a company or all of them")
 }
