@@ -42,19 +42,17 @@ func Scrape(company string, runLocally string) {
 
 func RunScraper(scraper Scraper, runLocally string) {
     if runLocally == "false" {
-        if (scraper.Name != "Microsoft" && scraper.Name != "Amazon") {
-            fmt.Println(BrightBlue("Scraping -->"), Bold(BrightBlue(scraper.Name)))
-            response, results := Extract(scraper.Name, scraper.Version, false)
-            n_results := len(results)
-            if n_results > 0 {
-                fmt.Println(Green("Number of results scraped: "), Bold(Green(n_results)))
-                scraping := scraper.StartScrapingSession()
-                file_path := GenerateFilePath(scraper.Name, scraping.Id)
-                SaveResults(scraper, scraping, results)
-                SaveResponseToStorage(response, file_path)
-            } else {
-                fmt.Println(Bold(Red("DANGER, NO RESULTS FOUND")))
-            }
+        fmt.Println(BrightBlue("Scraping -->"), Bold(BrightBlue(scraper.Name)))
+        response, results := Extract(scraper.Name, scraper.Version, false)
+        n_results := len(results)
+        if n_results > 0 {
+            fmt.Println(Green("Number of results scraped: "), Bold(Green(n_results)))
+            scraping := scraper.StartScrapingSession()
+            file_path := GenerateFilePath(scraper.Name, scraping.Id)
+            SaveResults(scraper, scraping, results)
+            SaveResponseToStorage(response, file_path)
+        } else {
+            fmt.Println(Bold(Red("DANGER, NO RESULTS FOUND")))
         }
     } else if runLocally == "true" {
 	    scraping := LastScrapingByNameVersion(scraper.Name, scraper.Version)
