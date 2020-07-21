@@ -212,9 +212,9 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 }
 
 func LastScrapingByNameVersion(
-	scraper_name string, scraper_version int) (scraping int, err error) {
+	scraper_name string, scraper_version int) (scraping int) {
 	fmt.Println(Gray(8-1, "Starting LastScrapingByNameVersion..."))
-	err = Db.QueryRow(`SELECT MAX(s.id)
+	err := Db.QueryRow(`SELECT MAX(s.id)
                        FROM scrapings s 
                        LEFT JOIN scrapers ss ON(s.scraperid = ss.id)
                        LEFT JOIN targets t ON(ss.targetid = t.id)
