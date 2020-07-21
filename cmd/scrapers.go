@@ -912,7 +912,7 @@ func (runtime Runtime) Microsoft(
 				if counter >= total_pages {
 					return
 				} else {
-					counter = counter + 1
+					counter++
 					time.Sleep(SecondsSleep * time.Second)
 					temp_m_url := m_base_url + strconv.Itoa(counter*number_results_per_page)
 					c.Visit(temp_m_url)
@@ -1024,7 +1024,7 @@ func (runtime Runtime) Twitter(
 				if counter >= total_pages {
 					return
 				} else {
-					counter = counter + 1
+					counter++
 					time.Sleep(SecondsSleep * time.Second)
 					temp_t_url := t_base_url + strconv.Itoa(counter*100)
 					c.Visit(temp_t_url)
@@ -1497,11 +1497,11 @@ func (runtime Runtime) Deutschebahn(
 
 		c := colly.NewCollector()
 
-		start := 301
-		end := 400
+		start := 0
+		end := 20
 		counter := start
-		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum=" + strconv.Itoa(start)
-		d_base_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?pageNum="
+		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?sort=pubExternalDate_td&pageNum=" + strconv.Itoa(start)
+		d_base_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?sort=pubExternalDate_td&pageNum="
 		d_job_url := "https://karriere.deutschebahn.com/"
 		main_section_tag := "ul"
 		main_section_attr := "class"
@@ -1567,7 +1567,7 @@ func (runtime Runtime) Deutschebahn(
 		c.OnHTML("a[class=active]", func(e *colly.HTMLElement) {
 			next_page_url := d_base_url + e.Text
 
-			counter = counter + 1
+			counter++
 
 			if counter > end {
 				return
@@ -2226,7 +2226,7 @@ func (runtime Runtime) Amazon(
 
 		c := colly.NewCollector()
 
-		a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Belgium&country=BEL&result_limit=1000&offset="
+		a_start_url := "https://www.amazon.jobs/en/search.json?loc_query=Germany&country=DEU&result_limit=1000&offset="
 		a_job_url := "https://www.amazon.jobs"
 		number_results_per_page := 1000
 		counter := 0
@@ -2320,7 +2320,7 @@ func (runtime Runtime) Amazon(
 			} else {
 				total_pages := tempJsonJobs.Hits / number_results_per_page
 				if counter < total_pages+1 {
-					counter = counter + 1
+					counter++
 					next_page := a_start_url + strconv.Itoa(counter*1000)
 					time.Sleep(SecondsSleep * time.Second)
 					c.Visit(next_page)
@@ -5620,6 +5620,118 @@ func (runtime Runtime) Facileit(
 			}
 			c.Visit("file:" + dir + "/response.html")
         }
+	}
+	return
+}
+
+func (runtime Runtime) Vodafone(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+        c := colly.NewCollector()
+        
+        today_date := "&date=" + strings.ReplaceAll(time.Now().Format("02/01/06"), "/", "%2F")
+
+        v_start_url := "https://careers.vodafone.com/search/?startrow="
+        v_base_url := "https://careers.vodafone.com"
+        number_results_per_page := 25
+        counter := 0
+
+		type Job struct {
+			Title       string
+			Url         string
+            Location    string
+            Date        string
+		}
+
+		var jsonJobs []Job
+
+		c.OnHTML(".html5", func(e *colly.HTMLElement) {
+			e.ForEach(".data-row", func(_ int, el *colly.HTMLElement) {
+                result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildTexts("a")[0]))," ")
+                result_url := v_base_url + strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
+                result_location := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("span[class=jobLocation]"))), " ")
+                result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("span[class=jobDate]"))), " ")
+
+                _, err := netUrl.ParseRequestURI(result_url)
+                if err == nil {
+
+                    temp_elem_json := Job{
+                        result_title,
+                        result_url,
+                        result_location,
+                        result_date,
+                    }
+
+                    elem_json, err := json.Marshal(temp_elem_json)
+                    if err != nil {
+                        panic(err.Error())
+                    }
+
+                    results = append(results, Result{
+                        runtime.Name,
+                        result_title,
+                        result_url,
+                        elem_json,
+                    })
+                }
+            })
+
+            temp_total_results := strings.Split(e.ChildText(".paginationLabel"), " ")
+            string_total_results := temp_total_results[len(temp_total_results)-1]
+            total_results, err := strconv.Atoi(string_total_results)
+            if err != nil {
+                panic(err.Error())
+            }
+            
+			total_pages := total_results/number_results_per_page + 2
+
+			if isLocal {
+				return
+			} else {
+				if counter >= total_pages {
+					return
+				} else {
+					counter++
+					time.Sleep(SecondsSleep * time.Second)
+					temp_v_url := v_start_url + strconv.Itoa(counter*number_results_per_page)
+					c.Visit(temp_v_url + today_date)
+				}
+            }
+        })
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(v_start_url + "0" + today_date)
+		}
 	}
 	return
 }

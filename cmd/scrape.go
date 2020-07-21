@@ -42,7 +42,7 @@ func Scrape(company string, runLocally string) {
 
 func RunScraper(scraper Scraper, runLocally string) {
     if runLocally == "false" {
-        if (scraper.Name != "Microsoft" && scraper.Name != "Deutschebahn" && scraper.Name != "Amazon") {
+        if (scraper.Name != "Microsoft" && scraper.Name != "Amazon") {
             fmt.Println(BrightBlue("Scraping -->"), Bold(BrightBlue(scraper.Name)))
             response, results := Extract(scraper.Name, scraper.Version, false)
             n_results := len(results)
