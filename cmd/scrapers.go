@@ -9,7 +9,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
+    "time"
+    "io/ioutil"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
@@ -5457,6 +5458,168 @@ func (runtime Runtime) Talentgarden(
 		} else {
 			c.Visit(url)
 		}
+	}
+	return
+}
+
+func (runtime Runtime) Facileit(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+    case 1:
+
+        type Job struct {
+            Title           string
+            Url             string
+            Location        string
+            Description    string
+        }
+
+        if !isLocal {
+
+            c := colly.NewCollector()
+            l := c.Clone()
+
+            url := "https://jobs.facile.it/chi-cerchiamo.html"
+
+            c.OnHTML("div[id=JB_central]", func(e *colly.HTMLElement) {
+                script_url := e.ChildAttr("script", "src")
+                k := strings.Split(strings.Split(script_url, "&k=")[1], "&LAC")[0]
+                base_url := "https://inrecruiting.intervieweb.it/app.php?module=iframeAnnunci&k=" + k + "&LAC=Facileit&act1=23"
+                l.Visit(base_url)
+            })
+
+            c.OnResponse(func(r *colly.Response) {
+                response = Response{r.Body}
+            })
+
+            c.OnRequest(func(r *colly.Request) {
+                fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+            })
+
+            c.OnError(func(r *colly.Response, err error) {
+                fmt.Println(
+                    Red("Request URL:"), Red(r.Request.URL),
+                    Red("failed with response:"), Red(r),
+                    Red("\nError:"), Red(err))
+            })
+
+            var jsonJobs []Job
+
+            l.OnResponse(func(r *colly.Response) {
+                responseText := string(r.Body)
+                url := strings.Split(strings.Split(responseText, "$.post('")[1], "',")[0]
+                cookie := c.Cookies(r.Request.URL.String())[0].Raw
+
+                client := &http.Client{}
+                var data = strings.NewReader(`orderBy=byfunction&descEn=1`)
+                req, _ := http.NewRequest("POST", url, data)
+                req.Header.Set("content-type", "application/x-www-form-urlencoded")
+                req.Header.Set("cookie", cookie)
+                resp, _ := client.Do(req)
+                bodyText, _ := ioutil.ReadAll(resp.Body)
+                doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(bodyText)))
+                if err != nil {
+                    panic(err.Error())
+                }
+
+                var titles []string
+                var urls []string
+                var locations []string
+                doc.Find("dt").Each(func(i int, s *goquery.Selection) {
+                    response_title := strings.TrimSpace(s.Find("a").Text())
+                    temp_response_url, _ := s.Find("a").Attr("href")
+                    response_url := strings.ReplaceAll(temp_response_url, "defgroup=", "defgroup=function") + "400&d=jobs.facile.it"
+                    response_location := strings.TrimSpace(s.Find("span[class=location_annuncio]").Text())
+                    titles = append(titles, response_title)
+                    urls = append(urls, response_url)
+                    locations = append(locations, response_location)
+                })
+
+                var descriptions []string
+                doc.Find("dd").Each(func(i int, s *goquery.Selection) {
+                    response_description := strings.TrimSpace(s.Find("p[class=description]").Text())
+                    descriptions = append(descriptions, response_description)
+                })
+
+                for i, _ := range titles {
+                    temp_elem_json := Job{
+                        titles[i],
+                        urls[i],
+                        locations[i],
+                        descriptions[i],
+                    }
+
+                    elem_json, err := json.Marshal(temp_elem_json)
+                    if err != nil {
+                        panic(err.Error())
+                    }
+
+                    results = append(results, Result{
+                        runtime.Name,
+                        titles[i],
+                        urls[i],
+                        elem_json,
+                    })
+
+                    jsonJobs = append(jsonJobs, temp_elem_json)
+                }
+            })
+
+            l.OnScraped(func(r *colly.Response) {
+                jsonJobs_marshal, err := json.Marshal(jsonJobs)
+                if err != nil {
+                    panic(err.Error())
+                }
+                response = Response{[]byte(jsonJobs_marshal)}
+            })
+
+            c.Visit(url)
+        } else {
+
+            c := colly.NewCollector()
+
+            var jsonJobs []Job
+
+            c.OnResponse(func(r *colly.Response) {
+                err := json.Unmarshal(r.Body, &jsonJobs)
+                if err != nil {
+                    panic(err.Error())
+                }
+
+                for _, elem := range jsonJobs {
+
+                    elem_json, err := json.Marshal(elem)
+                    if err != nil {
+                        panic(err.Error())
+                    }
+
+                    results = append(results, Result{
+                        runtime.Name,
+                        elem.Url,
+                        elem.Title,
+                        elem_json,
+                    })
+                }
+            })
+
+            c.OnScraped(func(r *colly.Response) {
+                jsonJobs_marshal, err := json.Marshal(jsonJobs)
+                if err != nil {
+                    panic(err.Error())
+                }
+                response = Response{[]byte(jsonJobs_marshal)}
+            })
+
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+        }
 	}
 	return
 }
