@@ -5264,3 +5264,199 @@ func (runtime Runtime) Elementinsurance(
 	}
 	return
 }
+
+func (runtime Runtime) Freeda(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://api.greenhouse.io/v1/boards/freedamedia/jobs"
+
+		type JsonJobs struct {
+			Jobs []struct {
+				AbsoluteURL    string `json:"absolute_url"`
+				DataCompliance []struct {
+					Type            string      `json:"type"`
+					RequiresConsent bool        `json:"requires_consent"`
+					RetentionPeriod interface{} `json:"retention_period"`
+				} `json:"data_compliance"`
+				Education     string `json:"education,omitempty"`
+				InternalJobID int    `json:"internal_job_id"`
+				Location      struct {
+					Name string `json:"name"`
+				} `json:"location"`
+				Metadata []struct {
+					ID        int         `json:"id"`
+					Name      string      `json:"name"`
+					Value     interface{} `json:"value"`
+					ValueType string      `json:"value_type"`
+				} `json:"metadata"`
+				ID            int    `json:"id"`
+				UpdatedAt     string `json:"updated_at"`
+				RequisitionID string `json:"requisition_id"`
+				Title         string `json:"title"`
+			} `json:"jobs"`
+			Meta struct {
+				Total int `json:"total"`
+			} `json:"meta"`
+		}
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Jobs {
+
+				result_title := elem.Title
+				result_url := elem.AbsoluteURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Talentgarden(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		url := "https://talentgarden.bamboohr.com/jobs/embed2.php?departmentId=0"
+		main_tag := "div"
+		main_tag_attr := "class"
+        main_tag_value := "BambooHR-ATS-board"
+        tag_department_section := "li[class=BambooHR-ATS-Department-Item]"
+        tag_department := "div[class=BambooHR-ATS-Department-Header]"
+        tag_job_section := "ul[class=BambooHR-ATS-Jobs-List]"
+        tag_title := "a"
+        tag_location := "span"
+
+		type Job struct {
+            Department  string
+			Title       string
+			Url         string
+			Location    string
+		}
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+				e.ForEach(tag_department_section, func(_ int, el *colly.HTMLElement) {
+                    result_department := strings.TrimSpace(el.ChildText(tag_department))
+                    el.ForEach(tag_job_section, func(_ int, ell *colly.HTMLElement) {
+                        result_title := ell.ChildText(tag_title)
+                        result_url := "https:" + ell.ChildAttr(tag_title, "href")
+                        result_location := ell.ChildText(tag_location)
+
+                        _, err := netUrl.ParseRequestURI(result_url)
+                        if err == nil {
+
+                            temp_elem_json := Job{
+                                result_department,
+                                result_title,
+                                result_url,
+                                result_location,
+                            }
+
+                            elem_json, err := json.Marshal(temp_elem_json)
+                            if err != nil {
+                                panic(err.Error())
+                            }
+
+                            results = append(results, Result{
+                                runtime.Name,
+                                result_title,
+                                result_url,
+                                elem_json,
+                            })
+                        }
+                    })
+                })
+			}
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
+	return
+}
