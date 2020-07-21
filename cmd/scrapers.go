@@ -5966,3 +5966,96 @@ func (runtime Runtime) Glickon(
 	}
 	return
 }
+
+func (runtime Runtime) Satispay(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		url := "https://satispay.breezy.hr"
+		main_tag := "ul"
+		main_tag_attr := "class"
+		main_tag_value := "position"
+		tag_title := "h2"
+		tag_url := "a"
+		tag_department := "li[class=department]"
+		tag_type := "li[class=type]"
+		tag_location := "li[class=location]"
+
+		type Job struct {
+			Title      string
+			Url        string
+			Department string
+			Type       string
+			Location   string
+		}
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_tag_attr), main_tag_value) {
+				e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+					result_title := el.ChildText(tag_title)
+					result_url := url + el.ChildAttr(tag_url, "href")
+					result_department := el.ChildText(tag_department)
+					result_type := el.ChildText(tag_type)
+					result_location := el.ChildText(tag_location)
+
+					_, err := netUrl.ParseRequestURI(result_url)
+					if err == nil {
+
+						temp_elem_json := Job{
+							result_title,
+							result_url,
+							result_department,
+							result_type,
+							result_location,
+						}
+
+						elem_json, err := json.Marshal(temp_elem_json)
+						if err != nil {
+							panic(err.Error())
+						}
+
+						results = append(results, Result{
+							runtime.Name,
+							result_title,
+							result_url,
+							elem_json,
+						})
+					}
+				})
+			}
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
+	return
+}
