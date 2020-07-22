@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/storage v1.10.0
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/antchfx/xpath v1.1.9 // indirect
+	github.com/chromedp/chromedp v0.5.3
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.7.0

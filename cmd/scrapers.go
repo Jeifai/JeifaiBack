@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	// "crypto/tls"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +15,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/chromedp/chromedp"
 	"github.com/gocolly/colly/v2"
 	. "github.com/logrusorgru/aurora"
 )
@@ -5630,9 +5633,9 @@ func (runtime Runtime) Vodafone(
 
 		c := colly.NewCollector()
 
-		today_date := "&date=" + strings.ReplaceAll(time.Now().Format("02/01/06"), "/", "%2F")
+		// today_date := "&date=" + strings.ReplaceAll(time.Now().Format("02/01/06"), "/", "%2F")
 
-		v_start_url := "https://careers.vodafone.com/search/?startrow="
+		v_start_url := "https://careers.vodafone.com/search/"
 		v_base_url := "https://careers.vodafone.com"
 		number_results_per_page := 25
 		counter := 0
@@ -5699,7 +5702,7 @@ func (runtime Runtime) Vodafone(
 					counter++
 					time.Sleep(SecondsSleep * time.Second)
 					temp_v_url := v_start_url + strconv.Itoa(counter*number_results_per_page)
-					c.Visit(temp_v_url + today_date)
+					c.Visit(temp_v_url)
 				}
 			}
 		})
@@ -5733,7 +5736,7 @@ func (runtime Runtime) Vodafone(
 			}
 			c.Visit("file:" + dir + "/response.html")
 		} else {
-			c.Visit(v_start_url + "0" + today_date)
+			c.Visit(v_start_url + "0")
 		}
 	}
 	return
@@ -6087,7 +6090,7 @@ func (runtime Runtime) Medtronic(
 			Result      struct {
 				JobSearchID int `json:"JobSearch.id"`
 			} `json:"Result"`
-        }
+		}
 
 		type Job struct {
 			Title       string
@@ -6261,43 +6264,43 @@ func (runtime Runtime) Bendingspoons(
 
 		c := colly.NewCollector()
 
-        start_url := "https://website.rolemodel.bendingspoons.com/roles.json"
-        job_url := "https://bendingspoons.com/careers.html?x="
+		start_url := "https://website.rolemodel.bendingspoons.com/roles.json"
+		job_url := "https://bendingspoons.com/careers.html?x="
 
-        type Jobs []struct {
-            Salary            string `json:"salary,omitempty"`
-            Title             string `json:"title"`
-            Photo             string `json:"photo"`
-            ID                string `json:"id"`
-            Area              string `json:"area"`
-            ApplicationFields []struct {
-                MaxFileSize   int           `json:"max_file_size"`
-                Subtitle      string        `json:"subtitle"`
-                Title         string        `json:"title"`
-                Optional      bool          `json:"optional"`
-                Choices       []interface{} `json:"choices"`
-                Extensions    []interface{} `json:"extensions"`
-                FileTypes     []interface{} `json:"file_types"`
-                Type          string        `json:"type"`
-                ID            string        `json:"id"`
-                MaxCharacters int           `json:"max_characters"`
-            } `json:"application_fields"`
-            Contract string `json:"contract,omitempty"`
-            WeOffer  []struct {
-                Text  string `json:"text"`
-                Title string `json:"title"`
-            } `json:"we_offer"`
-            ShortDescription string `json:"short_description"`
-            Version          int    `json:"version"`
-            Location         string `json:"location,omitempty"`
-            JobVisible       bool   `json:"job_visible"`
-            JobActive        bool   `json:"job_active"`
-            WeLookFor        []struct {
-                Text  string `json:"text"`
-                Title string `json:"title"`
-            } `json:"we_look_for"`
-            LongDescription string `json:"long_description"`
-        }
+		type Jobs []struct {
+			Salary            string `json:"salary,omitempty"`
+			Title             string `json:"title"`
+			Photo             string `json:"photo"`
+			ID                string `json:"id"`
+			Area              string `json:"area"`
+			ApplicationFields []struct {
+				MaxFileSize   int           `json:"max_file_size"`
+				Subtitle      string        `json:"subtitle"`
+				Title         string        `json:"title"`
+				Optional      bool          `json:"optional"`
+				Choices       []interface{} `json:"choices"`
+				Extensions    []interface{} `json:"extensions"`
+				FileTypes     []interface{} `json:"file_types"`
+				Type          string        `json:"type"`
+				ID            string        `json:"id"`
+				MaxCharacters int           `json:"max_characters"`
+			} `json:"application_fields"`
+			Contract string `json:"contract,omitempty"`
+			WeOffer  []struct {
+				Text  string `json:"text"`
+				Title string `json:"title"`
+			} `json:"we_offer"`
+			ShortDescription string `json:"short_description"`
+			Version          int    `json:"version"`
+			Location         string `json:"location,omitempty"`
+			JobVisible       bool   `json:"job_visible"`
+			JobActive        bool   `json:"job_active"`
+			WeLookFor        []struct {
+				Text  string `json:"text"`
+				Title string `json:"title"`
+			} `json:"we_look_for"`
+			LongDescription string `json:"long_description"`
+		}
 
 		var jsonJobs Jobs
 
@@ -6362,4 +6365,274 @@ func (runtime Runtime) Bendingspoons(
 		}
 	}
 	return
-} 
+}
+
+func (runtime Runtime) Bcg(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		type Job struct {
+			Title       string
+			Url         string
+			Location    string
+			Date        string
+			Description string
+		}
+
+		if !isLocal {
+
+			ctx, cancel := chromedp.NewContext(context.Background())
+			defer cancel()
+
+			b_start_url := "https://talent.bcg.com/en_US/apply/SearchJobs/?folderOffset=%d"
+			start_offset := 0
+			number_results_per_page := 20
+			_ = number_results_per_page
+
+			var initialResponse string
+			if err := chromedp.Run(ctx,
+				chromedp.Navigate(fmt.Sprintf(b_start_url, start_offset)),
+				chromedp.OuterHTML(".body_Chrome", &initialResponse),
+			); err != nil {
+				panic(err)
+			}
+
+			temp_total_results := strings.Split(
+				strings.Split(
+					strings.Split(initialResponse, `jobPaginationLegend`)[1], "</span>")[0], " ")
+			total_results, _ := strconv.Atoi(temp_total_results[len(temp_total_results)-1])
+
+			for i := 0; i <= total_results; i += number_results_per_page {
+				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, fmt.Sprintf(b_start_url, i)))
+				var pageResponse string
+				if err := chromedp.Run(ctx,
+					chromedp.Navigate(fmt.Sprintf(b_start_url, i)),
+					chromedp.OuterHTML(".body_Chrome", &pageResponse),
+				); err != nil {
+					panic(err)
+				}
+
+				results_sections := strings.Split(pageResponse, `<li class="listSingleColumnItem">`)
+				for q := 1; q < len(results_sections); q++ {
+					elem := results_sections[q]
+					result_title := strings.Split(strings.Split(strings.Split(elem, `<a href="`)[1], `">`)[1], `</a>`)[0]
+					result_url := strings.Split(strings.Split(elem, `<a href="`)[1], `"`)[0]
+					result_location := strings.Split(strings.Split(elem, `<span class="listSingleColumnItemMiscDataItem">`)[1], `</span>`)[0]
+					result_date := strings.Split(strings.Split(elem, `Posted `)[1], `</span>`)[0]
+					result_description := strings.Split(strings.Split(elem, `<div class="listSingleColumnItemDescription">`)[1], `<a`)[0]
+
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_location,
+						result_date,
+						result_description,
+					}
+
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
+				}
+			}
+			results_marshal, err := json.Marshal(results)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(results_marshal)}
+
+		} else {
+			file, _ := os.Open("response.html")
+			pageResponse, _ := ioutil.ReadAll(file)
+			var jobs []Job
+			err := json.Unmarshal(pageResponse, &jobs)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range jobs {
+
+				result_title := elem.Title
+				result_url := elem.Url
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Deloitte(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://jobs2.deloitte.com/widgets"
+		job_url := "https://jobs2.deloitte.com/it/it/job/"
+
+		type JsonJobs struct {
+			RefineSearch struct {
+				Status    int `json:"status"`
+				Hits      int `json:"hits"`
+				TotalHits int `json:"totalHits"`
+				Data      struct {
+					Jobs []struct {
+						Country            string      `json:"country"`
+						MlSkills           interface{} `json:"ml_skills"`
+						Type               string      `json:"type"`
+						MultiLocation      []string    `json:"multi_location"`
+						Title              string      `json:"title"`
+						Locale             string      `json:"locale"`
+						MultiLocationArray []struct {
+							Location string `json:"location"`
+						} `json:"multi_location_array"`
+						JobSeqNo             string    `json:"jobSeqNo"`
+						PostedDate           time.Time `json:"postedDate"`
+						DescriptionTeaser    string    `json:"descriptionTeaser"`
+						SearchresultsDisplay string    `json:"searchresults_display"`
+						DateCreated          time.Time `json:"dateCreated"`
+						State                string    `json:"state"`
+						Department           string    `json:"department"`
+						VisibilityType       string    `json:"visibilityType"`
+						JdDisplay            string    `json:"jd_display"`
+						IsMultiCategory      bool      `json:"isMultiCategory"`
+						MultiCategory        []string  `json:"multi_category"`
+						ReqID                string    `json:"reqId"`
+						JobID                string    `json:"jobId"`
+						MemberFirm           string    `json:"memberFirm"`
+						Badge                string    `json:"badge"`
+						JobVisibility        []string  `json:"jobVisibility"`
+						IsMultiLocation      bool      `json:"isMultiLocation"`
+						MultiCategoryArray   []struct {
+							Category string `json:"category"`
+						} `json:"multi_category_array"`
+						Location      string `json:"location"`
+						Category      string `json:"category"`
+						Entity        string `json:"entity"`
+						ExternalApply bool   `json:"externalApply"`
+					} `json:"jobs"`
+					SearchConfig struct {
+						ContextualSearch bool `json:"contextualSearch"`
+					} `json:"searchConfig"`
+					Suggestions struct {
+					} `json:"suggestions"`
+					UISkillsSelection interface{} `json:"ui_skills_selection"`
+				} `json:"data"`
+				Eid string `json:"eid"`
+			} `json:"refineSearch"`
+		}
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.RefineSearch.Data.Jobs {
+
+				result_title := elem.Title
+				result_url := job_url + elem.JobSeqNo
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.RefineSearch.Data.Jobs = append(
+				jsonJobs.RefineSearch.Data.Jobs, tempJson.RefineSearch.Data.Jobs...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			/**
+			  client := &http.Client{}
+			  var data = strings.NewReader(`{"lang":"it_it","ddoKey":"refineSearch","from":0,"jobs":true,"size":"50"}`)
+			  req, err := http.NewRequest("POST", start_url, data)
+			  if err != nil {
+			      panic(err.Error())
+			  }
+			  req.Header.Set("content-type", "application/json")
+			  req.Header.Set("origin", "https://jobs2.deloitte.com")
+			  resp, err := client.Do(req)
+			  if err != nil {
+			      panic(err.Error())
+			  }
+			  bodyText, err := ioutil.ReadAll(resp.Body)
+			  if err != nil {
+			      panic(err.Error())
+			  }
+			  fmt.Printf("%s\n", bodyText)
+			*/
+
+			// c.SetClient(client)
+			// c.Visit(start_url)
+
+			c.Request("POST",
+				start_url,
+				strings.NewReader(`{"lang":"it_it","ddoKey":"refineSearch","from":0,"jobs":true,"size":"50"}`),
+				nil,
+				http.Header{"content-type": []string{"application/json"}},
+			)
+		}
+	}
+	return
+}
