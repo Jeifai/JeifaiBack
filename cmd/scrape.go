@@ -8,8 +8,10 @@ import (
 	. "github.com/logrusorgru/aurora"
 )
 
-var scrapeCompany string
-var runLocally string
+var (
+	scrapeCompany string
+	runLocally    string
+)
 
 var scrapeCmd = &cobra.Command{
 	Use:   "scrape",
@@ -22,13 +24,13 @@ var scrapeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(scrapeCmd)
-    scrapeCmd.Flags().StringVarP(&scrapeCompany, "scrape", "s", "", "Specify a company or all of them")
+	scrapeCmd.Flags().StringVarP(&scrapeCompany, "scrape", "s", "", "Specify a company or all of them")
 	scrapeCmd.Flags().StringVarP(&runLocally, "islocal", "i", "", "Specify if the scraper will run locally or not")
 }
 
 func Scrape(company string, runLocally string) {
 	DbConnect()
-    defer Db.Close()
+	defer Db.Close()
 	if company == "all" {
 		scrapers := GetScrapers()
 		for _, elem := range scrapers {
@@ -41,29 +43,29 @@ func Scrape(company string, runLocally string) {
 }
 
 func RunScraper(scraper Scraper, runLocally string) {
-    if runLocally == "false" {
-        fmt.Println(BrightBlue("Scraping -->"), Bold(BrightBlue(scraper.Name)))
-        response, results := Extract(scraper.Name, scraper.Version, false)
-        n_results := len(results)
-        if n_results > 0 {
-            fmt.Println(Green("Number of results scraped: "), Bold(Green(n_results)))
-            scraping := scraper.StartScrapingSession()
-            file_path := GenerateFilePath(scraper.Name, scraping.Id)
-            SaveResults(scraper, scraping, results)
-            SaveResponseToStorage(response, file_path)
-        } else {
-            fmt.Println(Bold(Red("DANGER, NO RESULTS FOUND")))
-        }
-    } else if runLocally == "true" {
-	    scraping := LastScrapingByNameVersion(scraper.Name, scraper.Version)
-        file_path := GenerateFilePath(scraper.Name, scraping)
-        fileResponse := GetResponseFromStorage(file_path)
-        SaveResponseToFile(fileResponse)
-        _, results := Extract(scraper.Name, scraper.Version, true)
-        n_results := len(results)
-        if n_results > 0 {
-            fmt.Println(Green("Number of results scraped: "), Bold(Green(n_results)))
-        }
-        RemoveFile()
-    }
+	if runLocally == "false" {
+		fmt.Println(BrightBlue("Scraping -->"), Bold(BrightBlue(scraper.Name)))
+		response, results := Extract(scraper.Name, scraper.Version, false)
+		n_results := len(results)
+		if n_results > 0 {
+			fmt.Println(Green("Number of results scraped: "), Bold(Green(n_results)))
+			scraping := scraper.StartScrapingSession()
+			file_path := GenerateFilePath(scraper.Name, scraping.Id)
+			SaveResults(scraper, scraping, results)
+			SaveResponseToStorage(response, file_path)
+		} else {
+			fmt.Println(Bold(Red("DANGER, NO RESULTS FOUND")))
+		}
+	} else if runLocally == "true" {
+		scraping := LastScrapingByNameVersion(scraper.Name, scraper.Version)
+		file_path := GenerateFilePath(scraper.Name, scraping)
+		fileResponse := GetResponseFromStorage(file_path)
+		SaveResponseToFile(fileResponse)
+		_, results := Extract(scraper.Name, scraper.Version, true)
+		n_results := len(results)
+		if n_results > 0 {
+			fmt.Println(Green("Number of results scraped: "), Bold(Green(n_results)))
+		}
+		RemoveFile()
+	}
 }

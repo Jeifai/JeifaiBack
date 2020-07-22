@@ -56,6 +56,19 @@ func SaveResponseToFile(response string) {
 	f.WriteString(response)
 }
 
+func SaveResponseToFileWithFileName(response string, filename string) {
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	f, err := os.Create(dir + "/" + filename)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer f.Close()
+	f.WriteString(response)
+}
+
 func RemoveFile() {
 	dir, err := os.Getwd()
 	if err != nil {
