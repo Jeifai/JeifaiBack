@@ -7218,7 +7218,7 @@ func (runtime Runtime) Square(
 
             jsonJobs.Content = append(jsonJobs.Content, tempJson.Content...)
             
-            if !isLocal {
+            if isLocal {
                 return
             } else {
                 total_matches := tempJson.TotalFound
@@ -7261,6 +7261,126 @@ func (runtime Runtime) Square(
 		} else {
 			c.Visit(fmt.Sprintf(start_url, 0))
 		}
+	}
+	return
+}
+
+func (runtime Runtime) Facebook(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://www.facebook.com/careers/jobs?results_per_page=100&page=%d"
+        base_job_url := "https://www.facebook.com%s"
+        number_results_per_page := 100
+
+		type Job struct {
+			Title    string
+			Url      string
+			Location string
+			Info     string
+		}
+
+        if !isLocal {
+
+            c.OnHTML("#search_result", func(e *colly.HTMLElement) {
+                e.ForEach("a", func(_ int, el *colly.HTMLElement) {
+                    goqueryselector := el.DOM
+                    result_url := fmt.Sprintf(base_job_url, el.Attr("href"))
+                    result_title := el.ChildText("._8sel")
+                    result_location := goqueryselector.Find("._97fe ._8sen").Find("Span").Text()
+
+                    var result_info []string
+                    temp_result_info := el.ChildTexts("._8see")
+                    for _, elem := range temp_result_info {
+                        if !strings.Contains(elem, "+") {
+                            result_info = append(result_info, elem)
+                        }
+                    }
+
+                    _, err := netUrl.ParseRequestURI(result_url)
+                    if err == nil {
+                        temp_elem_json := Job{
+                            result_title,
+                            result_url,
+                            result_location,
+                            strings.Join(result_info," - "),
+                        }
+
+                        elem_json, err := json.Marshal(temp_elem_json)
+                        if err != nil {
+                            panic(err.Error())
+                        }
+
+                        results = append(results, Result{
+                            runtime.Name,
+                            result_title,
+                            result_url,
+                            elem_json,
+                        })
+                    }
+                })
+
+                array_number_results := strings.Split(e.ChildText("._6v-m"), " ")
+                string_number_results := array_number_results[len(array_number_results)-1]
+                number_results, _ := strconv.Atoi(string_number_results)
+                total_pages := number_results / number_results_per_page
+
+                for i := 2; i <= total_pages; i++ {
+                    time.Sleep(SecondsSleep * time.Second)
+                    c.Visit(fmt.Sprintf(start_url, i))
+                }
+            })
+
+            c.OnRequest(func(r *colly.Request) {
+                fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+            })
+
+            c.OnScraped(func(r *colly.Response) {
+                results_marshal, err := json.Marshal(results)
+                if err != nil {
+                    panic(err.Error())
+                }
+                response = Response{[]byte(results_marshal)}
+            })
+
+            c.OnError(func(r *colly.Response, err error) {
+                fmt.Println(
+                    Red("Request URL:"), Red(r.Request.URL),
+                    Red("failed with response:"), Red(r),
+                    Red("\nError:"), Red(err))
+            })
+
+            c.Visit(fmt.Sprintf(start_url, 1))
+        } else {
+            file, _ := os.Open("response.html")
+			pageResponse, _ := ioutil.ReadAll(file)
+			var jsonJobs []Job
+			err := json.Unmarshal(pageResponse, &jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range jsonJobs {
+
+				result_title := elem.Title
+				result_url := elem.Url
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+        }
 	}
 	return
 }
