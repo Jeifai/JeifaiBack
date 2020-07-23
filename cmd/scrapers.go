@@ -6913,3 +6913,119 @@ func (runtime Runtime) Bayern(
 	}
 	return
 }
+
+func (runtime Runtime) Roche(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://www.roche.com/toolbox/jobSearch.json?type=json&api=jobs&pageLength=%d&offset=%d"
+        base_url := "https://www.roche.com%s"
+        number_results_per_page := 300
+        
+        type JsonJobs struct {
+            Jobs struct {
+                Status       string `json:"status"`
+                TotalMatches int    `json:"totalMatches"`
+                Items        []struct {
+                    Title           string `json:"title"`
+                    DetailsURL      string `json:"detailsUrl"`
+                    OpenDate        string `json:"openDate"`
+                    JobLevel        string `json:"jobLevel"`
+                    PrimaryLocation struct {
+                        Country string `json:"country"`
+                        State   string `json:"state"`
+                        City    string `json:"city"`
+                    } `json:"primaryLocation"`
+                    PrimaryLocationCode struct {
+                        CountryCode string `json:"countryCode"`
+                        StateCode   string `json:"stateCode"`
+                        CityCode    string `json:"cityCode"`
+                    } `json:"primaryLocationCode"`
+                    OtherLocations     []interface{} `json:"otherLocations"`
+                    OtherLocationCodes []interface{} `json:"otherLocationCodes"`
+                    ReqID              string        `json:"reqId"`
+                    JobBoard           string        `json:"jobBoard"`
+                } `json:"items"`
+            } `json:"jobs"`
+        }
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			if err != nil {
+				panic(err.Error())
+            }
+            
+            elem_json, err := json.Marshal(tempJsonJobs)
+            if err != nil {
+                panic(err.Error())
+            }            
+            SaveResponseToFileWithFileName(string(elem_json), "Output.json")
+
+			for _, elem := range tempJsonJobs.Jobs.Items {
+
+				result_title := elem.Title
+				result_url := fmt.Sprintf(base_url, elem.DetailsURL) 
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+            jsonJobs.Jobs.Items = append(jsonJobs.Jobs.Items, tempJsonJobs.Jobs.Items...)
+            
+            total_matches := tempJsonJobs.Jobs.TotalMatches
+            total_pages := total_matches / number_results_per_page
+            for i := 1; i <= total_pages; i++ {
+                time.Sleep(SecondsSleep * time.Second)
+                c.Visit(fmt.Sprintf(start_url, number_results_per_page, i))
+            }
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(fmt.Sprintf(start_url, number_results_per_page, 0))
+		}
+	}
+	return
+}
