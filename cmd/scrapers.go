@@ -6479,164 +6479,6 @@ func (runtime Runtime) Bcg(
 	}
 	return
 }
-
-func (runtime Runtime) DeloitteOLD(
-	version int, isLocal bool) (
-	response Response, results []Result) {
-	switch version {
-	case 1:
-
-		c := colly.NewCollector()
-
-		start_url := "https://jobs2.deloitte.com/widgets"
-		job_url := "https://jobs2.deloitte.com/it/it/job/"
-
-		type JsonJobs struct {
-			RefineSearch struct {
-				Status    int `json:"status"`
-				Hits      int `json:"hits"`
-				TotalHits int `json:"totalHits"`
-				Data      struct {
-					Jobs []struct {
-						Country            string      `json:"country"`
-						MlSkills           interface{} `json:"ml_skills"`
-						Type               string      `json:"type"`
-						MultiLocation      []string    `json:"multi_location"`
-						Title              string      `json:"title"`
-						Locale             string      `json:"locale"`
-						MultiLocationArray []struct {
-							Location string `json:"location"`
-						} `json:"multi_location_array"`
-						JobSeqNo             string    `json:"jobSeqNo"`
-						PostedDate           time.Time `json:"postedDate"`
-						DescriptionTeaser    string    `json:"descriptionTeaser"`
-						SearchresultsDisplay string    `json:"searchresults_display"`
-						DateCreated          time.Time `json:"dateCreated"`
-						State                string    `json:"state"`
-						Department           string    `json:"department"`
-						VisibilityType       string    `json:"visibilityType"`
-						JdDisplay            string    `json:"jd_display"`
-						IsMultiCategory      bool      `json:"isMultiCategory"`
-						MultiCategory        []string  `json:"multi_category"`
-						ReqID                string    `json:"reqId"`
-						JobID                string    `json:"jobId"`
-						MemberFirm           string    `json:"memberFirm"`
-						Badge                string    `json:"badge"`
-						JobVisibility        []string  `json:"jobVisibility"`
-						IsMultiLocation      bool      `json:"isMultiLocation"`
-						MultiCategoryArray   []struct {
-							Category string `json:"category"`
-						} `json:"multi_category_array"`
-						Location      string `json:"location"`
-						Category      string `json:"category"`
-						Entity        string `json:"entity"`
-						ExternalApply bool   `json:"externalApply"`
-					} `json:"jobs"`
-					SearchConfig struct {
-						ContextualSearch bool `json:"contextualSearch"`
-					} `json:"searchConfig"`
-					Suggestions struct {
-					} `json:"suggestions"`
-					UISkillsSelection interface{} `json:"ui_skills_selection"`
-				} `json:"data"`
-				Eid string `json:"eid"`
-			} `json:"refineSearch"`
-		}
-
-		var jsonJobs JsonJobs
-
-		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			for _, elem := range tempJson.RefineSearch.Data.Jobs {
-
-				result_title := elem.Title
-				result_url := job_url + elem.JobSeqNo
-
-				elem_json, err := json.Marshal(elem)
-				if err != nil {
-					panic(err.Error())
-				}
-
-				results = append(results, Result{
-					runtime.Name,
-					result_title,
-					result_url,
-					elem_json,
-				})
-			}
-
-			jsonJobs.RefineSearch.Data.Jobs = append(
-				jsonJobs.RefineSearch.Data.Jobs, tempJson.RefineSearch.Data.Jobs...)
-		})
-
-		c.OnRequest(func(r *colly.Request) {
-			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
-		})
-
-		c.OnError(func(r *colly.Response, err error) {
-			fmt.Println(
-				Red("Request URL:"), Red(r.Request.URL),
-				Red("failed with response:"), Red(r),
-				Red("\nError:"), Red(err))
-		})
-
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			/**
-			  client := &http.Client{}
-			  var data = strings.NewReader(`{"lang":"it_it","ddoKey":"refineSearch","from":0,"jobs":true,"size":"50"}`)
-			  req, err := http.NewRequest("POST", start_url, data)
-			  if err != nil {
-			      panic(err.Error())
-			  }
-			  req.Header.Set("content-type", "application/json")
-			  req.Header.Set("origin", "https://jobs2.deloitte.com")
-			  resp, err := client.Do(req)
-			  if err != nil {
-			      panic(err.Error())
-			  }
-			  bodyText, err := ioutil.ReadAll(resp.Body)
-			  if err != nil {
-			      panic(err.Error())
-			  }
-			  fmt.Printf("%s\n", bodyText)
-			*/
-
-			// c.SetClient(client)
-			// c.Visit(start_url)
-
-			c.Request("POST",
-				start_url,
-				strings.NewReader(`{"lang":"it_it","ddoKey":"refineSearch","from":0,"jobs":true,"size":"50"}`),
-				nil,
-				http.Header{"content-type": []string{"application/json"}},
-			)
-		}
-	}
-	return
-}
-
 func (runtime Runtime) Deloitte(
 	version int, isLocal bool) (response Response, results []Result) {
 	/**
@@ -6921,36 +6763,36 @@ func (runtime Runtime) Roche(
 
 		c := colly.NewCollector()
 
-        start_url := "https://www.roche.com/toolbox/jobSearch.json?type=json&api=jobs&pageLength=%d&offset=%d"
-        base_url := "https://www.roche.com%s"
-        number_results_per_page := 300
-        
-        type JsonJobs struct {
-            Jobs struct {
-                Status       string `json:"status"`
-                TotalMatches int    `json:"totalMatches"`
-                Items        []struct {
-                    Title           string `json:"title"`
-                    DetailsURL      string `json:"detailsUrl"`
-                    OpenDate        string `json:"openDate"`
-                    JobLevel        string `json:"jobLevel"`
-                    PrimaryLocation struct {
-                        Country string `json:"country"`
-                        State   string `json:"state"`
-                        City    string `json:"city"`
-                    } `json:"primaryLocation"`
-                    PrimaryLocationCode struct {
-                        CountryCode string `json:"countryCode"`
-                        StateCode   string `json:"stateCode"`
-                        CityCode    string `json:"cityCode"`
-                    } `json:"primaryLocationCode"`
-                    OtherLocations     []interface{} `json:"otherLocations"`
-                    OtherLocationCodes []interface{} `json:"otherLocationCodes"`
-                    ReqID              string        `json:"reqId"`
-                    JobBoard           string        `json:"jobBoard"`
-                } `json:"items"`
-            } `json:"jobs"`
-        }
+		start_url := "https://www.roche.com/toolbox/jobSearch.json?type=json&api=jobs&pageLength=%d&offset=%d"
+		base_url := "https://www.roche.com%s"
+		number_results_per_page := 300
+
+		type JsonJobs struct {
+			Jobs struct {
+				Status       string `json:"status"`
+				TotalMatches int    `json:"totalMatches"`
+				Items        []struct {
+					Title           string `json:"title"`
+					DetailsURL      string `json:"detailsUrl"`
+					OpenDate        string `json:"openDate"`
+					JobLevel        string `json:"jobLevel"`
+					PrimaryLocation struct {
+						Country string `json:"country"`
+						State   string `json:"state"`
+						City    string `json:"city"`
+					} `json:"primaryLocation"`
+					PrimaryLocationCode struct {
+						CountryCode string `json:"countryCode"`
+						StateCode   string `json:"stateCode"`
+						CityCode    string `json:"cityCode"`
+					} `json:"primaryLocationCode"`
+					OtherLocations     []interface{} `json:"otherLocations"`
+					OtherLocationCodes []interface{} `json:"otherLocationCodes"`
+					ReqID              string        `json:"reqId"`
+					JobBoard           string        `json:"jobBoard"`
+				} `json:"items"`
+			} `json:"jobs"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -6959,18 +6801,18 @@ func (runtime Runtime) Roche(
 			err := json.Unmarshal(r.Body, &tempJsonJobs)
 			if err != nil {
 				panic(err.Error())
-            }
-            
-            elem_json, err := json.Marshal(tempJsonJobs)
-            if err != nil {
-                panic(err.Error())
-            }            
-            SaveResponseToFileWithFileName(string(elem_json), "Output.json")
+			}
+
+			elem_json, err := json.Marshal(tempJsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			SaveResponseToFileWithFileName(string(elem_json), "Output.json")
 
 			for _, elem := range tempJsonJobs.Jobs.Items {
 
 				result_title := elem.Title
-				result_url := fmt.Sprintf(base_url, elem.DetailsURL) 
+				result_url := fmt.Sprintf(base_url, elem.DetailsURL)
 
 				elem_json, err := json.Marshal(elem)
 				if err != nil {
@@ -6985,14 +6827,14 @@ func (runtime Runtime) Roche(
 				})
 			}
 
-            jsonJobs.Jobs.Items = append(jsonJobs.Jobs.Items, tempJsonJobs.Jobs.Items...)
-            
-            total_matches := tempJsonJobs.Jobs.TotalMatches
-            total_pages := total_matches / number_results_per_page
-            for i := 1; i <= total_pages; i++ {
-                time.Sleep(SecondsSleep * time.Second)
-                c.Visit(fmt.Sprintf(start_url, number_results_per_page, i))
-            }
+			jsonJobs.Jobs.Items = append(jsonJobs.Jobs.Items, tempJsonJobs.Jobs.Items...)
+
+			total_matches := tempJsonJobs.Jobs.TotalMatches
+			total_pages := total_matches / number_results_per_page
+			for i := 1; i <= total_pages; i++ {
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, number_results_per_page, i))
+			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
@@ -7025,6 +6867,173 @@ func (runtime Runtime) Roche(
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(fmt.Sprintf(start_url, number_results_per_page, 0))
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Msd(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		type JsonJobs struct {
+			EagerLoadRefineSearch struct {
+				Status    int `json:"status"`
+				Hits      int `json:"hits"`
+				TotalHits int `json:"totalHits"`
+				Data      struct {
+					Jobs []struct {
+						Country           string    `json:"country"`
+						CityState         string    `json:"cityState"`
+						City              string    `json:"city"`
+						MlSkills          []string  `json:"ml_skills"`
+						Type              string    `json:"type"`
+						Experience        string    `json:"experience,omitempty"`
+						Locale            string    `json:"locale"`
+						Title             string    `json:"title"`
+						MultiLocation     []string  `json:"multi_location"`
+						PostedDate        time.Time `json:"postedDate"`
+						JobSeqNo          string    `json:"jobSeqNo"`
+						DescriptionTeaser string    `json:"descriptionTeaser"`
+						DateCreated       time.Time `json:"dateCreated"`
+						State             string    `json:"state"`
+						CityStateCountry  string    `json:"cityStateCountry"`
+						Department        string    `json:"department,omitempty"`
+						VisibilityType    string    `json:"visibilityType"`
+						SiteType          string    `json:"siteType"`
+						IsMultiCategory   bool      `json:"isMultiCategory"`
+						ReqID             string    `json:"reqId"`
+						JobID             string    `json:"jobId"`
+						Badge             string    `json:"badge"`
+						JobVisibility     []string  `json:"jobVisibility"`
+						IsMultiLocation   bool      `json:"isMultiLocation"`
+						Location          string    `json:"location"`
+						Category          string    `json:"category"`
+						ExternalApply     bool      `json:"externalApply"`
+						SubCategory       string    `json:"subCategory,omitempty"`
+						Industry          string    `json:"industry,omitempty"`
+						WorkLocation      string    `json:"workLocation,omitempty"`
+						Address           string    `json:"address,omitempty"`
+						MultiCategory     []string  `json:"multi_category,omitempty"`
+						ApplyURL          string    `json:"applyUrl,omitempty"`
+					} `json:"jobs"`
+				} `json:"data"`
+			} `json:"eagerLoadRefineSearch"`
+		}
+
+		start_url := "https://jobs.msd.com/gb/en/search-results?s=1&from=%d"
+		base_job_url := "https://jobs.msd.com/gb/en/job/%s"
+
+		var jsonJobs JsonJobs
+
+		if !isLocal {
+
+			ctx, cancel := chromedp.NewContext(context.Background())
+			defer cancel()
+
+			var initialResponse string
+			if err := chromedp.Run(ctx,
+				chromedp.Navigate(fmt.Sprintf(start_url, 0)),
+				chromedp.OuterHTML(".desktop", &initialResponse),
+			); err != nil {
+				panic(err)
+			}
+
+			temp_jsonjob_section := strings.Split(
+				strings.Split(
+					initialResponse, `"eagerLoadRefineSearch":`)[1], `,"jobwidgetsettings`)[0]
+			jsonjobs_sections := `{"eagerLoadRefineSearch":` + temp_jsonjob_section + "}"
+
+			SaveResponseToFileWithFileName(jsonjobs_sections, "Outputjsonjobs_sections.json")
+
+			var tempJsonJobs JsonJobs
+			err := json.Unmarshal([]byte(jsonjobs_sections), &tempJsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			items_per_page := tempJsonJobs.EagerLoadRefineSearch.Hits
+			total_matches := tempJsonJobs.EagerLoadRefineSearch.TotalHits
+			total_pages := total_matches / items_per_page
+			for i := 1; i <= total_pages+1; i++ {
+
+				jobs_url := fmt.Sprintf(start_url, i*items_per_page)
+				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, jobs_url))
+
+				var jobResponse string
+				if err := chromedp.Run(ctx,
+					chromedp.Navigate(jobs_url),
+					chromedp.OuterHTML(".desktop", &jobResponse),
+				); err != nil {
+					panic(err)
+				}
+
+				temp_jsonjob_section := strings.Split(
+					strings.Split(
+						jobResponse, `"eagerLoadRefineSearch":`)[1], `,"jobwidgetsettings`)[0]
+				jsonjobs_sections := `{"eagerLoadRefineSearch":` + temp_jsonjob_section + "}"
+
+				var tempJson JsonJobs
+				err := json.Unmarshal([]byte(jsonjobs_sections), &tempJson)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				for _, elem := range tempJson.EagerLoadRefineSearch.Data.Jobs {
+
+					result_title := elem.Title
+					result_url := fmt.Sprintf(base_job_url, elem.JobID)
+
+					elem_json, err := json.Marshal(elem)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
+				}
+
+				jsonJobs.EagerLoadRefineSearch.Data.Jobs = append(
+					jsonJobs.EagerLoadRefineSearch.Data.Jobs,
+					tempJson.EagerLoadRefineSearch.Data.Jobs...)
+			}
+
+			results_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(results_marshal)}
+		} else {
+			file, _ := os.Open("response.html")
+			pageResponse, _ := ioutil.ReadAll(file)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(pageResponse, &jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range jsonJobs.EagerLoadRefineSearch.Data.Jobs {
+
+				result_title := elem.Title
+				result_url := fmt.Sprintf(base_job_url, elem.JobID)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
 		}
 	}
 	return
