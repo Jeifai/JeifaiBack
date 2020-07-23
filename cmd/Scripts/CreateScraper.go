@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Subitoit"
+	scraper_name := "Square"
 	scraper_version := 1
-	jobs_url := "https://info.subito.it/lavora-con-noi.htm"
-	host_url := "https://www.subito.it"
+	jobs_url := "https://careers.squareup.com"
+	host_url := "https://squareup.com"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }

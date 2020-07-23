@@ -7120,3 +7120,147 @@ func (runtime Runtime) Subitoit(
 	}
 	return
 }
+
+func (runtime Runtime) Square(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://api.smartrecruiters.com/v1/companies/square/postings?offset=%d"
+        base_job_url := "https://www.smartrecruiters.com/Square/%s"
+        number_results_per_page := 100
+
+        type Jobs struct {
+            Offset     int `json:"offset"`
+            Limit      int `json:"limit"`
+            TotalFound int `json:"totalFound"`
+            Content    []struct {
+                ID        string `json:"id"`
+                Name      string `json:"name"`
+                UUID      string `json:"uuid"`
+                RefNumber string `json:"refNumber"`
+                Company   struct {
+                    Identifier string `json:"identifier"`
+                    Name       string `json:"name"`
+                } `json:"company"`
+                ReleasedDate time.Time `json:"releasedDate"`
+                Location     struct {
+                    City    string `json:"city"`
+                    Region  string `json:"region"`
+                    Country string `json:"country"`
+                    Remote  bool   `json:"remote"`
+                } `json:"location"`
+                Industry struct {
+                    ID    string `json:"id"`
+                    Label string `json:"label"`
+                } `json:"industry"`
+                Department struct {
+                    ID    string `json:"id"`
+                    Label string `json:"label"`
+                } `json:"department"`
+                Function struct {
+                    ID    string `json:"id"`
+                    Label string `json:"label"`
+                } `json:"function"`
+                TypeOfEmployment struct {
+                    Label string `json:"label"`
+                } `json:"typeOfEmployment"`
+                ExperienceLevel struct {
+                    ID    string `json:"id"`
+                    Label string `json:"label"`
+                } `json:"experienceLevel"`
+                CustomField []struct {
+                    FieldID    string `json:"fieldId"`
+                    FieldLabel string `json:"fieldLabel"`
+                    ValueID    string `json:"valueId"`
+                    ValueLabel string `json:"valueLabel"`
+                } `json:"customField"`
+                Ref     string `json:"ref"`
+                Creator struct {
+                    Name string `json:"name"`
+                } `json:"creator"`
+                Language struct {
+                    Code        string `json:"code"`
+                    Label       string `json:"label"`
+                    LabelNative string `json:"labelNative"`
+                } `json:"language"`
+            } `json:"content"`
+        }
+
+		var jsonJobs Jobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson Jobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Content {
+
+				result_title := elem.Name
+				result_url := fmt.Sprintf(base_job_url, elem.ID)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+            jsonJobs.Content = append(jsonJobs.Content, tempJson.Content...)
+            
+            if !isLocal {
+                return
+            } else {
+                total_matches := tempJson.TotalFound
+                total_pages := total_matches / number_results_per_page
+                for i := 1; i <= total_pages; i++ {
+                    time.Sleep(SecondsSleep * time.Second)
+                    c.Visit(fmt.Sprintf(start_url, number_results_per_page * i))
+                }
+            }
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(fmt.Sprintf(start_url, 0))
+		}
+	}
+	return
+}
