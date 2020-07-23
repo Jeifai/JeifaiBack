@@ -6479,6 +6479,7 @@ func (runtime Runtime) Bcg(
 	}
 	return
 }
+
 func (runtime Runtime) Deloitte(
 	version int, isLocal bool) (response Response, results []Result) {
 	/**
@@ -7034,6 +7035,87 @@ func (runtime Runtime) Msd(
 					elem_json,
 				})
 			}
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Subitoit(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://info.subito.it/lavora-con-noi.htm"
+        tag_section := ".work-openings"
+        tag_result := ".list-box-item"
+		tag_title := "a"
+		tag_department := "h4"
+
+	    type Job struct {
+            Url        string
+            Title      string
+            Department string
+        }
+
+        c.OnHTML(tag_section, func(e *colly.HTMLElement) {
+            e.ForEach(tag_result, func(_ int, el *colly.HTMLElement) {
+                
+                result_title := el.ChildText(tag_title)
+                result_url := el.ChildAttr(tag_title, "href")
+                result_department := el.ChildText(tag_department)  
+
+                _, err := netUrl.ParseRequestURI(result_url)
+                if err == nil {
+
+                    temp_elem_json := Job{
+                        result_title,
+                        result_url,
+                        result_department,
+                    }
+
+                    elem_json, err := json.Marshal(temp_elem_json)
+                    if err != nil {
+                        panic(err.Error())
+                    }
+
+                    results = append(results, Result{
+                        runtime.Name,
+                        result_title,
+                        result_url,
+                        elem_json,
+                    })
+                }
+            })
+        })
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
 		}
 	}
 	return
