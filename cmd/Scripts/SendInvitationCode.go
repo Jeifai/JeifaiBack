@@ -61,5 +61,5 @@ func (invitation *Invitation) SendInvitationCode() {
 		panic(err.Error())
 	}
 
-	// SaveEmailIntoDb(invitation.Email, "SendInvitationEmail")
+	// SaveEmailIntoDb(invitation.Email, "SendInvitationCode")
 }
