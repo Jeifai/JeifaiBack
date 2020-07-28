@@ -5635,7 +5635,7 @@ func (runtime Runtime) Vodafone(
 
 		// today_date := "&date=" + strings.ReplaceAll(time.Now().Format("02/01/06"), "/", "%2F")
 
-		v_start_url := "https://careers.vodafone.com/search/"
+		v_start_url := "https://careers.vodafone.com/search/?startrow=%d"
 		v_base_url := "https://careers.vodafone.com"
 		number_results_per_page := 25
 		counter := 0
@@ -5701,7 +5701,7 @@ func (runtime Runtime) Vodafone(
 				} else {
 					counter++
 					time.Sleep(SecondsSleep * time.Second)
-					temp_v_url := v_start_url + strconv.Itoa(counter*number_results_per_page)
+					temp_v_url := fmt.Sprintf(v_start_url, counter*number_results_per_page)
 					c.Visit(temp_v_url)
 				}
 			}
@@ -5736,7 +5736,7 @@ func (runtime Runtime) Vodafone(
 			}
 			c.Visit("file:" + dir + "/response.html")
 		} else {
-			c.Visit(v_start_url + "0")
+			c.Visit(fmt.Sprintf(v_start_url, 0))
 		}
 	}
 	return
@@ -6808,7 +6808,6 @@ func (runtime Runtime) Roche(
 			if err != nil {
 				panic(err.Error())
 			}
-			SaveResponseToFileWithFileName(string(elem_json), "Output.json")
 
 			for _, elem := range tempJsonJobs.Jobs.Items {
 
