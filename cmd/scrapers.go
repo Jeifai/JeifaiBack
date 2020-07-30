@@ -6482,146 +6482,167 @@ func (runtime Runtime) Bcg(
 
 func (runtime Runtime) Deloitte(
 	version int, isLocal bool) (response Response, results []Result) {
-	/**
+	d_start_url := "https://jobs2.deloitte.com/us/en"
+	tag_title := ".title"
+	more_results_javascript := `document.getElementsByClassName("action-btn au-target")[0].click()`
+	initial_file_name := "deloitteDepartments.html"
 
-		switch version {
-		case 1:
+	type Job struct {
+		Url         string
+		Title       string
+		Company     string
+		Entity      string
+		Department  string
+		Id          string
+		Type        string
+		Date        string
+		Description string
+	}
 
-	        type JsonJob struct {
-	            Jobs []struct {
-	                Country            string      `json:"country"`
-	                MlSkills           interface{} `json:"ml_skills"`
-	                Type               string      `json:"type"`
-	                MultiLocation      []string    `json:"multi_location"`
-	                Title              string      `json:"title"`
-	                Locale             string      `json:"locale"`
-	                MultiLocationArray []struct {
-	                    Location string `json:"location"`
-	                } `json:"multi_location_array"`
-	                JobSeqNo             string    `json:"jobSeqNo"`
-	                PostedDate           time.Time `json:"postedDate"`
-	                DescriptionTeaser    string    `json:"descriptionTeaser"`
-	                SearchresultsDisplay string    `json:"searchresults_display"`
-	                DateCreated          time.Time `json:"dateCreated"`
-	                State                string    `json:"state"`
-	                Department           string    `json:"department"`
-	                VisibilityType       string    `json:"visibilityType"`
-	                JdDisplay            string    `json:"jd_display"`
-	                IsMultiCategory      bool      `json:"isMultiCategory"`
-	                MultiCategory        []string  `json:"multi_category"`
-	                ReqID                string    `json:"reqId"`
-	                JobID                string    `json:"jobId"`
-	                MemberFirm           string    `json:"memberFirm"`
-	                Badge                string    `json:"badge"`
-	                JobVisibility        []string  `json:"jobVisibility"`
-	                IsMultiLocation      bool      `json:"isMultiLocation"`
-	                MultiCategoryArray   []struct {
-	                    Category string `json:"category"`
-	                } `json:"multi_category_array"`
-	                Location      string `json:"location"`
-	                Category      string `json:"category"`
-	                Entity        string `json:"entity"`
-	                ExternalApply bool   `json:"externalApply"`
-	            } `json:"jobs"`
-	        }
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
 
-			if !isLocal {
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
 
-	            ctx, cancel := chromedp.NewContext(context.Background())
-				defer cancel()
+	var res []byte
+	var initialResponse string
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(d_start_url),
+		chromedp.WaitReady(tag_title, chromedp.ByQuery),
+		chromedp.EvaluateAsDevTools(more_results_javascript, &res),
+		chromedp.OuterHTML("html", &initialResponse),
+	); err != nil {
+		panic(err)
+	}
+	SaveResponseToFileWithFileName(initialResponse, initial_file_name)
 
-	            base_url := "https://jobs2.deloitte.com/it/it/%s"
-	            number_results_per_page := 50
+	c := colly.NewCollector()
+	c.WithTransport(t)
+	l := c.Clone()
+	l.WithTransport(t)
 
-				var initialResponse string
-				if err := chromedp.Run(ctx,
-	                chromedp.Navigate(fmt.Sprintf(base_url, "")),
-	                chromedp.WaitReady(`.au-target`),
-					chromedp.OuterHTML(".home-page", &initialResponse),
-				); err != nil {
-					panic(err)
-	            }
+	c.OnHTML("html", func(e *colly.HTMLElement) {
+		e.ForEach(".content-list-item", func(_ int, el *colly.HTMLElement) {
+			department_url := el.ChildAttr("a", "href")
 
-	            SaveResponseToFileWithFileName(initialResponse, "initialResponse.html")
-
-	            departments_sections := strings.Split(initialResponse, `ph-tag="ph-category-overview-v3"`)
-	            var department_urls []string
-	            for i := 1; i < len(departments_sections); i ++ {
-	                elem := departments_sections[i]
-	                department_url := strings.Split(strings.Split(elem, `href="`)[1], `"`)[0]
-	                if !Contains(department_urls, department_url) {
-	                    fmt.Println(department_url)
-	                    department_urls = append(department_urls, department_url)
-	                }
-	            }
-
-	            for _, elem := range department_urls {
-
-	                fmt.Println(Gray(8-1, "Visiting THIS PAGE --> "), Gray(8-1, elem))
-
-	                var departmentResponse string
-	                if err := chromedp.Run(ctx,
-	                    chromedp.Navigate(elem),
-	                    chromedp.OuterHTML(".home-page", &departmentResponse),
-	                ); err != nil {
-	                    panic(err)
-	                }
-
-	                temp_total_results := strings.Split(strings.Split(departmentResponse, `"totalHits":`)[1], `,`)[0]
-	                total_results, _ := strconv.Atoi(temp_total_results)
-
-	                fmt.Println(total_results)
-
-	                for i := 0; i <= total_results; i += number_results_per_page {
-
-	                    page_url := elem + "s=1&from=" + strconv.Itoa(i)
-
-	                    fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, page_url))
-
-	                    var jobsResponse string
-	                    if err := chromedp.Run(ctx,
-	                        chromedp.Navigate(page_url),
-	                        chromedp.OuterHTML(".home-page", &jobsResponse),
-	                    ); err != nil {
-	                        panic(err)
-	                    }
-
-	                    temp_jobs := strings.Split(strings.Split(jobsResponse, `eagerLoadRefineSearch`)[1], `</script>`)[0]
-	                    jobs := strings.Split(strings.Split(temp_jobs, `data":`)[1], `,"eid"`)[0]
-
-	                    var jsonjobs JsonJob
-	                    err := json.Unmarshal([]byte(jobs), &jsonjobs)
-	                    if err != nil {
-	                        panic(err.Error())
-	                    }
-
-	                    for _, elem := range jsonjobs.Jobs {
-	                        result_title := elem.Title
-	                        result_url := fmt.Sprintf(base_url, "job/" + elem.JobSeqNo)
-	                        fmt.Println(result_title, result_url)
-
-	                        elem_json, err := json.Marshal(elem)
-	                        if err != nil {
-	                            panic(err.Error())
-	                        }
-
-	                        results = append(results, Result{
-	                            runtime.Name,
-	                            result_title,
-	                            result_url,
-	                            elem_json,
-	                        })
-	                    }
-	                }
-	            }
-	            results_marshal, err := json.Marshal(results)
-	            if err != nil {
-	                panic(err.Error())
-	            }
-	            response = Response{[]byte(results_marshal)}
+			var departmentResponse string
+			if err := chromedp.Run(ctx,
+				chromedp.Navigate(department_url),
+				chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
+				chromedp.OuterHTML("html", &departmentResponse),
+			); err != nil {
+				panic(err)
 			}
-	    }
-	*/
+
+			department_file_name := strings.Split(department_url, "c/")[1] + "departmentResponse.html"
+
+			SaveResponseToFileWithFileName(departmentResponse, department_file_name)
+			l.WithTransport(t)
+			l.Visit("file:" + dir + "/" + department_file_name)
+			// RemoveFileWithFileName(department_file_name)
+		})
+	})
+
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(
+			Red("Request URL:"), Red(r.Request.URL),
+			Red("failed with response:"), Red(r),
+			Red("\nError:"), Red(err))
+	})
+
+	l.OnHTML("html", func(e *colly.HTMLElement) {
+		e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
+			result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
+			result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
+			result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
+			result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
+			result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
+			result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
+			result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
+			result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
+			result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
+
+			temp_elem_json := Job{
+				result_url,
+				result_title,
+				result_company,
+				result_entity,
+				result_department,
+				result_id,
+				result_type,
+				result_date,
+				result_description,
+			}
+
+			elem_json, err := json.Marshal(temp_elem_json)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
+		})
+
+		temp_number_of_jobs := e.ChildAttr(".search-bottom-count", "data-ph-at-total-jobs-text")
+		number_of_jobs, _ := strconv.Atoi(temp_number_of_jobs)
+		number_results_per_page := 50
+		jobs_base_url := e.ChildAttr(`meta[property="og:url"]`, "content") + "?s=1&from=%d"
+
+		for i := number_results_per_page; i <= number_of_jobs; i += number_results_per_page {
+
+			sub_department_url := fmt.Sprintf(jobs_base_url, i)
+
+			var departmentSubPageResponse string
+			if err := chromedp.Run(ctx,
+				chromedp.Navigate(sub_department_url),
+				chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
+				chromedp.OuterHTML("html", &departmentSubPageResponse),
+			); err != nil {
+				panic(err)
+			}
+
+			sub_file_name := fmt.Sprintf("sub_department_url%d.html", i)
+			SaveResponseToFileWithFileName(departmentSubPageResponse, sub_file_name)
+			l.Visit("file:" + dir + "/" + sub_file_name)
+			// RemoveFileWithFileName(sub_file_name)
+		}
+	})
+
+	l.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+
+	l.OnScraped(func(r *colly.Response) {
+		results_marshal, err := json.Marshal(results)
+		if err != nil {
+			panic(err.Error())
+		}
+		response = Response{[]byte(results_marshal)}
+	})
+
+	l.OnError(func(r *colly.Response, err error) {
+		fmt.Println(
+			Red("Request URL:"), Red(r.Request.URL),
+			Red("failed with response:"), Red(r),
+			Red("\nError:"), Red(err))
+	})
+
+	c.WithTransport(t)
+	c.Visit("file:" + dir + "/" + initial_file_name)
+
 	return
 }
 
@@ -6800,11 +6821,6 @@ func (runtime Runtime) Roche(
 		c.OnResponse(func(r *colly.Response) {
 			var tempJsonJobs JsonJobs
 			err := json.Unmarshal(r.Body, &tempJsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			elem_json, err := json.Marshal(tempJsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}

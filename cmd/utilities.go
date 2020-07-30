@@ -79,3 +79,14 @@ func RemoveFile() {
 		panic(err.Error())
 	}
 }
+
+func RemoveFileWithFileName(filename string) {
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	err = os.Remove(dir + "/" + filename)
+	if err != nil {
+		panic(err.Error())
+	}
+}
