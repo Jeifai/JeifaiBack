@@ -7596,3 +7596,32 @@ func (runtime Runtime) Paintgun(
 	}
 	return
 }
+
+func (runtime Runtime) Nen(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+    case 1:
+
+        results = append(results, Result{
+            runtime.Name,
+            "Salesforce Lead",
+            "https://www.linkedin.com/jobs/view/1947567619",
+            []byte("{}"),
+        })
+
+        results = append(results, Result{
+            runtime.Name,
+            "AWS Lead",
+            "https://www.linkedin.com/jobs/view/1960300179",
+            []byte("{}"),
+        })
+
+        results_marshal, err := json.Marshal(results)
+        if err != nil {
+            panic(err.Error())
+        }
+        response = Response{[]byte(results_marshal)}
+	}
+	return
+}
