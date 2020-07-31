@@ -3,7 +3,7 @@
   <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Your Invitation Code</title>
+    <title>There is something for you</title>
     <style>
       /* -------------------------------------
           GLOBAL RESETS
@@ -333,7 +333,7 @@
     </style>
   </head>
   <body class="">
-    <span class="preheader">You just got your invitation code!</span>
+    <span class="preheader">We have prepared something for you!</span>
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
       <tr>
         <td>&nbsp;</td>
@@ -350,10 +350,17 @@
                     <tr>
                       <td>
                         <p>Hi {{ .Email}},</p>
-                        <p>Here your invitation code:</p>
-                        <p><b>{{ .InvitationCode}}</b></p>
-                        <p>You can use your code here:</p>
-                        <p>https://jeifai.ew.r.appspot.com/signup</p>
+                        <p>We work hard for you, here what is ready to go:</p>
+                        <p>
+                            {{range $i, $a := .Targets}}
+                                <h3><b>Target</b>: {{$a}}</h3>
+                            {{end}}
+                        </p>
+                        <p><b>How does it work now?<b></p>
+                        <p>We are going to monitor your targets, saving and store data we get.</p>
+                        <p>Whenever any of your target publishes a job offer which is matching one of your keywords,</p>
+                        <p>we'll let you know ASAP.</p>
+                        <p>Hurray!!!</p>
                       </td>
                     </tr>
                   </table>
