@@ -6482,188 +6482,221 @@ func (runtime Runtime) Bcg(
 
 func (runtime Runtime) Deloitte(
 	version int, isLocal bool) (response Response, results []Result) {
-	initial_file_name := "deloitteDepartments.html"
 
-	type Job struct {
-		Url         string
-		Title       string
-		Company     string
-		Entity      string
-		Department  string
-		Id          string
-		Type        string
-		Date        string
-		Description string
-	}
+	switch version {
+	case 1:
 
-	t := &http.Transport{}
-	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err.Error())
-	}
+        initial_file_name := "deloitteDepartments.html"
 
-	ctx, cancel := chromedp.NewContext(context.Background())
-	defer cancel()
-
-	var res []byte
-	var initialResponse string
-	if err := chromedp.Run(ctx,
-		chromedp.Navigate("https://jobs2.deloitte.com/us/en/c/analytics-jobs"),
-		chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
-        chromedp.EvaluateAsDevTools(`document.getElementsByClassName("clearall")[0].click()`, &res),
-        chromedp.Sleep(SecondsSleep * time.Second),
-        chromedp.WaitReady(`.phs-jobs-block`, chromedp.ByQuery),
-		chromedp.OuterHTML("html", &initialResponse),
-	); err != nil {
-		panic(err)
-	}
-	SaveResponseToFileWithFileName(initialResponse, initial_file_name)
-
-	c := colly.NewCollector()
-	c.WithTransport(t)
-	x := c.Clone()
-	x.WithTransport(t)
-
-	c.OnHTML("html", func(e *colly.HTMLElement) {
-
-		e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
-			result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
-			result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
-			result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
-			result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
-			result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
-			result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
-			result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
-			result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
-			result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
-
-			temp_elem_json := Job{
-				result_url,
-				result_title,
-				result_company,
-				result_entity,
-				result_department,
-				result_id,
-				result_type,
-				result_date,
-				result_description,
-			}
-
-			elem_json, err := json.Marshal(temp_elem_json)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			results = append(results, Result{
-				runtime.Name,
-				result_title,
-				result_url,
-				elem_json,
-			})
-        })
-
-		temp_number_of_jobs := e.ChildAttr(".search-bottom-count", "data-ph-at-total-jobs-text")
-        number_of_jobs, _ := strconv.Atoi(temp_number_of_jobs)
-
-		number_results_per_page := 50
-		jobs_base_url := e.ChildAttr(`meta[property="og:url"]`, "content") + "?s=1&from=%d"
-
-		for i := number_results_per_page; i <= number_of_jobs; i += number_results_per_page {
-
-            sub_department_url := fmt.Sprintf(jobs_base_url, i)
-
-			var departmentSubPageResponse string
-			if err := chromedp.Run(ctx,
-				chromedp.Navigate(sub_department_url),
-				chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
-				chromedp.OuterHTML("html", &departmentSubPageResponse),
-			); err != nil {
-				panic(err)
-			}
-
-			sub_file_name := fmt.Sprintf("sub_department_url%d.html", i)
-			SaveResponseToFileWithFileName(departmentSubPageResponse, sub_file_name)
-            x.Visit("file:" + dir + "/" + sub_file_name)
-            time.Sleep(SecondsSleep * time.Second)
-
-			RemoveFileWithFileName(sub_file_name)
+        type Job struct {
+            Url         string
+            Title       string
+            Company     string
+            Entity      string
+            Department  string
+            Id          string
+            Type        string
+            Date        string
+            Description string
         }
-        
-	})
 
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
+		if !isLocal {
 
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(
-			Red("Request URL:"), Red(r.Request.URL),
-			Red("failed with response:"), Red(r),
-			Red("\nError:"), Red(err))
-    })
-    
-	c.OnScraped(func(r *colly.Response) {
-		results_marshal, err := json.Marshal(results)
-		if err != nil {
-			panic(err.Error())
-		}
-        response = Response{[]byte(results_marshal)}
-        
-        RemoveFileWithFileName(initial_file_name)
-	})
-    
-	x.OnHTML("html", func(e *colly.HTMLElement) {
-		e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
-			result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
-			result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
-			result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
-			result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
-			result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
-			result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
-			result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
-			result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
-			result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
+            t := &http.Transport{}
+            t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+            dir, err := os.Getwd()
+            if err != nil {
+                panic(err.Error())
+            }
 
-			temp_elem_json := Job{
-				result_url,
-				result_title,
-				result_company,
-				result_entity,
-				result_department,
-				result_id,
-				result_type,
-				result_date,
-				result_description,
-			}
+            ctx, cancel := chromedp.NewContext(context.Background())
+            defer cancel()
 
-			elem_json, err := json.Marshal(temp_elem_json)
+            var res []byte
+            var initialResponse string
+            if err := chromedp.Run(ctx,
+                chromedp.Navigate("https://jobs2.deloitte.com/us/en/c/analytics-jobs"),
+                chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
+                chromedp.EvaluateAsDevTools(`document.getElementsByClassName("clearall")[0].click()`, &res),
+                chromedp.Sleep(SecondsSleep * time.Second),
+                chromedp.WaitReady(`.phs-jobs-block`, chromedp.ByQuery),
+                chromedp.OuterHTML("html", &initialResponse),
+            ); err != nil {
+                panic(err)
+            }
+            SaveResponseToFileWithFileName(initialResponse, initial_file_name)
+
+            c := colly.NewCollector()
+            c.WithTransport(t)
+            x := c.Clone()
+            x.WithTransport(t)
+
+            c.OnHTML("html", func(e *colly.HTMLElement) {
+
+                e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
+                    result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
+                    result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
+                    result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
+                    result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
+                    result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
+                    result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
+                    result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
+                    result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
+                    result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
+
+                    temp_elem_json := Job{
+                        result_url,
+                        result_title,
+                        result_company,
+                        result_entity,
+                        result_department,
+                        result_id,
+                        result_type,
+                        result_date,
+                        result_description,
+                    }
+
+                    elem_json, err := json.Marshal(temp_elem_json)
+                    if err != nil {
+                        panic(err.Error())
+                    }
+
+                    results = append(results, Result{
+                        runtime.Name,
+                        result_title,
+                        result_url,
+                        elem_json,
+                    })
+                })
+
+                temp_number_of_jobs := e.ChildAttr(".search-bottom-count", "data-ph-at-total-jobs-text")
+                number_of_jobs, _ := strconv.Atoi(temp_number_of_jobs)
+
+                number_results_per_page := 50
+                jobs_base_url := e.ChildAttr(`meta[property="og:url"]`, "content") + "?s=1&from=%d"
+
+                for i := number_results_per_page; i <= number_of_jobs; i += number_results_per_page {
+
+                    sub_department_url := fmt.Sprintf(jobs_base_url, i)
+
+                    var departmentSubPageResponse string
+                    if err := chromedp.Run(ctx,
+                        chromedp.Navigate(sub_department_url),
+                        chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
+                        chromedp.OuterHTML("html", &departmentSubPageResponse),
+                    ); err != nil {
+                        panic(err)
+                    }
+
+                    sub_file_name := fmt.Sprintf("sub_department_url%d.html", i)
+                    SaveResponseToFileWithFileName(departmentSubPageResponse, sub_file_name)
+                    x.Visit("file:" + dir + "/" + sub_file_name)
+                    time.Sleep(SecondsSleep * time.Second)
+
+                    RemoveFileWithFileName(sub_file_name)
+                }
+            })
+
+            c.OnRequest(func(r *colly.Request) {
+                fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+            })
+
+            c.OnError(func(r *colly.Response, err error) {
+                fmt.Println(
+                    Red("Request URL:"), Red(r.Request.URL),
+                    Red("failed with response:"), Red(r),
+                    Red("\nError:"), Red(err))
+            })
+            
+            c.OnScraped(func(r *colly.Response) {
+                results_marshal, err := json.Marshal(results)
+                if err != nil {
+                    panic(err.Error())
+                }
+                response = Response{[]byte(results_marshal)}
+                
+                RemoveFileWithFileName(initial_file_name)
+            })
+            
+            x.OnHTML("html", func(e *colly.HTMLElement) {
+                e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
+                    result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
+                    result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
+                    result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
+                    result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
+                    result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
+                    result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
+                    result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
+                    result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
+                    result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
+
+                    temp_elem_json := Job{
+                        result_url,
+                        result_title,
+                        result_company,
+                        result_entity,
+                        result_department,
+                        result_id,
+                        result_type,
+                        result_date,
+                        result_description,
+                    }
+
+                    elem_json, err := json.Marshal(temp_elem_json)
+                    if err != nil {
+                        panic(err.Error())
+                    }
+
+                    results = append(results, Result{
+                        runtime.Name,
+                        result_title,
+                        result_url,
+                        elem_json,
+                    })
+                })
+            })
+            
+            x.OnRequest(func(r *colly.Request) {
+                fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+            })
+            
+            x.OnError(func(r *colly.Response, err error) {
+                fmt.Println(
+                    Red("Request URL:"), Red(r.Request.URL),
+                    Red("failed with response:"), Red(r),
+                    Red("\nError:"), Red(err))
+            })
+
+            c.WithTransport(t)
+            c.Visit("file:" + dir + "/" + initial_file_name)
+        } else {
+			file, _ := os.Open("response.html")
+			pageResponse, _ := ioutil.ReadAll(file)
+			var jobs []Job
+			err := json.Unmarshal(pageResponse, &jobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			results = append(results, Result{
-				runtime.Name,
-				result_title,
-				result_url,
-				elem_json,
-			})
-        })
-    })
-    
-	x.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-    })
-    
-	x.OnError(func(r *colly.Response, err error) {
-		fmt.Println(
-			Red("Request URL:"), Red(r.Request.URL),
-			Red("failed with response:"), Red(r),
-			Red("\nError:"), Red(err))
-    })
+			for _, elem := range jobs {
 
-	c.WithTransport(t)
-	c.Visit("file:" + dir + "/" + initial_file_name)
+				result_title := elem.Title
+				result_url := elem.Url
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+		}
+    }
 
 	return
 }
