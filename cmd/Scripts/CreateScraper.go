@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Infarm"
+	scraper_name := "Pitch"
 	scraper_version := 1
-	jobs_url := "https://boards.greenhouse.io/infarm"
-	host_url := "https://www.infarm.com"
+	jobs_url := "https://pitch.com/about#hiring"
+	host_url := "https://pitch.com"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }
