@@ -7453,3 +7453,146 @@ func (runtime Runtime) Facebook(
 	}
 	return
 }
+
+func (runtime Runtime) Paintgun(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://join.com/api/public/companies/9628/jobs?page=1&pageSize=100"
+        job_base_url := "https://paintgun.join.com/jobs/%s"
+
+        type JsonJobs struct {
+            Items []struct {
+                ID               int       `json:"id"`
+                LastID           int       `json:"lastId"`
+                OriginIDParam    string    `json:"originIdParam"`
+                IDParam          string    `json:"idParam"`
+                Title            string    `json:"title"`
+                PlaceID          string    `json:"placeId"`
+                Zip              string    `json:"zip"`
+                IsRemote         bool      `json:"isRemote"`
+                CountryID        int       `json:"countryId"`
+                EmploymentTypeID int       `json:"employmentTypeId"`
+                LanguageID       int       `json:"languageId"`
+                CategoryID       int       `json:"categoryId"`
+                CreatedAt        time.Time `json:"createdAt"`
+                EmploymentType   struct {
+                    ID          int       `json:"id"`
+                    Name        string    `json:"name"`
+                    Slug        string    `json:"slug"`
+                    CreatedAt   time.Time `json:"createdAt"`
+                    UpdatedAt   time.Time `json:"updatedAt"`
+                    IsNullValue bool      `json:"isNullValue"`
+                    GoogleType  string    `json:"googleType"`
+                    NameEn      string    `json:"nameEn"`
+                    NameDe      string    `json:"nameDe"`
+                    NameIt      string    `json:"nameIt"`
+                    NameFr      string    `json:"nameFr"`
+                    SortOrder   int       `json:"sortOrder"`
+                } `json:"employmentType"`
+                Language struct {
+                    ID        int       `json:"id"`
+                    Name      string    `json:"name"`
+                    Iso6391   string    `json:"iso6391"`
+                    IsDefault bool      `json:"isDefault"`
+                    CreatedAt time.Time `json:"createdAt"`
+                    UpdatedAt time.Time `json:"updatedAt"`
+                    Locale    string    `json:"locale"`
+                } `json:"language"`
+                Country struct {
+                    ID        int       `json:"id"`
+                    Name      string    `json:"name"`
+                    Iso3166   string    `json:"iso3166"`
+                    CreatedAt time.Time `json:"createdAt"`
+                    UpdatedAt time.Time `json:"updatedAt"`
+                } `json:"country"`
+                UnifiedDescription bool `json:"unifiedDescription"`
+                PendingDeletion    bool `json:"pendingDeletion"`
+                EducationID        int  `json:"educationId,omitempty"`
+                Education          struct {
+                    ID          int       `json:"id"`
+                    Name        string    `json:"name"`
+                    Slug        string    `json:"slug"`
+                    CreatedAt   time.Time `json:"createdAt"`
+                    UpdatedAt   time.Time `json:"updatedAt"`
+                    IsNullValue bool      `json:"isNullValue"`
+                } `json:"education,omitempty"`
+            } `json:"items"`
+            Pagination struct {
+                RowCount  int `json:"rowCount"`
+                PageCount int `json:"pageCount"`
+                Page      int `json:"page"`
+                PageSize  int `json:"pageSize"`
+            } `json:"pagination"`
+            Aggregations      []interface{} `json:"aggregations"`
+            UsingFallbackData bool          `json:"usingFallbackData"`
+        }
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Items {
+
+				result_title := elem.Title
+				result_url := fmt.Sprintf(job_base_url, elem.IDParam)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Items = append(jsonJobs.Items, tempJson.Items...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}
