@@ -12,8 +12,8 @@ import (
 )
 
 type TargetsReady struct {
-	Email          string
-	Targets        []string
+	Email   string
+	Targets []string
 }
 
 func main() {

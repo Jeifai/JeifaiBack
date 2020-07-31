@@ -50,7 +50,7 @@ func Extract(
 	}
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
-    results = function_output[1].Interface().([]Result)
+	results = function_output[1].Interface().([]Result)
 	results = Unique(results)
 	return
 }
@@ -6482,194 +6482,192 @@ func (runtime Runtime) Bcg(
 
 func (runtime Runtime) Deloitte(
 	version int, isLocal bool) (response Response, results []Result) {
-
 	switch version {
 	case 1:
 
-        initial_file_name := "deloitteDepartments.html"
+		initial_file_name := "deloitteDepartments.html"
 
-        type Job struct {
-            Url         string
-            Title       string
-            Company     string
-            Entity      string
-            Department  string
-            Id          string
-            Type        string
-            Date        string
-            Description string
-        }
+		type Job struct {
+			Url         string
+			Title       string
+			Company     string
+			Entity      string
+			Department  string
+			Id          string
+			Type        string
+			Date        string
+			Description string
+		}
 
 		if !isLocal {
 
-            t := &http.Transport{}
-            t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-            dir, err := os.Getwd()
-            if err != nil {
-                panic(err.Error())
-            }
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
 
-            ctx, cancel := chromedp.NewContext(context.Background())
-            defer cancel()
+			ctx, cancel := chromedp.NewContext(context.Background())
+			defer cancel()
 
-            var res []byte
-            var initialResponse string
-            if err := chromedp.Run(ctx,
-                chromedp.Navigate("https://jobs2.deloitte.com/us/en/c/analytics-jobs"),
-                chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
-                chromedp.EvaluateAsDevTools(`document.getElementsByClassName("clearall")[0].click()`, &res),
-                chromedp.Sleep(SecondsSleep * time.Second),
-                chromedp.WaitReady(`.phs-jobs-block`, chromedp.ByQuery),
-                chromedp.OuterHTML("html", &initialResponse),
-            ); err != nil {
-                panic(err)
-            }
-            SaveResponseToFileWithFileName(initialResponse, initial_file_name)
+			var res []byte
+			var initialResponse string
+			if err := chromedp.Run(ctx,
+				chromedp.Navigate("https://jobs2.deloitte.com/us/en/c/analytics-jobs"),
+				chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
+				chromedp.EvaluateAsDevTools(`document.getElementsByClassName("clearall")[0].click()`, &res),
+				chromedp.Sleep(SecondsSleep*time.Second),
+				chromedp.WaitReady(`.phs-jobs-block`, chromedp.ByQuery),
+				chromedp.OuterHTML("html", &initialResponse),
+			); err != nil {
+				panic(err)
+			}
+			SaveResponseToFileWithFileName(initialResponse, initial_file_name)
 
-            c := colly.NewCollector()
-            c.WithTransport(t)
-            x := c.Clone()
-            x.WithTransport(t)
+			c := colly.NewCollector()
+			c.WithTransport(t)
+			x := c.Clone()
+			x.WithTransport(t)
 
-            c.OnHTML("html", func(e *colly.HTMLElement) {
+			c.OnHTML("html", func(e *colly.HTMLElement) {
+				e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
+					result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
+					result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
+					result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
+					result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
+					result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
+					result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
+					result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
+					result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
+					result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
 
-                e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
-                    result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
-                    result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
-                    result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
-                    result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
-                    result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
-                    result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
-                    result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
-                    result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
-                    result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
+					temp_elem_json := Job{
+						result_url,
+						result_title,
+						result_company,
+						result_entity,
+						result_department,
+						result_id,
+						result_type,
+						result_date,
+						result_description,
+					}
 
-                    temp_elem_json := Job{
-                        result_url,
-                        result_title,
-                        result_company,
-                        result_entity,
-                        result_department,
-                        result_id,
-                        result_type,
-                        result_date,
-                        result_description,
-                    }
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
 
-                    elem_json, err := json.Marshal(temp_elem_json)
-                    if err != nil {
-                        panic(err.Error())
-                    }
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
+				})
 
-                    results = append(results, Result{
-                        runtime.Name,
-                        result_title,
-                        result_url,
-                        elem_json,
-                    })
-                })
+				temp_number_of_jobs := e.ChildAttr(".search-bottom-count", "data-ph-at-total-jobs-text")
+				number_of_jobs, _ := strconv.Atoi(temp_number_of_jobs)
 
-                temp_number_of_jobs := e.ChildAttr(".search-bottom-count", "data-ph-at-total-jobs-text")
-                number_of_jobs, _ := strconv.Atoi(temp_number_of_jobs)
+				number_results_per_page := 50
+				jobs_base_url := e.ChildAttr(`meta[property="og:url"]`, "content") + "?s=1&from=%d"
 
-                number_results_per_page := 50
-                jobs_base_url := e.ChildAttr(`meta[property="og:url"]`, "content") + "?s=1&from=%d"
+				for i := number_results_per_page; i <= number_of_jobs; i += number_results_per_page {
 
-                for i := number_results_per_page; i <= number_of_jobs; i += number_results_per_page {
+					sub_department_url := fmt.Sprintf(jobs_base_url, i)
 
-                    sub_department_url := fmt.Sprintf(jobs_base_url, i)
+					var departmentSubPageResponse string
+					if err := chromedp.Run(ctx,
+						chromedp.Navigate(sub_department_url),
+						chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
+						chromedp.OuterHTML("html", &departmentSubPageResponse),
+					); err != nil {
+						panic(err)
+					}
 
-                    var departmentSubPageResponse string
-                    if err := chromedp.Run(ctx,
-                        chromedp.Navigate(sub_department_url),
-                        chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
-                        chromedp.OuterHTML("html", &departmentSubPageResponse),
-                    ); err != nil {
-                        panic(err)
-                    }
+					sub_file_name := fmt.Sprintf("sub_department_url%d.html", i)
+					SaveResponseToFileWithFileName(departmentSubPageResponse, sub_file_name)
+					x.Visit("file:" + dir + "/" + sub_file_name)
+					time.Sleep(SecondsSleep * time.Second)
 
-                    sub_file_name := fmt.Sprintf("sub_department_url%d.html", i)
-                    SaveResponseToFileWithFileName(departmentSubPageResponse, sub_file_name)
-                    x.Visit("file:" + dir + "/" + sub_file_name)
-                    time.Sleep(SecondsSleep * time.Second)
+					RemoveFileWithFileName(sub_file_name)
+				}
+			})
 
-                    RemoveFileWithFileName(sub_file_name)
-                }
-            })
+			c.OnRequest(func(r *colly.Request) {
+				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+			})
 
-            c.OnRequest(func(r *colly.Request) {
-                fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-            })
+			c.OnError(func(r *colly.Response, err error) {
+				fmt.Println(
+					Red("Request URL:"), Red(r.Request.URL),
+					Red("failed with response:"), Red(r),
+					Red("\nError:"), Red(err))
+			})
 
-            c.OnError(func(r *colly.Response, err error) {
-                fmt.Println(
-                    Red("Request URL:"), Red(r.Request.URL),
-                    Red("failed with response:"), Red(r),
-                    Red("\nError:"), Red(err))
-            })
-            
-            c.OnScraped(func(r *colly.Response) {
-                results_marshal, err := json.Marshal(results)
-                if err != nil {
-                    panic(err.Error())
-                }
-                response = Response{[]byte(results_marshal)}
-                
-                RemoveFileWithFileName(initial_file_name)
-            })
-            
-            x.OnHTML("html", func(e *colly.HTMLElement) {
-                e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
-                    result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
-                    result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
-                    result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
-                    result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
-                    result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
-                    result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
-                    result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
-                    result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
-                    result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
+			c.OnScraped(func(r *colly.Response) {
+				results_marshal, err := json.Marshal(results)
+				if err != nil {
+					panic(err.Error())
+				}
+				response = Response{[]byte(results_marshal)}
 
-                    temp_elem_json := Job{
-                        result_url,
-                        result_title,
-                        result_company,
-                        result_entity,
-                        result_department,
-                        result_id,
-                        result_type,
-                        result_date,
-                        result_description,
-                    }
+				RemoveFileWithFileName(initial_file_name)
+			})
 
-                    elem_json, err := json.Marshal(temp_elem_json)
-                    if err != nil {
-                        panic(err.Error())
-                    }
+			x.OnHTML("html", func(e *colly.HTMLElement) {
+				e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
+					result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
+					result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
+					result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
+					result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
+					result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
+					result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
+					result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
+					result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
+					result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
 
-                    results = append(results, Result{
-                        runtime.Name,
-                        result_title,
-                        result_url,
-                        elem_json,
-                    })
-                })
-            })
-            
-            x.OnRequest(func(r *colly.Request) {
-                fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-            })
-            
-            x.OnError(func(r *colly.Response, err error) {
-                fmt.Println(
-                    Red("Request URL:"), Red(r.Request.URL),
-                    Red("failed with response:"), Red(r),
-                    Red("\nError:"), Red(err))
-            })
+					temp_elem_json := Job{
+						result_url,
+						result_title,
+						result_company,
+						result_entity,
+						result_department,
+						result_id,
+						result_type,
+						result_date,
+						result_description,
+					}
 
-            c.WithTransport(t)
-            c.Visit("file:" + dir + "/" + initial_file_name)
-        } else {
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
+				})
+			})
+
+			x.OnRequest(func(r *colly.Request) {
+				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+			})
+
+			x.OnError(func(r *colly.Response, err error) {
+				fmt.Println(
+					Red("Request URL:"), Red(r.Request.URL),
+					Red("failed with response:"), Red(r),
+					Red("\nError:"), Red(err))
+			})
+
+			c.WithTransport(t)
+			c.Visit("file:" + dir + "/" + initial_file_name)
+		} else {
 			file, _ := os.Open("response.html")
 			pageResponse, _ := ioutil.ReadAll(file)
 			var jobs []Job
@@ -6696,7 +6694,7 @@ func (runtime Runtime) Deloitte(
 				})
 			}
 		}
-    }
+	}
 
 	return
 }
@@ -7462,75 +7460,75 @@ func (runtime Runtime) Paintgun(
 
 		c := colly.NewCollector()
 
-        start_url := "https://join.com/api/public/companies/9628/jobs?page=1&pageSize=100"
-        job_base_url := "https://paintgun.join.com/jobs/%s"
+		start_url := "https://join.com/api/public/companies/9628/jobs?page=1&pageSize=100"
+		job_base_url := "https://paintgun.join.com/jobs/%s"
 
-        type JsonJobs struct {
-            Items []struct {
-                ID               int       `json:"id"`
-                LastID           int       `json:"lastId"`
-                OriginIDParam    string    `json:"originIdParam"`
-                IDParam          string    `json:"idParam"`
-                Title            string    `json:"title"`
-                PlaceID          string    `json:"placeId"`
-                Zip              string    `json:"zip"`
-                IsRemote         bool      `json:"isRemote"`
-                CountryID        int       `json:"countryId"`
-                EmploymentTypeID int       `json:"employmentTypeId"`
-                LanguageID       int       `json:"languageId"`
-                CategoryID       int       `json:"categoryId"`
-                CreatedAt        time.Time `json:"createdAt"`
-                EmploymentType   struct {
-                    ID          int       `json:"id"`
-                    Name        string    `json:"name"`
-                    Slug        string    `json:"slug"`
-                    CreatedAt   time.Time `json:"createdAt"`
-                    UpdatedAt   time.Time `json:"updatedAt"`
-                    IsNullValue bool      `json:"isNullValue"`
-                    GoogleType  string    `json:"googleType"`
-                    NameEn      string    `json:"nameEn"`
-                    NameDe      string    `json:"nameDe"`
-                    NameIt      string    `json:"nameIt"`
-                    NameFr      string    `json:"nameFr"`
-                    SortOrder   int       `json:"sortOrder"`
-                } `json:"employmentType"`
-                Language struct {
-                    ID        int       `json:"id"`
-                    Name      string    `json:"name"`
-                    Iso6391   string    `json:"iso6391"`
-                    IsDefault bool      `json:"isDefault"`
-                    CreatedAt time.Time `json:"createdAt"`
-                    UpdatedAt time.Time `json:"updatedAt"`
-                    Locale    string    `json:"locale"`
-                } `json:"language"`
-                Country struct {
-                    ID        int       `json:"id"`
-                    Name      string    `json:"name"`
-                    Iso3166   string    `json:"iso3166"`
-                    CreatedAt time.Time `json:"createdAt"`
-                    UpdatedAt time.Time `json:"updatedAt"`
-                } `json:"country"`
-                UnifiedDescription bool `json:"unifiedDescription"`
-                PendingDeletion    bool `json:"pendingDeletion"`
-                EducationID        int  `json:"educationId,omitempty"`
-                Education          struct {
-                    ID          int       `json:"id"`
-                    Name        string    `json:"name"`
-                    Slug        string    `json:"slug"`
-                    CreatedAt   time.Time `json:"createdAt"`
-                    UpdatedAt   time.Time `json:"updatedAt"`
-                    IsNullValue bool      `json:"isNullValue"`
-                } `json:"education,omitempty"`
-            } `json:"items"`
-            Pagination struct {
-                RowCount  int `json:"rowCount"`
-                PageCount int `json:"pageCount"`
-                Page      int `json:"page"`
-                PageSize  int `json:"pageSize"`
-            } `json:"pagination"`
-            Aggregations      []interface{} `json:"aggregations"`
-            UsingFallbackData bool          `json:"usingFallbackData"`
-        }
+		type JsonJobs struct {
+			Items []struct {
+				ID               int       `json:"id"`
+				LastID           int       `json:"lastId"`
+				OriginIDParam    string    `json:"originIdParam"`
+				IDParam          string    `json:"idParam"`
+				Title            string    `json:"title"`
+				PlaceID          string    `json:"placeId"`
+				Zip              string    `json:"zip"`
+				IsRemote         bool      `json:"isRemote"`
+				CountryID        int       `json:"countryId"`
+				EmploymentTypeID int       `json:"employmentTypeId"`
+				LanguageID       int       `json:"languageId"`
+				CategoryID       int       `json:"categoryId"`
+				CreatedAt        time.Time `json:"createdAt"`
+				EmploymentType   struct {
+					ID          int       `json:"id"`
+					Name        string    `json:"name"`
+					Slug        string    `json:"slug"`
+					CreatedAt   time.Time `json:"createdAt"`
+					UpdatedAt   time.Time `json:"updatedAt"`
+					IsNullValue bool      `json:"isNullValue"`
+					GoogleType  string    `json:"googleType"`
+					NameEn      string    `json:"nameEn"`
+					NameDe      string    `json:"nameDe"`
+					NameIt      string    `json:"nameIt"`
+					NameFr      string    `json:"nameFr"`
+					SortOrder   int       `json:"sortOrder"`
+				} `json:"employmentType"`
+				Language struct {
+					ID        int       `json:"id"`
+					Name      string    `json:"name"`
+					Iso6391   string    `json:"iso6391"`
+					IsDefault bool      `json:"isDefault"`
+					CreatedAt time.Time `json:"createdAt"`
+					UpdatedAt time.Time `json:"updatedAt"`
+					Locale    string    `json:"locale"`
+				} `json:"language"`
+				Country struct {
+					ID        int       `json:"id"`
+					Name      string    `json:"name"`
+					Iso3166   string    `json:"iso3166"`
+					CreatedAt time.Time `json:"createdAt"`
+					UpdatedAt time.Time `json:"updatedAt"`
+				} `json:"country"`
+				UnifiedDescription bool `json:"unifiedDescription"`
+				PendingDeletion    bool `json:"pendingDeletion"`
+				EducationID        int  `json:"educationId,omitempty"`
+				Education          struct {
+					ID          int       `json:"id"`
+					Name        string    `json:"name"`
+					Slug        string    `json:"slug"`
+					CreatedAt   time.Time `json:"createdAt"`
+					UpdatedAt   time.Time `json:"updatedAt"`
+					IsNullValue bool      `json:"isNullValue"`
+				} `json:"education,omitempty"`
+			} `json:"items"`
+			Pagination struct {
+				RowCount  int `json:"rowCount"`
+				PageCount int `json:"pageCount"`
+				Page      int `json:"page"`
+				PageSize  int `json:"pageSize"`
+			} `json:"pagination"`
+			Aggregations      []interface{} `json:"aggregations"`
+			UsingFallbackData bool          `json:"usingFallbackData"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -7601,27 +7599,27 @@ func (runtime Runtime) Nen(
 	version int, isLocal bool) (
 	response Response, results []Result) {
 	switch version {
-    case 1:
+	case 1:
 
-        results = append(results, Result{
-            runtime.Name,
-            "Salesforce Lead",
-            "https://www.linkedin.com/jobs/view/1947567619",
-            []byte("{}"),
-        })
+		results = append(results, Result{
+			runtime.Name,
+			"Salesforce Lead",
+			"https://www.linkedin.com/jobs/view/1947567619",
+			[]byte("{}"),
+		})
 
-        results = append(results, Result{
-            runtime.Name,
-            "AWS Lead",
-            "https://www.linkedin.com/jobs/view/1960300179",
-            []byte("{}"),
-        })
+		results = append(results, Result{
+			runtime.Name,
+			"AWS Lead",
+			"https://www.linkedin.com/jobs/view/1960300179",
+			[]byte("{}"),
+		})
 
-        results_marshal, err := json.Marshal(results)
-        if err != nil {
-            panic(err.Error())
-        }
-        response = Response{[]byte(results_marshal)}
+		results_marshal, err := json.Marshal(results)
+		if err != nil {
+			panic(err.Error())
+		}
+		response = Response{[]byte(results_marshal)}
 	}
 	return
 }
