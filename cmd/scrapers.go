@@ -7704,3 +7704,226 @@ func (runtime Runtime) Amboss(
 	}
 	return
 }
+
+func (runtime Runtime) Chatterbug(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		p_start_url := "https://chatterbug.recruitee.com/api/offers"
+
+		type Jobs struct {
+            Offers []struct {
+                ID                 int           `json:"id"`
+                Slug               string        `json:"slug"`
+                Position           int           `json:"position"`
+                Status             string        `json:"status"`
+                OptionsPhone       string        `json:"options_phone"`
+                OptionsPhoto       string        `json:"options_photo"`
+                OptionsCoverLetter string        `json:"options_cover_letter"`
+                OptionsCv          string        `json:"options_cv"`
+                Remote             interface{}   `json:"remote"`
+                CountryCode        string        `json:"country_code"`
+                StateCode          string        `json:"state_code"`
+                PostalCode         string        `json:"postal_code"`
+                MinHours           int           `json:"min_hours"`
+                MaxHours           int           `json:"max_hours"`
+                Title              string        `json:"title"`
+                Description        string        `json:"description"`
+                Requirements       string        `json:"requirements"`
+                Location           string        `json:"location"`
+                City               string        `json:"city"`
+                Country            string        `json:"country"`
+                CareersURL         string        `json:"careers_url"`
+                CareersApplyURL    string        `json:"careers_apply_url"`
+                MailboxEmail       string        `json:"mailbox_email"`
+                CompanyName        string        `json:"company_name"`
+                Department         interface{}   `json:"department"`
+                CreatedAt          string        `json:"created_at"`
+                EmploymentTypeCode string        `json:"employment_type_code"`
+                CategoryCode       string        `json:"category_code"`
+                ExperienceCode     string        `json:"experience_code"`
+                EducationCode      string        `json:"education_code"`
+                Tags               []interface{} `json:"tags"`
+                Translations       struct {
+                    En struct {
+                        Title        string `json:"title"`
+                        Description  string `json:"description"`
+                        Requirements string `json:"requirements"`
+                    } `json:"en"`
+                } `json:"translations"`
+                OpenQuestions []interface{} `json:"open_questions"`
+            } `json:"offers"`
+        }
+
+		var jsonJobs Jobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson Jobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Offers {
+
+				result_title := elem.Title
+				result_url := elem.CareersURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Offers = append(jsonJobs.Offers, tempJson.Offers...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(p_start_url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Infarm(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://api.greenhouse.io/v1/boards/infarm/jobs"
+
+		type JsonJobs struct {
+			Jobs []struct {
+				AbsoluteURL    string `json:"absolute_url"`
+				DataCompliance []struct {
+					Type            string      `json:"type"`
+					RequiresConsent bool        `json:"requires_consent"`
+					RetentionPeriod interface{} `json:"retention_period"`
+				} `json:"data_compliance"`
+				Education     string `json:"education,omitempty"`
+				InternalJobID int    `json:"internal_job_id"`
+				Location      struct {
+					Name string `json:"name"`
+				} `json:"location"`
+				Metadata []struct {
+					ID        int         `json:"id"`
+					Name      string      `json:"name"`
+					Value     interface{} `json:"value"`
+					ValueType string      `json:"value_type"`
+				} `json:"metadata"`
+				ID            int    `json:"id"`
+				UpdatedAt     string `json:"updated_at"`
+				RequisitionID string `json:"requisition_id"`
+				Title         string `json:"title"`
+			} `json:"jobs"`
+			Meta struct {
+				Total int `json:"total"`
+			} `json:"meta"`
+		}
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Jobs {
+
+				result_title := elem.Title
+				result_url := elem.AbsoluteURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}
