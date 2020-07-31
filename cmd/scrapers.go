@@ -51,8 +51,6 @@ func Extract(
 	function_output := method.Call(params)
 	response = function_output[0].Interface().(Response)
     results = function_output[1].Interface().([]Result)
-    fmt.Println("NOT UNIQUE RESULTS")
-    fmt.Println(len(results))
 	results = Unique(results)
 	return
 }
@@ -6484,9 +6482,6 @@ func (runtime Runtime) Bcg(
 
 func (runtime Runtime) Deloitte(
 	version int, isLocal bool) (response Response, results []Result) {
-	d_start_url := "https://jobs2.deloitte.com/us/en"
-	tag_title := ".title"
-	more_results_javascript := `document.getElementsByClassName("action-btn au-target")[0].click()`
 	initial_file_name := "deloitteDepartments.html"
 
 	type Job struct {
@@ -6514,9 +6509,11 @@ func (runtime Runtime) Deloitte(
 	var res []byte
 	var initialResponse string
 	if err := chromedp.Run(ctx,
-		chromedp.Navigate(d_start_url),
-		chromedp.WaitReady(tag_title, chromedp.ByQuery),
-		chromedp.EvaluateAsDevTools(more_results_javascript, &res),
+		chromedp.Navigate("https://jobs2.deloitte.com/us/en/c/analytics-jobs"),
+		chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
+        chromedp.EvaluateAsDevTools(`document.getElementsByClassName("clearall")[0].click()`, &res),
+        chromedp.Sleep(SecondsSleep * time.Second),
+        chromedp.WaitReady(`.phs-jobs-block`, chromedp.ByQuery),
 		chromedp.OuterHTML("html", &initialResponse),
 	); err != nil {
 		panic(err)
@@ -6525,45 +6522,10 @@ func (runtime Runtime) Deloitte(
 
 	c := colly.NewCollector()
 	c.WithTransport(t)
-	l := c.Clone()
-    l.WithTransport(t)
 	x := c.Clone()
 	x.WithTransport(t)
 
 	c.OnHTML("html", func(e *colly.HTMLElement) {
-		e.ForEach(".content-list-item", func(_ int, el *colly.HTMLElement) {
-            department_url := el.ChildAttr("a", "href")
-
-            var departmentResponse string
-            if err := chromedp.Run(ctx,
-                chromedp.Navigate(department_url),
-                chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
-                chromedp.OuterHTML("html", &departmentResponse),
-            ); err != nil {
-                panic(err)
-            }
-
-            department_file_name := strings.Split(department_url, "c/")[1] + ".html"
-
-            SaveResponseToFileWithFileName(departmentResponse, department_file_name)
-            l.WithTransport(t)
-            l.Visit("file:" + dir + "/" + department_file_name)
-            // RemoveFileWithFileName(department_file_name)
-		})
-	})
-
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(
-			Red("Request URL:"), Red(r.Request.URL),
-			Red("failed with response:"), Red(r),
-			Red("\nError:"), Red(err))
-	})
-
-	l.OnHTML("html", func(e *colly.HTMLElement) {
 
 		e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
 			result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
@@ -6604,17 +6566,12 @@ func (runtime Runtime) Deloitte(
 		temp_number_of_jobs := e.ChildAttr(".search-bottom-count", "data-ph-at-total-jobs-text")
         number_of_jobs, _ := strconv.Atoi(temp_number_of_jobs)
 
-        fmt.Println("NUMBER JOBS")
-        fmt.Println(number_of_jobs)
-
 		number_results_per_page := 50
 		jobs_base_url := e.ChildAttr(`meta[property="og:url"]`, "content") + "?s=1&from=%d"
 
 		for i := number_results_per_page; i <= number_of_jobs; i += number_results_per_page {
 
             sub_department_url := fmt.Sprintf(jobs_base_url, i)
-
-            fmt.Println(sub_department_url)
 
 			var departmentSubPageResponse string
 			if err := chromedp.Run(ctx,
@@ -6628,34 +6585,35 @@ func (runtime Runtime) Deloitte(
 			sub_file_name := fmt.Sprintf("sub_department_url%d.html", i)
 			SaveResponseToFileWithFileName(departmentSubPageResponse, sub_file_name)
             x.Visit("file:" + dir + "/" + sub_file_name)
+            time.Sleep(SecondsSleep * time.Second)
 
-			// RemoveFileWithFileName(sub_file_name)
+			RemoveFileWithFileName(sub_file_name)
         }
-        fmt.Println("NUMBER RESULTS")
-        fmt.Println(len(results))  
+        
 	})
 
-	l.OnRequest(func(r *colly.Request) {
+	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 	})
 
-	l.OnScraped(func(r *colly.Response) {
-		results_marshal, err := json.Marshal(results)
-		if err != nil {
-			panic(err.Error())
-		}
-		response = Response{[]byte(results_marshal)}
-	})
-
-	l.OnError(func(r *colly.Response, err error) {
+	c.OnError(func(r *colly.Response, err error) {
 		fmt.Println(
 			Red("Request URL:"), Red(r.Request.URL),
 			Red("failed with response:"), Red(r),
 			Red("\nError:"), Red(err))
     })
     
+	c.OnScraped(func(r *colly.Response) {
+		results_marshal, err := json.Marshal(results)
+		if err != nil {
+			panic(err.Error())
+		}
+        response = Response{[]byte(results_marshal)}
+        
+        RemoveFileWithFileName(initial_file_name)
+	})
+    
 	x.OnHTML("html", func(e *colly.HTMLElement) {
-        fmt.Println("I AM INSIDE THE XXXX")
 		e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
 			result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
 			result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
