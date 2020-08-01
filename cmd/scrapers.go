@@ -9184,3 +9184,85 @@ func (runtime Runtime) Ninox(
 	}
 	return
 }
+
+func (runtime Runtime) Zenjob(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://zenjob.teamtailor.com"
+        tag_main_section := ".jobs"
+        tag_job_section := "li"
+        tag_title := ".title"
+        tag_location := ".meta"
+        job_base_url := "https://zenjob.teamtailor.com%s"
+
+        type Job struct {
+            Url        string
+            Title      string
+            Location   string
+        }
+
+        c.OnHTML(tag_main_section, func(e *colly.HTMLElement) {
+            e.ForEach(tag_job_section, func(_ int, el *colly.HTMLElement) {
+                result_url := fmt.Sprintf(job_base_url, el.ChildAttr("a", "href"))
+                result_title := el.ChildText(tag_title)
+                result_location := el.ChildText(tag_location)
+
+                _, err := netUrl.ParseRequestURI(result_url)
+                if err == nil {
+
+                    temp_elem_json := Job{
+                        result_url,
+                        result_title,
+                        result_location,
+                    }
+
+                    elem_json, err := json.Marshal(temp_elem_json)
+                    if err != nil {
+                        panic(err.Error())
+                    }
+
+                    results = append(results, Result{
+                        runtime.Name,
+                        result_title,
+                        result_url,
+                        elem_json,
+                    })
+                }
+            })
+        })
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}
