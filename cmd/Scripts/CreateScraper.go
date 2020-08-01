@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Idagio"
+	scraper_name := "Joblift"
 	scraper_version := 1
-	jobs_url := "https://idagio-jobs.personio.de"
-	host_url := "https://www.idagio.com"
+	jobs_url := "https://joblift.com/join"
+	host_url := "https://joblift.com"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }

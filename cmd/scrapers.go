@@ -8613,3 +8613,92 @@ func (runtime Runtime) Idagio(
 	}
 	return
 }
+
+func (runtime Runtime) Joblift(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://joblift-talent.freshteam.com/jobs"
+        tag_main_section := ".job-role-list"
+        tag_department_section := "li:not([class])"
+        tag_department := ".role-title"
+        tag_job_section := ".job-list-info"
+        tag_title := ".job-title"
+        tag_location := ".location-info"
+        job_base_url := "https://joblift-talent.freshteam.com%s"
+
+		type Job struct {
+            Url             string
+            Title           string
+            Location        string
+            Department      string
+		}
+
+        c.OnHTML(tag_main_section, func(e *colly.HTMLElement) {
+            e.ForEach(tag_department_section, func(_ int, el *colly.HTMLElement) {
+                result_department := strings.Split(el.ChildText(tag_department), "-")[0]
+                el.ForEach(tag_job_section, func(_ int, ell *colly.HTMLElement) {
+                    result_url := fmt.Sprintf(job_base_url, ell.ChildAttr("a", "href"))
+                    result_title := ell.ChildText(tag_title)
+                    result_location := strings.Split(ell.ChildText(tag_location), "\n")[0]
+
+                    _, err := netUrl.ParseRequestURI(result_url)
+                    if err == nil {
+
+                        temp_elem_json := Job{
+                            result_url,
+                            result_title,
+                            result_location,
+                            result_department,
+                        }
+
+                        elem_json, err := json.Marshal(temp_elem_json)
+                        if err != nil {
+                            panic(err.Error())
+                        }
+
+                        results = append(results, Result{
+                            runtime.Name,
+                            result_title,
+                            result_url,
+                            elem_json,
+                        })
+                    }
+                })
+            })
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}
