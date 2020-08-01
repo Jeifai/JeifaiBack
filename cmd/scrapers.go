@@ -8904,3 +8904,116 @@ func (runtime Runtime) Medloop(
 	}
 	return
 }
+
+func (runtime Runtime) Medwing(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		c_start_url := "https://team.medwing.com/wp-json/wp/v2/jobs"
+
+		type Jobs []struct {
+            ID      int    `json:"id"`
+            Date    string `json:"date"`
+            DateGmt string `json:"date_gmt"`
+            GUID    struct {
+                Rendered string `json:"rendered"`
+            } `json:"guid"`
+            Modified    string `json:"modified"`
+            ModifiedGmt string `json:"modified_gmt"`
+            Slug        string `json:"slug"`
+            Status      string `json:"status"`
+            Type        string `json:"type"`
+            Link        string `json:"link"`
+            Title       struct {
+                Rendered string `json:"rendered"`
+            } `json:"title"`
+            Content struct {
+                Rendered  string `json:"rendered"`
+                Protected bool   `json:"protected"`
+            } `json:"content"`
+            Excerpt struct {
+                Rendered  string `json:"rendered"`
+                Protected bool   `json:"protected"`
+            } `json:"excerpt"`
+            Author        int           `json:"author"`
+            FeaturedMedia int           `json:"featured_media"`
+            CommentStatus string        `json:"comment_status"`
+            PingStatus    string        `json:"ping_status"`
+            Template      string        `json:"template"`
+            Format        string        `json:"format"`
+            Meta          []interface{} `json:"meta"`
+            Kategorie     []int         `json:"kategorie"`
+            Department    []int         `json:"department"`
+            Einstieg      []int         `json:"einstieg"`
+            Vertrag       []int         `json:"vertrag"`
+            Location      []int         `json:"location"`
+        }
+
+		var jsonJobs Jobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson Jobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson {
+
+				result_title := elem.Title.Rendered
+				result_url := elem.Link
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs = append(jsonJobs, tempJson...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(c_start_url)
+		}
+	}
+	return
+}
