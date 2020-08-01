@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Plantix"
+	scraper_name := "Coachhub"
 	scraper_version := 1
-	jobs_url := "https://plantix.recruitee.com"
-	host_url := "https://plantix.net"
+	jobs_url := "https://coachhub.io/de/jobs"
+	host_url := "https://coachhub.io"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }
