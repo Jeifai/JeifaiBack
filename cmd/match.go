@@ -44,7 +44,7 @@ func RunMatcher(scraper Scraper) {
 
 	matching := Matching{}
 	matching.StartMatchingSession(scraper.Id)
-	matches := GetMatches(matching, scraper.Id)
+	matches := GenerateMatches(matching, scraper.Id)
 
 	for _, elem := range matches {
 		fmt.Println(

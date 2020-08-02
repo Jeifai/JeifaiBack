@@ -33,8 +33,6 @@ type Matching struct {
 
 type Match struct {
 	Id              int
-	ResultCreatedAt time.Time
-	CompanyName     string
 	JobTitle        string
 	JobUrl          string
 	KeywordText     string
@@ -281,48 +279,53 @@ func (matching *Matching) StartMatchingSession(scraper_id int) {
 	return
 }
 
-func GetMatches(matching Matching, scraper_id int) (matches []Match) {
-	fmt.Println(Gray(8-1, "Starting GetMatches..."))
-	rows, err := Db.Query(`
+func GenerateMatches(matching Matching, scraper_id int) (matches []Match) {
+	fmt.Println(Gray(8-1, "Starting GenerateMatches..."))
+    rows, err := Db.Query(`
+                        WITH 
+                            active_keywords AS(
+                                SELECT DISTINCT
+                                    utk.keywordid,
+                                    k.text,
+                                    REPLACE(LOWER(k.text), ' ', '') AS lowertext
+                                FROM userstargetskeywords utk
+                                LEFT JOIN keywords k ON(utk.keywordid = k.id)
+                                WHERE utk.deletedat IS NULL),
+                            today_results AS(
+                                SELECT
+                                    r.id AS resultid,
+                                    r.title,
+                                    r.url,
+                                    REPLACE(LOWER(r.title), ' ', '') AS lowertitle
+                                FROM results r
+                                WHERE r.scraperid = $1
+                                AND r.createdat::date = current_timestamp::date)
                         SELECT
-                            r.createdat AS created_at,
-                            s.name AS company,
-                            r.title AS job_title,
-                            r.url AS job_url,
-                            k.text AS keyword_text,
-                            k.id AS keyword_id,
-                            r.id AS result_id
-                        FROM targets t
-                        INNER JOIN scrapers s ON(t.id = s.targetid)
-                        INNER JOIN results r ON(s.id = r.scraperid)
-                        LEFT JOIN userstargetskeywords utk ON(t.id = utk.targetid)
-                        LEFT JOIN keywords k ON(utk.keywordid = k.id)
-                        WHERE r.createdat::date = date_trunc('day', now()) 
-                        AND r.createdat > current_date
-                        AND s.id = $1
-                        AND REPLACE(LOWER(r.title), ' ', '') LIKE '%' || REPLACE(LOWER(k.text), ' ', '') || '%'`, scraper_id)
+                            tr.resultid,
+                            ak.keywordid,
+                            tr.title,
+                            tr.url,
+                            ak.text
+                        FROM today_results tr
+                        INNER JOIN active_keywords ak ON(tr.lowertitle LIKE '%' || ak.lowertext || '%');`, scraper_id)
 	for rows.Next() {
 		match := Match{}
 		if err = rows.Scan(
-			&match.ResultCreatedAt,
-			&match.CompanyName,
-			&match.JobTitle,
-			&match.JobUrl,
-			&match.KeywordText,
-			&match.KeywordId,
-			&match.ResultId); err != nil {
+			&match.ResultId,
+            &match.KeywordId,
+            &match.JobTitle,
+            &match.JobUrl,
+            &match.KeywordText,
+            ); err != nil {
 			return
 		}
-		match.CreatedAt = time.Now()
 		match.MatchingId = matching.Id
 		matches = append(matches, match)
 	}
 	rows.Close()
-
 	if err != nil {
 		panic(err.Error())
 	}
-
 	return
 }
 
@@ -330,7 +333,7 @@ func SaveMatches(matching Matching, matches []Match) {
 	fmt.Println(Gray(8-1, "Starting SaveMatches..."))
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
-	timeNow := time.Now() // updatedAt and createdAt will be identical
+	timeNow := time.Now()
 	for i, elem := range matches {
 		str1 := "$" + strconv.Itoa(1+i*4) + ","
 		str2 := "$" + strconv.Itoa(2+i*4) + ","
