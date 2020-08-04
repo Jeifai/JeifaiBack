@@ -9965,29 +9965,34 @@ func (runtime Runtime) Bryter(
 		}
 
 		c.OnHTML("#careers-listing", func(e *colly.HTMLElement) {
-            result_url := e.ChildAttr("a", "href")
-            result_title := e.ChildText("h4")
+            e.ForEach("a", func(_ int, el *colly.HTMLElement) {
+                result_url := el.Attr("href")
+                result_title := el.ChildText("h4")
 
-            _, err := netUrl.ParseRequestURI(result_url)
-            if err == nil {
+                fmt.Println(result_url)
+                fmt.Println(result_title)
 
-                temp_elem_json := Job{
-                    result_title,
-                    result_url,
+                _, err := netUrl.ParseRequestURI(result_url)
+                if err == nil {
+
+                    temp_elem_json := Job{
+                        result_title,
+                        result_url,
+                    }
+
+                    elem_json, err := json.Marshal(temp_elem_json)
+                    if err != nil {
+                        panic(err.Error())
+                    }
+
+                    results = append(results, Result{
+                        runtime.Name,
+                        result_title,
+                        result_url,
+                        elem_json,
+                    })
                 }
-
-                elem_json, err := json.Marshal(temp_elem_json)
-                if err != nil {
-                    panic(err.Error())
-                }
-
-                results = append(results, Result{
-                    runtime.Name,
-                    result_title,
-                    result_url,
-                    elem_json,
-                })
-            }
+		    })
 		})
 
 		c.OnResponse(func(r *colly.Response) {
