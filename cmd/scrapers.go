@@ -9572,6 +9572,11 @@ func (runtime Runtime) Acatus(
 				result_type := strings.Join(strings.Fields(strings.TrimSpace(result_info[0])), " ")
                 result_location := strings.Join(strings.Fields(strings.TrimSpace(result_info[1])), " ")
 
+                fmt.Println(result_url)
+                fmt.Println("\t", result_title)
+                fmt.Println("\t", result_type)
+                fmt.Println("\t", result_location)
+
 				_, err := netUrl.ParseRequestURI(result_url)
 				if err == nil {
 
@@ -10176,6 +10181,103 @@ func (runtime Runtime) Candis(
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(p_start_url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Cargoone(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		c_start_url := "https://api.lever.co/v0/postings/cargo-2?mode=json"
+
+		type Jobs []struct {
+			AdditionalPlain string `json:"additionalPlain"`
+			Additional      string `json:"additional"`
+			Categories      struct {
+				Commitment string `json:"commitment"`
+				Department string `json:"department"`
+				Location   string `json:"location"`
+				Team       string `json:"team"`
+			} `json:"categories"`
+			CreatedAt        int64  `json:"createdAt"`
+			DescriptionPlain string `json:"descriptionPlain"`
+			Description      string `json:"description"`
+			ID               string `json:"id"`
+			Lists            []struct {
+				Text    string `json:"text"`
+				Content string `json:"content"`
+			} `json:"lists"`
+			Text      string `json:"text"`
+			HostedURL string `json:"hostedUrl"`
+			ApplyURL  string `json:"applyUrl"`
+		}
+
+		var jsonJobs Jobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson Jobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson {
+
+				result_title := elem.Text
+				result_url := elem.HostedURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs = append(jsonJobs, tempJson...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(c_start_url)
 		}
 	}
 	return
