@@ -9957,20 +9957,19 @@ func (runtime Runtime) Bryter(
 
 		c := colly.NewCollector()
 
-		url := "https://bryter.io/careers"
+        url := "https://bryter.io/careers"
+        tag_main_section := "#careers-listing"
+        tag_title := "h4"
 
 		type Job struct {
 			Title       string
 			Url         string
 		}
 
-		c.OnHTML("#careers-listing", func(e *colly.HTMLElement) {
+		c.OnHTML(tag_main_section, func(e *colly.HTMLElement) {
             e.ForEach("a", func(_ int, el *colly.HTMLElement) {
                 result_url := el.Attr("href")
-                result_title := el.ChildText("h4")
-
-                fmt.Println(result_url)
-                fmt.Println(result_title)
+                result_title := el.ChildText(tag_title)
 
                 _, err := netUrl.ParseRequestURI(result_url)
                 if err == nil {
