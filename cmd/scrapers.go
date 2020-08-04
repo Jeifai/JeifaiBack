@@ -3,7 +3,7 @@ package cmd
 import (
 	// "crypto/tls"
 	"context"
-	"encoding/json"
+    "encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -9824,6 +9824,126 @@ func (runtime Runtime) Automationhero(
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(c_start_url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Bonify(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "http://www.bonify.de/jobs"
+        job_base_url := "https://www.bonify.de/jobs/%s"
+        
+        type JsonJobs struct {
+            Page             int         `json:"page"`
+            ResultsPerPage   int         `json:"results_per_page"`
+            ResultsSize      int         `json:"results_size"`
+            TotalResultsSize int         `json:"total_results_size"`
+            TotalPages       int         `json:"total_pages"`
+            NextPage         interface{} `json:"next_page"`
+            PrevPage         interface{} `json:"prev_page"`
+            Results          []struct {
+                ID                   string        `json:"id"`
+                UID                  string        `json:"uid"`
+                Type                 string        `json:"type"`
+                Href                 string        `json:"href"`
+                Tags                 []interface{} `json:"tags"`
+                FirstPublicationDate string        `json:"first_publication_date"`
+                LastPublicationDate  string        `json:"last_publication_date"`
+                Slugs                []string      `json:"slugs"`
+                LinkedDocuments      []interface{} `json:"linked_documents"`
+                Lang                 string        `json:"lang"`
+                AlternateLanguages   []interface{} `json:"alternate_languages"`
+                Data                 struct {
+                    Title []struct {
+                        Type  string        `json:"type"`
+                        Text  string        `json:"text"`
+                        Spans []interface{} `json:"spans"`
+                    } `json:"title"`
+                    PersonioJobID        string `json:"personio_job_id"`
+                    JobType              string `json:"job_type"`
+                    Index                string `json:"index"`
+                    FocusKeyPhrase       string `json:"focus_key_phrase"`
+                    BreadcrumbVisibility string `json:"breadcrumb_visibility"`
+                    Department           string `json:"department"`
+                } `json:"data"`
+            } `json:"results"`
+            Version string `json:"version"`
+            License string `json:"license"`
+        }
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+
+            body := string(r.Body)
+            json_body := strings.Split(
+                strings.Split(
+                    body, `resultsAllJobsListingsTrimmed":`)[1], `,"resultsCompanyBenefits`)[0]
+
+			var tempJson JsonJobs
+			err := json.Unmarshal([]byte(json_body), &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Results {
+
+				result_title := elem.Data.Title[0].Text
+                result_url := fmt.Sprintf(job_base_url, elem.UID)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Results = append(jsonJobs.Results, tempJson.Results...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
 		}
 	}
 	return
