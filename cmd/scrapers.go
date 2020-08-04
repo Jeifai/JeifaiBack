@@ -9542,3 +9542,88 @@ func (runtime Runtime) Raisin(
 	}
 	return
 }
+
+func (runtime Runtime) Acatus(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		url := "https://acatus-jobs.personio.de/?language=en#all"
+		main_tag_job := ".job-list-desc"
+		tag_title := "a"
+		tag_info := "p"
+		separator := "·"
+
+		type Job struct {
+			Title    string
+			Url      string
+			Type     string
+			Location string
+		}
+
+		c.OnHTML("body", func(e *colly.HTMLElement) {
+            e.ForEach(main_tag_job, func(_ int, el *colly.HTMLElement) {
+				result_url := el.ChildAttr(tag_title, "href")
+				result_title := el.ChildText(tag_title)
+				result_info := strings.Split(el.ChildText(tag_info), separator)
+				result_type := strings.Join(strings.Fields(strings.TrimSpace(result_info[0])), " ")
+                result_location := strings.Join(strings.Fields(strings.TrimSpace(result_info[1])), " ")
+
+				_, err := netUrl.ParseRequestURI(result_url)
+				if err == nil {
+
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_type,
+						result_location,
+					}
+
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
+				}
+			})
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(url)
+		}
+	}
+	return
+}
