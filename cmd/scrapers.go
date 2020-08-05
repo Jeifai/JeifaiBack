@@ -6699,7 +6699,7 @@ func (runtime Runtime) Deloitte(
 	return
 }
 
-func (runtime Runtime) Bayern(
+func (runtime Runtime) Bayer(
 	version int, isLocal bool) (response Response, results []Result) {
 	switch version {
 	case 1:
