@@ -7355,7 +7355,7 @@ func (runtime Runtime) Facebook(
 					goqueryselector := el.DOM
 					result_url := fmt.Sprintf(base_job_url, el.Attr("href"))
 					result_title := el.ChildText("._8sel")
-					result_location := goqueryselector.Find("._97fe ._8sen").Find("Span").Text()
+					result_location := goqueryselector.Find("._97fe ._8sen").Find("span").Text()
 
 					var result_info []string
 					temp_result_info := el.ChildTexts("._8see")
