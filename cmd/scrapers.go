@@ -9572,11 +9572,6 @@ func (runtime Runtime) Acatus(
 				result_type := strings.Join(strings.Fields(strings.TrimSpace(result_info[0])), " ")
                 result_location := strings.Join(strings.Fields(strings.TrimSpace(result_info[1])), " ")
 
-                fmt.Println(result_url)
-                fmt.Println("\t", result_title)
-                fmt.Println("\t", result_type)
-                fmt.Println("\t", result_location)
-
 				_, err := netUrl.ParseRequestURI(result_url)
 				if err == nil {
 
@@ -10042,13 +10037,6 @@ func (runtime Runtime) Bunch(
             "https://angel.co/company/bunch-hq/jobs/682927-freelance-full-time-product-designer",
 			[]byte("{}"),
 		})
-
-		results = append(results, Result{
-			runtime.Name,
-			"Senior iOS Engineer (Freelance)",
-			"https://angel.co/company/bunch-hq/jobs/913956-senior-ios-engineer-freelance",
-			[]byte("{}"),
-        })
         
 		results = append(results, Result{
 			runtime.Name,
