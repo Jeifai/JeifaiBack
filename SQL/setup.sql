@@ -36,7 +36,8 @@ create table targets (
   url           varchar(500) not null unique,
   host          varchar(64) not null,             
   createdat     timestamp not null,
-  name          varchar(64)
+  name          varchar(64),
+  linkedinurl   varchar(100)
 );
 
 
@@ -147,4 +148,15 @@ create table sentemails (
   email           varchar(255),
   action          varchar(255),
   sentat          timestamp not null
+)
+
+create table linkedin (
+  id              serial primary key,
+  targetid        integer references targets(id),
+  employees       integer,
+  followers       integer,
+  headquarters    varchar(100),
+  industry        varchar(100),
+  companysize     varchar(50),
+  createdat       timestamp not null
 )
