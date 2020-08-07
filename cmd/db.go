@@ -32,14 +32,14 @@ type Matching struct {
 }
 
 type Match struct {
-	Id              int
-	JobTitle        string
-	JobUrl          string
-	KeywordText     string
-	KeywordId       int
-	ResultId        int
-	CreatedAt       time.Time
-	MatchingId      int
+	Id          int
+	JobTitle    string
+	JobUrl      string
+	KeywordText string
+	KeywordId   int
+	ResultId    int
+	CreatedAt   time.Time
+	MatchingId  int
 }
 
 type Notifier struct {
@@ -281,7 +281,7 @@ func (matching *Matching) StartMatchingSession(scraper_id int) {
 
 func GenerateMatches(matching Matching, scraper_id int) (matches []Match) {
 	fmt.Println(Gray(8-1, "Starting GenerateMatches..."))
-    rows, err := Db.Query(`
+	rows, err := Db.Query(`
                         WITH 
                             active_keywords AS(
                                 SELECT DISTINCT
@@ -312,11 +312,11 @@ func GenerateMatches(matching Matching, scraper_id int) (matches []Match) {
 		match := Match{}
 		if err = rows.Scan(
 			&match.ResultId,
-            &match.KeywordId,
-            &match.JobTitle,
-            &match.JobUrl,
-            &match.KeywordText,
-            ); err != nil {
+			&match.KeywordId,
+			&match.JobTitle,
+			&match.JobUrl,
+			&match.KeywordText,
+		); err != nil {
 			return
 		}
 		match.MatchingId = matching.Id
