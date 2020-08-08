@@ -49,10 +49,10 @@ func RunScraper(scraper Scraper, runLocally string, runSavers string) {
 		fmt.Println(BrightBlue("Scraping -->"), Bold(BrightBlue(scraper.Name)))
 		response, results := Extract(scraper.Name, scraper.Version, false)
 		if runSavers == "true" {
-			n_results := len(results)
-			if n_results > 0 {
-				fmt.Println(Green("Number of results scraped: "), Bold(Green(n_results)))
-				scraping := scraper.StartScrapingSession()
+			count_results := len(results)
+			if count_results > 0 {
+				fmt.Println(Green("Number of results scraped: "), Bold(Green(count_results)))
+				scraping := scraper.StartScrapingSession(count_results)
 				file_path := GenerateFilePath(scraper.Name, scraping.Id)
 				SaveResults(scraper, scraping, results)
 				SaveResponseToStorage(response, file_path)

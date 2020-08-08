@@ -153,17 +153,17 @@ func GetScrapers() (scrapers []Scraper) {
 	return
 }
 
-func (scraper *Scraper) StartScrapingSession() (scraping Scraping) {
+func (scraper *Scraper) StartScrapingSession(count_results int) (scraping Scraping) {
 	fmt.Println(Gray(8-1, "Starting StartScrapingSession..."))
-	statement := `INSERT INTO scrapings (scraperid, createdat)
-                  VALUES ($1, $2) 
+	statement := `INSERT INTO scrapings (scraperid, countresults, createdat)
+                  VALUES ($1, $2, $3) 
                   RETURNING id, scraperid, createdat`
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(scraper.Id, time.Now()).Scan(
+	err = stmt.QueryRow(scraper.Id, count_results, time.Now()).Scan(
 		&scraping.Id, &scraping.ScraperId, &scraping.CreatedAt)
 	if err != nil {
 		panic(err.Error())

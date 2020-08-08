@@ -61,7 +61,8 @@ create table scrapers (
 create table scrapings (
   id            serial primary key,
   scraperid     integer references scrapers(id),
-  createdat     timestamp
+  createdat     timestamp,
+  countresults  int
 );
 
 create table results (
