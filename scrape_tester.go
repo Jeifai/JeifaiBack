@@ -2,48 +2,79 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"time"
 	// "strconv"
-	// "strings"
-	// "context"
+	"context"
+	"strings"
 
-	"github.com/gocolly/colly/v2"
-	// "github.com/chromedp/chromedp"
+	// "github.com/gocolly/colly/v2"
+	"github.com/chromedp/chromedp"
 )
 
-func mainTTTT() {
-	t := &http.Transport{}
-	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err.Error())
+func mainTTT() {
+	/**
+		t := &http.Transport{}
+		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+		dir, err := os.Getwd()
+		if err != nil {
+			panic(err.Error())
+		}
+
+		c := colly.NewCollector()
+
+		c.OnHTML(".tab-content", func(e *colly.HTMLElement) {
+			e.ForEach("p", func(_ int, el *colly.HTMLElement) {
+				result_title := el.ChildText("a")
+				result_url := el.ChildAttr("a", "href")
+				fmt.Println(result_title, result_url)
+			})
+	    })
+	*/
+
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+
+	var res string
+	var initialResponse string
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate("https://job.bytedance.com/en/position?limit=10"),
+		chromedp.Sleep(5*time.Second),
+		chromedp.EvaluateAsDevTools(`document.cookie`, &res),
+		chromedp.OuterHTML("html", &initialResponse),
+	); err != nil {
+		panic(err)
 	}
+	SaveResponseToFileWithFileName(initialResponse, "bytedance.html")
 
-	c := colly.NewCollector()
+	token := strings.Split(res, "atsx-csrf-token=")[1]
+	fmt.Println(res)
+	fmt.Println(token)
 
-	c.OnHTML(".tab-content", func(e *colly.HTMLElement) {
-		e.ForEach("p", func(_ int, el *colly.HTMLElement) {
-			result_title := el.ChildText("a")
-			result_url := el.ChildAttr("a", "href")
-			fmt.Println(result_title, result_url)
-		})
-	})
+	client := &http.Client{}
+	data := strings.NewReader(`{"limit":30}`)
+	req, err := http.NewRequest("POST", "https://job.bytedance.com/api/v1/search/job/posts", data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("x-csrf-token", strings.ReplaceAll(token, "%3D", "="))
+	req.Header.Set("Cookie", "channel=overseas; atsx-csrf-token="+token)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bodyText, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%s\n", bodyText)
+
+	SaveResponseToFileWithFileName(string(bodyText), "bytedancef.json")
 
 	/**
-	    ctx, cancel := chromedp.NewContext(context.Background())
-		defer cancel()
-
-		var initialResponse string
-		if err := chromedp.Run(ctx,
-			chromedp.Navigate("https://coachhub-jobs.personio.de/"),
-			chromedp.WaitReady("body", chromedp.ByQuery),
-			chromedp.OuterHTML("html", &initialResponse),
-		); err != nil {
-			panic(err)
-		}
-	    SaveResponseToFileWithFileName(initialResponse, "coachhub.html")
-
 	    start_url := "https://coachhub-jobs.personio.de/"
 	    tag_main := ".panel-container"
 	    tag_job_section := ".recent-job-list"
@@ -73,10 +104,10 @@ func mainTTTT() {
 	            _ = result_location
 	        })
 	    })
-	*/
 
-	c.WithTransport(t)
-	c.Visit("file:" + dir + "/response.html")
+		c.WithTransport(t)
+	    c.Visit("file:" + dir + "/response.html")
+	*/
 }
 
 func SaveResponseToFileWithFileName(response string, filename string) {
