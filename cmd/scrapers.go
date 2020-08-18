@@ -10428,3 +10428,132 @@ func (runtime Runtime) Crosslend(
 	}
 	return
 }
+
+func (runtime Runtime) Bytedance(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		base_url := "https://job.bytedance.com/en/position/detail/%s"
+
+		type Jobs struct {
+			Code int `json:"code"`
+			Data struct {
+				JobPostList []struct {
+					ID          string `json:"id"`
+					Title       string `json:"title"`
+					SubTitle    string `json:"sub_title"`
+					Description string `json:"description"`
+					Requirement string `json:"requirement"`
+					JobCategory struct {
+						ID       string `json:"id"`
+						Name     string `json:"name"`
+						EnName   string `json:"en_name"`
+						I18NName string `json:"i18n_name"`
+						Depth    int    `json:"depth"`
+						Parent   struct {
+							ID       string      `json:"id"`
+							Name     string      `json:"name"`
+							EnName   string      `json:"en_name"`
+							I18NName string      `json:"i18n_name"`
+							Depth    int         `json:"depth"`
+							Parent   interface{} `json:"parent"`
+							Children interface{} `json:"children"`
+						} `json:"parent"`
+						Children interface{} `json:"children"`
+					} `json:"job_category"`
+					CityInfo struct {
+						Code         string      `json:"code"`
+						Name         string      `json:"name"`
+						EnName       string      `json:"en_name"`
+						LocationType interface{} `json:"location_type"`
+						I18NName     string      `json:"i18n_name"`
+						PyName       interface{} `json:"py_name"`
+					} `json:"city_info"`
+					RecruitType struct {
+						ID       string `json:"id"`
+						Name     string `json:"name"`
+						EnName   string `json:"en_name"`
+						I18NName string `json:"i18n_name"`
+						Depth    int    `json:"depth"`
+						Parent   struct {
+							ID       string      `json:"id"`
+							Name     string      `json:"name"`
+							EnName   string      `json:"en_name"`
+							I18NName string      `json:"i18n_name"`
+							Depth    int         `json:"depth"`
+							Parent   interface{} `json:"parent"`
+							Children interface{} `json:"children"`
+						} `json:"parent"`
+						Children interface{} `json:"children"`
+					} `json:"recruit_type"`
+					PublishTime int64       `json:"publish_time"`
+					JobHotFlag  int         `json:"job_hot_flag"`
+					JobSubject  interface{} `json:"job_subject"`
+				} `json:"job_post_list"`
+				Count int    `json:"count"`
+				Extra string `json:"extra"`
+			} `json:"data"`
+			Message string      `json:"message"`
+			Error   interface{} `json:"error"`
+		}
+
+		ctx, cancel := chromedp.NewContext(context.Background())
+		defer cancel()
+
+		var res string
+		if err := chromedp.Run(ctx,
+			chromedp.Navigate("https://job.bytedance.com/en/position?limit=10"),
+			chromedp.Sleep(5*time.Second),
+			chromedp.EvaluateAsDevTools(`document.cookie`, &res),
+		); err != nil {
+			panic(err.Error())
+		}
+
+		token := strings.Split(res, "atsx-csrf-token=")[1]
+		fmt.Println(res)
+		fmt.Println(token)
+
+		client := &http.Client{}
+		data := strings.NewReader(`{"limit":1000}`)
+		req, err := http.NewRequest("POST", "https://job.bytedance.com/api/v1/search/job/posts", data)
+		if err != nil {
+			panic(err.Error())
+		}
+		req.Header.Set("x-csrf-token", strings.ReplaceAll(token, "%3D", "="))
+		req.Header.Set("Cookie", "channel=overseas; atsx-csrf-token="+token)
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err.Error())
+		}
+		bodyText, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		var tempJson Jobs
+		err = json.Unmarshal(bodyText, &tempJson)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		for _, elem := range tempJson.Data.JobPostList {
+			result_title := elem.Title
+			result_url := fmt.Sprintf(base_url, elem.ID)
+
+			elem_json, err := json.Marshal(elem)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
+		}
+		response = Response{bodyText}
+	}
+	return
+}
