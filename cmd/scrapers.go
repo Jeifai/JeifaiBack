@@ -10511,8 +10511,6 @@ func (runtime Runtime) Bytedance(
 		}
 
 		token := strings.Split(res, "atsx-csrf-token=")[1]
-		fmt.Println(res)
-		fmt.Println(token)
 
 		client := &http.Client{}
 		data := strings.NewReader(`{"limit":1000}`)
