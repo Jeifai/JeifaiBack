@@ -1391,6 +1391,132 @@ func (runtime Runtime) N26(
 		} else {
 			c.Visit(n_start_url)
 		}
+	case 2:
+
+		c := colly.NewCollector()
+		l := c.Clone()
+
+		n_start_url := "https://n26.com/en/careers"
+		n_base_url := "https://www.n26.com"
+		main_tag := "a"
+		main_attr := "href"
+		string_location_url := "locations"
+
+		c.OnHTML(main_tag, func(e *colly.HTMLElement) {
+			if strings.Contains(e.Attr(main_attr), string_location_url) {
+				temp_location_url := e.Attr(main_attr)
+				location_url := n_base_url + temp_location_url
+				l.Visit(location_url)
+			}
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			if isLocal {
+				type JsonJob struct {
+					CompanyName string          `json:"CompanyName"`
+					Title       string          `json:"Title"`
+					Url         string          `json:"ResultUrl"`
+					Data        json.RawMessage `json:"Data"`
+				}
+
+				jobs := make([]JsonJob, 0)
+				json.Unmarshal(r.Body, &jobs)
+
+				for _, elem := range jobs {
+					results = append(results, Result{
+						runtime.Name,
+						elem.Title,
+						elem.Url,
+						elem.Data,
+					})
+				}
+			}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			response_json, err := json.Marshal(results)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(response_json)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		l.OnHTML("li", func(e *colly.HTMLElement) {
+			e.ForEach("div", func(_ int, el *colly.HTMLElement) {
+				if strings.Contains(el.ChildAttr("a", "href"), "positions") {
+					temp_result_url := el.ChildAttr("a", "href")
+
+					result_url := n_base_url + temp_result_url
+
+					result_title := el.ChildText("a")
+
+					goquerySelection := el.DOM
+
+					details_nodes := goquerySelection.Find("dd").Nodes
+					location := details_nodes[0].FirstChild.Data
+					contract := ""
+					if len(details_nodes) > 1 {
+						contract = details_nodes[1].FirstChild.Data
+					}
+
+					type Job struct {
+						Title    string
+						Url      string
+						Location string
+						Contract string
+					}
+
+					temp_elem_json := Job{result_title, result_url, location, contract}
+
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
+				}
+			})
+		})
+
+		l.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		l.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(n_start_url)
+		}
 	}
 	return
 }
