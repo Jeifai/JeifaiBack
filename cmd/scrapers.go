@@ -1627,8 +1627,6 @@ func (runtime Runtime) Deutschebahn(
 		c := colly.NewCollector()
 
 		start := 0
-		end := 20
-		counter := start
 		d_start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?sort=pubExternalDate_td&pageNum=" + strconv.Itoa(start)
 		d_base_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?sort=pubExternalDate_td&pageNum="
 		d_job_url := "https://karriere.deutschebahn.com/"
@@ -1692,17 +1690,10 @@ func (runtime Runtime) Deutschebahn(
 			}
 		})
 
-		// Find and visit next page links
 		c.OnHTML("a[class=active]", func(e *colly.HTMLElement) {
 			next_page_url := d_base_url + e.Text
-
-			counter++
-
-			if counter > end {
-				return
-			} else {
-				e.Request.Visit(next_page_url)
-			}
+			time.Sleep(SecondsSleep * time.Second)
+			e.Request.Visit(next_page_url)
 		})
 
 		c.OnResponse(func(r *colly.Response) {
