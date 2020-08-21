@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -31,6 +32,7 @@ func init() {
 }
 
 func Scrape(company string, runLocally string, runSavers string) {
+	t := time.Now()
 	DbConnect()
 	defer Db.Close()
 	if company == "all" {
@@ -42,6 +44,8 @@ func Scrape(company string, runLocally string, runSavers string) {
 		scraper := GetScraper(company)
 		RunScraper(scraper, runLocally, runSavers)
 	}
+	elapsed := time.Since(t)
+	fmt.Println(BrightMagenta("Total scraping time -->"), Bold(BrightMagenta(elapsed.Seconds())))
 }
 
 func RunScraper(scraper Scraper, runLocally string, runSavers string) {
