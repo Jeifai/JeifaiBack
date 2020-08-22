@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -9,9 +10,10 @@ import (
 )
 
 var (
-	scrapeCompany string
-	runLocally    string
-	runSavers     string
+	scrapeCompany     string
+	runLocally        string
+	runSavers         string
+	excludedCompanies []string
 )
 
 var scrapeCmd = &cobra.Command{
@@ -19,7 +21,7 @@ var scrapeCmd = &cobra.Command{
 	Short: "Run the scraper",
 	Long:  `Run the scraper for specific targets or for all of them.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		Scrape(scrapeCompany, runLocally, runSavers)
+		Scrape(scrapeCompany, runLocally, runSavers, excludedCompanies)
 	},
 }
 
@@ -28,20 +30,26 @@ func init() {
 	scrapeCmd.Flags().StringVarP(&scrapeCompany, "scrape", "s", "", "Specify a company or all of them")
 	scrapeCmd.Flags().StringVarP(&runLocally, "islocal", "i", "", "Specify if the scraper will run locally or not")
 	scrapeCmd.Flags().StringVarP(&runSavers, "results", "r", "", "Specify to save results or not")
+	scrapeCmd.Flags().StringSliceVarP(&excludedCompanies, "excluded", "e", []string{}, "Specify which companies to exclude from scraping")
 }
 
-func Scrape(company string, runLocally string, runSavers string) {
+func Scrape(company string, runLocally string, runSavers string, excludedCompanies []string) {
+	start := time.Now()
 	DbConnect()
 	defer Db.Close()
 	if company == "all" {
 		scrapers := GetScrapers()
 		for _, elem := range scrapers {
-			RunScraper(elem, runLocally, runSavers)
+			if !Contains(excludedCompanies, elem.Name) {
+				RunScraper(elem, runLocally, runSavers)
+			}
 		}
 	} else {
 		scraper := GetScraper(company)
 		RunScraper(scraper, runLocally, runSavers)
 	}
+	elapsed := time.Since(start)
+	fmt.Println(BrightMagenta("Total Execution Time -->"), Bold(BrightMagenta(elapsed)))
 }
 
 func RunScraper(scraper Scraper, runLocally string, runSavers string) {
