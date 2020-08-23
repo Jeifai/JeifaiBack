@@ -10672,3 +10672,110 @@ func (runtime Runtime) Bytedance(
 	}
 	return
 }
+
+func (runtime Runtime) Bmw(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://www.bmwgroup.jobs/content/grpw/websites/jobfinder.joblist.en.de.json"
+		base_job_url := "https://www.bmwgroup.jobs/en/jobfinder/job-description.%s"
+
+		type JsonJobs struct {
+			Data []struct {
+				PostingDate string `json:"postingDate"`
+				Favorite    bool   `json:"favorite"`
+				RefNo       string `json:"refNo"`
+				ReqTitle    string `json:"reqTitle"`
+				JobType     struct {
+					Value   string `json:"value"`
+					Display string `json:"display"`
+				} `json:"jobType"`
+				LegalEntity struct {
+					Value   string `json:"value"`
+					Display string `json:"display"`
+				} `json:"legalEntity"`
+				JobField struct {
+					Value   string `json:"value"`
+					Display string `json:"display"`
+				} `json:"jobField"`
+				Location struct {
+					Value   string `json:"value"`
+					Display string `json:"display"`
+				} `json:"location"`
+				JobDescriptionLink string `json:"jobDescriptionLink"`
+				JobLevel           string `json:"jobLevel"`
+				EmployeeStatus     string `json:"employeeStatus"`
+				Schedule           string `json:"schedule"`
+				HotJob             bool   `json:"hotJob"`
+				Fulltext           string `json:"fulltext"`
+			} `json:"data"`
+		}
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Data {
+
+				result_title := elem.ReqTitle
+				result_url := fmt.Sprintf(base_job_url, elem.JobDescriptionLink)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Data = append(jsonJobs.Data, tempJson.Data...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}
