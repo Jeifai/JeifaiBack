@@ -10779,3 +10779,87 @@ func (runtime Runtime) Bmw(
 	}
 	return
 }
+
+func (runtime Runtime) Infineon(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		base_url := "https://www.infineon.com%s"
+
+		type Jobs struct {
+			Pages struct {
+				Count int `json:"count"`
+				Items []struct {
+					PublicationLanguageDe bool     `json:"publication_language_de"`
+					LocationEn            string   `json:"location_en"`
+					ID                    string   `json:"id"`
+					PublicationLanguageEn bool     `json:"publication_language_en"`
+					CreationDate          string   `json:"creation_date"`
+					FieldsOfStudy         []string `json:"fields_of_study,omitempty"`
+					FunctionalArea        string   `json:"functional_area"`
+					Location              string   `json:"location"`
+					Country               string   `json:"country"`
+					EntryLevel            string   `json:"entry_level"`
+					Division              string   `json:"division"`
+					DesiredStartDate      string   `json:"desired_start_date"`
+					DetailPageURL         string   `json:"detail_page_url"`
+					JobAttributes         []string `json:"job_attributes"`
+					Role                  string   `json:"role"`
+					Title                 string   `json:"title"`
+					Description           string   `json:"description"`
+					DetailDataURL         string   `json:"detail_data_url"`
+					Icons                 []struct {
+						Type string `json:"type"`
+						Text string `json:"text"`
+					} `json:"icons,omitempty"`
+					Tags []string `json:"tags,omitempty"`
+				} `json:"items"`
+			} `json:"pages"`
+			Offset     int `json:"offset"`
+			HasResults int `json:"has_results"`
+			Count      int `json:"count"`
+		}
+
+		client := &http.Client{}
+		var data = strings.NewReader(`term=&offset=0&max_results=1000&lang=en`)
+		req, err := http.NewRequest("POST", "https://www.infineon.com/search/jobs/jobs", data)
+		if err != nil {
+			panic(err.Error())
+		}
+		req.Header.Set("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err.Error())
+		}
+		bodyText, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		var tempJson Jobs
+		err = json.Unmarshal(bodyText, &tempJson)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		for _, elem := range tempJson.Pages.Items {
+			result_title := elem.Title
+			result_url := fmt.Sprintf(base_url, elem.DetailPageURL)
+
+			elem_json, err := json.Marshal(elem)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			results = append(results, Result{
+				runtime.Name,
+				result_title,
+				result_url,
+				elem_json,
+			})
+		}
+		response = Response{bodyText}
+	}
+	return
+}
