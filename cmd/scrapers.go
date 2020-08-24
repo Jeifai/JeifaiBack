@@ -10863,3 +10863,255 @@ func (runtime Runtime) Infineon(
 	}
 	return
 }
+
+func (runtime Runtime) Porsche(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := `https://api-jobs.porsche.com/search/?data={"SearchParameters":{"FirstItem":1,"CountItem":1000}}`
+
+		type JsonJobs struct {
+			LanguageCode string `json:"LanguageCode"`
+			SearchResult struct {
+				SearchResultCount    int `json:"SearchResultCount"`
+				SearchResultCountAll int `json:"SearchResultCountAll"`
+				SearchResultItems    []struct {
+					MatchedObjectID         string `json:"MatchedObjectId"`
+					MatchedObjectDescriptor struct {
+						ID                  string   `json:"ID"`
+						PositionID          string   `json:"PositionID"`
+						PositionTitle       string   `json:"PositionTitle"`
+						PublicationCode     string   `json:"PublicationCode"`
+						PositionURI         string   `json:"PositionURI"`
+						ApplyURI            []string `json:"ApplyURI"`
+						PublicationLanguage struct {
+							Code string `json:"Code"`
+						} `json:"PublicationLanguage"`
+						PublicationChannel []struct {
+							ID        int    `json:"Id"`
+							StartDate string `json:"StartDate"`
+							EndDate   string `json:"EndDate"`
+						} `json:"PublicationChannel"`
+						PublicationEndDate string `json:"PublicationEndDate"`
+						PositionIndustry   []struct {
+							Code string `json:"Code"`
+							Name string `json:"Name"`
+						} `json:"PositionIndustry"`
+						JobCategory []struct {
+							Code string `json:"Code"`
+							Name string `json:"Name"`
+						} `json:"JobCategory"`
+						CareerLevel []struct {
+							Code string `json:"Code"`
+							Name string `json:"Name"`
+						} `json:"CareerLevel"`
+						TargetGroup      []interface{} `json:"TargetGroup"`
+						PositionSchedule []struct {
+							Code string `json:"Code"`
+							Name string `json:"Name"`
+						} `json:"PositionSchedule"`
+						PositionOfferingType []struct {
+							Code string `json:"Code"`
+							Name string `json:"Name"`
+						} `json:"PositionOfferingType"`
+						ParentOrganization     string `json:"ParentOrganization"`
+						ParentOrganizationName string `json:"ParentOrganizationName"`
+						PositionLocation       []struct {
+							Continent              string `json:"Continent"`
+							ContinentName          string `json:"ContinentName"`
+							Country                string `json:"Country"`
+							CountryName            string `json:"CountryName"`
+							CountryCode            string `json:"CountryCode"`
+							CountrySubDivision     string `json:"CountrySubDivision"`
+							CountrySubDivisionName string `json:"CountrySubDivisionName"`
+							City                   string `json:"City"`
+							CityName               string `json:"CityName"`
+						} `json:"PositionLocation"`
+						Organization         string   `json:"Organization"`
+						OrganizationName     string   `json:"OrganizationName"`
+						LogoURI              []string `json:"LogoURI"`
+						PublicationStartDate string   `json:"PublicationStartDate"`
+					} `json:"MatchedObjectDescriptor"`
+					RelevanceScore int `json:"RelevanceScore"`
+					RelevanceRank  int `json:"RelevanceRank"`
+				} `json:"SearchResultItems"`
+				UserArea struct {
+					ExecutionError int `json:"ExecutionError"`
+				} `json:"UserArea"`
+			} `json:"SearchResult"`
+		}
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.SearchResult.SearchResultItems {
+
+				result_title := elem.MatchedObjectDescriptor.PositionTitle
+				result_url := elem.MatchedObjectDescriptor.PositionURI
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.SearchResult.SearchResultItems = append(
+				jsonJobs.SearchResult.SearchResultItems,
+				tempJson.SearchResult.SearchResultItems...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Bosch(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings?offset=%d"
+		base_job_url := "https://www.smartrecruiters.com/BoschGroup/%s"
+		number_results_per_page := 100
+
+		type Jobs struct {
+			Offset     int `json:"offset"`
+			Limit      int `json:"limit"`
+			TotalFound int `json:"totalFound"`
+			Content    []struct {
+				ID        string `json:"id"`
+				Name      string `json:"name"`
+				UUID      string `json:"uuid"`
+				RefNumber string `json:"refNumber"`
+				Company   struct {
+					Identifier string `json:"identifier"`
+					Name       string `json:"name"`
+				} `json:"company"`
+				ReleasedDate time.Time `json:"releasedDate"`
+			} `json:"content"`
+		}
+
+		var jsonJobs Jobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson Jobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Content {
+
+				result_title := elem.Name
+				result_url := fmt.Sprintf(base_job_url, elem.ID)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Content = append(jsonJobs.Content, tempJson.Content...)
+
+			if isLocal {
+				return
+			} else {
+				total_matches := tempJson.TotalFound
+				total_pages := total_matches / number_results_per_page
+				for i := 1; i <= total_pages; i++ {
+					time.Sleep(SecondsSleep * time.Second)
+					c.Visit(fmt.Sprintf(start_url, number_results_per_page*i))
+				}
+			}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(fmt.Sprintf(start_url, 0))
+		}
+	}
+	return
+}
