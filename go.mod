@@ -5,10 +5,12 @@ go 1.13
 require (
 	cloud.google.com/go/storage v1.10.0
 	github.com/PuerkitoBio/goquery v1.5.1
-	github.com/antchfx/xpath v1.1.9 // indirect
+	github.com/antchfx/xpath v1.1.10 // indirect
 	github.com/chromedp/chromedp v0.5.3
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/gocolly/colly v1.2.0
 	github.com/gocolly/colly/v2 v2.1.0
+	github.com/jawher/mow.cli v1.2.0 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.7.0
 	github.com/logrusorgru/aurora v2.0.2+incompatible
@@ -22,7 +24,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/net v0.0.0-20200625001655-4c5254603344 // indirect
+	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
 	golang.org/x/sys v0.0.0-20200810151505-1b9f1253b3ed // indirect
 	google.golang.org/api v0.28.0
 	google.golang.org/protobuf v1.25.0 // indirect

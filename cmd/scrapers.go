@@ -10822,7 +10822,7 @@ func (runtime Runtime) Infineon(
 		}
 
 		client := &http.Client{}
-		var data = strings.NewReader(`term=&offset=0&max_results=1000&lang=en`)
+		data := strings.NewReader(`term=&offset=0&max_results=1000&lang=en`)
 		req, err := http.NewRequest("POST", "https://www.infineon.com/search/jobs/jobs", data)
 		if err != nil {
 			panic(err.Error())
@@ -11123,38 +11123,38 @@ func (runtime Runtime) Mckinsey(
 
 		c := colly.NewCollector()
 
-        start_url := "https://mobileservices.mckinsey.com/services/ContentAPI/SearchAPI.svc/jobs/search?&pageSize=100&start=%d"
-        base_url := "https://www.mckinsey.com/careers/search-jobs/jobs/%s"
-        number_results_per_page := 100
-        counter := 0
+		start_url := "https://mobileservices.mckinsey.com/services/ContentAPI/SearchAPI.svc/jobs/search?&pageSize=100&start=%d"
+		base_url := "https://www.mckinsey.com/careers/search-jobs/jobs/%s"
+		number_results_per_page := 100
+		counter := 0
 
-        type JsonJobs struct {
-            Response struct {
-                NumFound int `json:"numFound"`
-                Start    int `json:"start"`
-                Docs     []struct {
-                    JobID                  string   `json:"jobID"`
-                    Title                  string   `json:"title"`
-                    RecordTypeName         []string `json:"recordTypeName"`
-                    JobSkillGroup          []string `json:"jobSkillGroup"`
-                    JobSkillCode           []string `json:"jobSkillCode"`
-                    Interest               string   `json:"interest"`
-                    InterestCategory       string   `json:"interestCategory"`
-                    Cities                 []string `json:"cities"`
-                    Countries              []string `json:"countries"`
-                    Continents             []string `json:"continents"`
-                    Functions              []string `json:"functions,omitempty"`
-                    Industries             []string `json:"industries,omitempty"`
-                    WhoYouWillWorkWith     string   `json:"whoYouWillWorkWith"`
-                    WhatYouWillDo          string   `json:"whatYouWillDo"`
-                    YourBackground         string   `json:"yourBackground"`
-                    LinkedInSeniorityLevel []string `json:"linkedInSeniorityLevel,omitempty"`
-                    JobApplyURL            string   `json:"jobApplyURL"`
-                    FriendlyURL            string   `json:"friendlyURL"`
-                    ShortJobSummary        string   `json:"shortJobSummary,omitempty"`
-                } `json:"docs"`
-            } `json:"response"`
-        }
+		type JsonJobs struct {
+			Response struct {
+				NumFound int `json:"numFound"`
+				Start    int `json:"start"`
+				Docs     []struct {
+					JobID                  string   `json:"jobID"`
+					Title                  string   `json:"title"`
+					RecordTypeName         []string `json:"recordTypeName"`
+					JobSkillGroup          []string `json:"jobSkillGroup"`
+					JobSkillCode           []string `json:"jobSkillCode"`
+					Interest               string   `json:"interest"`
+					InterestCategory       string   `json:"interestCategory"`
+					Cities                 []string `json:"cities"`
+					Countries              []string `json:"countries"`
+					Continents             []string `json:"continents"`
+					Functions              []string `json:"functions,omitempty"`
+					Industries             []string `json:"industries,omitempty"`
+					WhoYouWillWorkWith     string   `json:"whoYouWillWorkWith"`
+					WhatYouWillDo          string   `json:"whatYouWillDo"`
+					YourBackground         string   `json:"yourBackground"`
+					LinkedInSeniorityLevel []string `json:"linkedInSeniorityLevel,omitempty"`
+					JobApplyURL            string   `json:"jobApplyURL"`
+					FriendlyURL            string   `json:"friendlyURL"`
+					ShortJobSummary        string   `json:"shortJobSummary,omitempty"`
+				} `json:"docs"`
+			} `json:"response"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -11184,18 +11184,18 @@ func (runtime Runtime) Mckinsey(
 			}
 
 			jsonJobs.Response.Docs = append(
-                jsonJobs.Response.Docs,
-                tempJsonJobs.Response.Docs...)
+				jsonJobs.Response.Docs,
+				tempJsonJobs.Response.Docs...)
 
 			total_pages := tempJsonJobs.Response.NumFound / number_results_per_page
 
 			if counter >= total_pages {
 				return
 			} else {
-                counter++
-                time.Sleep(SecondsSleep * time.Second)
-                c.Visit(fmt.Sprintf(start_url, counter * number_results_per_page))
-            }
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, counter*number_results_per_page))
+			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
@@ -11208,6 +11208,101 @@ func (runtime Runtime) Mckinsey(
 				panic(err.Error())
 			}
 			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(fmt.Sprintf(start_url, 0))
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Sap(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://jobs.sap.com/search/?q=&sortColumn=referencedate&sortDirection=desc&startrow=%d"
+		base_url := "https://jobs.sap.com/%s"
+		number_results_per_page := 25
+		counter := 0
+
+		type Job struct {
+			Title    string
+			Url      string
+			Location string
+		}
+
+		c.OnHTML(".html5", func(e *colly.HTMLElement) {
+			e.ForEach(".data-row", func(_ int, el *colly.HTMLElement) {
+				result_url := fmt.Sprintf(base_url, el.ChildAttr("a", "href"))
+				result_title := el.ChildText("a")
+				result_location := el.ChildText(".jobLocation.visible-phone")
+
+				_, err := netUrl.ParseRequestURI(result_url)
+				if err == nil {
+
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_location,
+					}
+
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
+				}
+			})
+
+			temp_pages := strings.Split(e.ChildText(".srHelp"), " ")
+			s_temp_pages := temp_pages[len(temp_pages)-1]
+			total_pages, err := strconv.Atoi(s_temp_pages)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			if counter > total_pages {
+				return
+			} else {
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, counter*number_results_per_page))
+			}
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
