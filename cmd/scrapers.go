@@ -11757,3 +11757,143 @@ func (runtime Runtime) Continental(
 	}
 	return
 }
+
+func (runtime Runtime) Deliveryhero(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://careers.deliveryhero.com/global/en/search-results?s=1&from=%d"
+        base_job_url := "https://careers.deliveryhero.com/global/en/job/%s"
+        number_results_per_page := 50
+        counter := 0
+
+		type JsonJobs struct {
+			EagerLoadRefineSearch struct {
+				Status    int `json:"status"`
+				Hits      int `json:"hits"`
+				TotalHits int `json:"totalHits"`
+				Data      struct {
+					Jobs []struct {
+						Country            string   `json:"country"`
+						CityState          string   `json:"cityState"`
+						SubCategory        string   `json:"subCategory"`
+						City               string   `json:"city"`
+						MlSkills           []string `json:"ml_skills"`
+						PostalCode         string   `json:"postalCode"`
+						Industry           string   `json:"industry"`
+						Type               string   `json:"type"`
+						MultiLocation      []string `json:"multi_location"`
+						Locale             string   `json:"locale"`
+						Title              string   `json:"title"`
+						MultiLocationArray []struct {
+							Location string `json:"location"`
+						} `json:"multi_location_array"`
+						JobSeqNo           string    `json:"jobSeqNo"`
+						PostedDate         time.Time `json:"postedDate"`
+						DescriptionTeaser  string    `json:"descriptionTeaser"`
+						DateCreated        time.Time `json:"dateCreated"`
+						State              string    `json:"state"`
+						CityStateCountry   string    `json:"cityStateCountry"`
+						Brand              string    `json:"brand"`
+						VisibilityType     string    `json:"visibilityType"`
+						SiteType           string    `json:"siteType"`
+						Address            string    `json:"address"`
+						IsMultiCategory    bool      `json:"isMultiCategory"`
+						MultiCategory      []string  `json:"multi_category"`
+						ReqID              string    `json:"reqId"`
+						JobID              string    `json:"jobId"`
+						Badge              string    `json:"badge"`
+						JobVisibility      []string  `json:"jobVisibility"`
+						IsMultiLocation    bool      `json:"isMultiLocation"`
+						ApplyURL           string    `json:"applyUrl"`
+						MultiCategoryArray []struct {
+							Category string `json:"category"`
+						} `json:"multi_category_array"`
+						Location        string      `json:"location"`
+						Category        string      `json:"category"`
+						ExternalApply   bool        `json:"externalApply"`
+						LocationLatlong interface{} `json:"locationLatlong"`
+					} `json:"jobs"`
+				} `json:"data"`
+			} `json:"eagerLoadRefineSearch"`
+		}
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			response = Response{r.Body}
+			response_body := string(response.Html)
+			response_json := strings.Split(
+				strings.Split(
+					response_body, "phApp.ddo = ")[1], "; phApp.experimentData")[0]
+			
+			var tempJson JsonJobs
+			err := json.Unmarshal([]byte(response_json), &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.EagerLoadRefineSearch.Data.Jobs {
+
+				result_title := elem.Title
+				result_url := fmt.Sprintf(base_job_url, elem.JobID)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.EagerLoadRefineSearch.Data.Jobs = append(
+				jsonJobs.EagerLoadRefineSearch.Data.Jobs,
+				tempJson.EagerLoadRefineSearch.Data.Jobs...)
+
+			total_pages := tempJson.EagerLoadRefineSearch.TotalHits / number_results_per_page
+
+			if counter > total_pages {
+				return
+			} else {
+	            counter++
+	            time.Sleep(SecondsSleep * time.Second)
+	            c.Visit(fmt.Sprintf(start_url, counter * number_results_per_page))
+	        }
+
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(fmt.Sprintf(start_url, 0))
+		}
+	}
+	return
+}
