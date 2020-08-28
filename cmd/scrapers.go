@@ -11115,3 +11115,120 @@ func (runtime Runtime) Bosch(
 	}
 	return
 }
+
+func (runtime Runtime) Mckinsey(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://mobileservices.mckinsey.com/services/ContentAPI/SearchAPI.svc/jobs/search?&pageSize=100&start=%d"
+        base_url := "https://www.mckinsey.com/careers/search-jobs/jobs/%s"
+        number_results_per_page := 100
+        counter := 0
+
+        type JsonJobs struct {
+            Response struct {
+                NumFound int `json:"numFound"`
+                Start    int `json:"start"`
+                Docs     []struct {
+                    JobID                  string   `json:"jobID"`
+                    Title                  string   `json:"title"`
+                    RecordTypeName         []string `json:"recordTypeName"`
+                    JobSkillGroup          []string `json:"jobSkillGroup"`
+                    JobSkillCode           []string `json:"jobSkillCode"`
+                    Interest               string   `json:"interest"`
+                    InterestCategory       string   `json:"interestCategory"`
+                    Cities                 []string `json:"cities"`
+                    Countries              []string `json:"countries"`
+                    Continents             []string `json:"continents"`
+                    Functions              []string `json:"functions,omitempty"`
+                    Industries             []string `json:"industries,omitempty"`
+                    WhoYouWillWorkWith     string   `json:"whoYouWillWorkWith"`
+                    WhatYouWillDo          string   `json:"whatYouWillDo"`
+                    YourBackground         string   `json:"yourBackground"`
+                    LinkedInSeniorityLevel []string `json:"linkedInSeniorityLevel,omitempty"`
+                    JobApplyURL            string   `json:"jobApplyURL"`
+                    FriendlyURL            string   `json:"friendlyURL"`
+                    ShortJobSummary        string   `json:"shortJobSummary,omitempty"`
+                } `json:"docs"`
+            } `json:"response"`
+        }
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJsonJobs.Response.Docs {
+
+				result_title := elem.Title
+				result_url := fmt.Sprintf(base_url, elem.FriendlyURL)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Response.Docs = append(
+                jsonJobs.Response.Docs,
+                tempJsonJobs.Response.Docs...)
+
+			total_pages := tempJsonJobs.Response.NumFound / number_results_per_page
+
+			if counter >= total_pages {
+				return
+			} else {
+                counter++
+                time.Sleep(SecondsSleep * time.Second)
+                c.Visit(fmt.Sprintf(start_url, counter * number_results_per_page))
+            }
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(fmt.Sprintf(start_url, 0))
+		}
+	}
+	return
+}
