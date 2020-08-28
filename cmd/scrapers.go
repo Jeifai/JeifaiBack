@@ -11328,6 +11328,95 @@ func (runtime Runtime) Sap(
 	return
 }
 
+func (runtime Runtime) Puma(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://about.puma.com/api/PUMA/Feature/JobFinder?loadMore=500"
+        base_url := "https://about.puma.com%s"
+
+        type JsonJobs struct {
+            NumberFound string `json:"numberFound"`
+            LoadMoreURL string `json:"loadMoreUrl"`
+            Teaser      []struct {
+                Jobitemid  string      `json:"jobitemid"`
+                URL        string      `json:"url"`
+                Title      string      `json:"title"`
+                Team       string      `json:"team"`
+                Location   string      `json:"location"`
+                LocationID interface{} `json:"locationId"`
+            } `json:"teaser"`
+        }
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Teaser {
+
+				result_title := elem.Title
+				result_url := fmt.Sprintf(base_url, elem.URL)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Teaser = append(jsonJobs.Teaser, tempJson.Teaser...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}
+
 func (runtime Runtime) Daimler(
 	version int, isLocal bool) (
 	response Response, results []Result) {
