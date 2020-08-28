@@ -11649,3 +11649,111 @@ func (runtime Runtime) Siemens(
 	}
 	return
 }
+
+func (runtime Runtime) Continental(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := `https://api.continental-jobs.com/search/?data={"LanguageCode":"EN","SearchParameters":{"FirstItem":1,"CountItem":2000,"Sort":[{"Criterion":"PublicationStartDate","Direction":"DESC"}],"MatchedObjectDescriptor":["ID","PositionID","PositionTitle","PositionURI","PositionLocation.CountryName","PositionLocation.CityName","PositionLocation.Longitude","PositionLocation.Latitude","PositionIndustry.Name","JobCategory.Name","PublicationStartDate","VacancyDivision"]},"SearchCriteria":[{"CriterionName":"PublicationLanguage.Code","CriterionValue":["EN"]},{"CriterionName":"PublicationChannel.Code","CriterionValue":["12"]}]}`
+
+        type JsonJobs struct {
+            SearchResult struct {
+                SearchResultCount    int `json:"SearchResultCount"`
+                SearchResultCountAll int `json:"SearchResultCountAll"`
+                SearchResultItems    []struct {
+                    MatchedObjectID         string `json:"MatchedObjectId"`
+                    MatchedObjectDescriptor struct {
+                        PositionIndustry struct {
+                            Name string `json:"Name"`
+                        } `json:"PositionIndustry"`
+                        PublicationStartDate string `json:"PublicationStartDate"`
+                        PositionTitle        string `json:"PositionTitle"`
+                        PositionLocation     []struct {
+                            CityName    string  `json:"CityName"`
+                            Longitude   float64 `json:"Longitude"`
+                            Latitude    float64 `json:"Latitude"`
+                            CountryName string  `json:"CountryName"`
+                        } `json:"PositionLocation"`
+                        PositionURI string `json:"PositionURI"`
+                        ID          int    `json:"ID"`
+                        JobCategory struct {
+                            Name string `json:"Name"`
+                        } `json:"JobCategory"`
+                        PositionID string `json:"PositionID"`
+                    } `json:"MatchedObjectDescriptor,omitempty"`
+                    RelevanceScore          int `json:"RelevanceScore"`
+                    RelevanceRank           int `json:"RelevanceRank"`
+                } `json:"SearchResultItems"`
+            } `json:"SearchResult"`
+        }
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJson JsonJobs
+			err := json.Unmarshal(r.Body, &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.SearchResult.SearchResultItems {
+
+				result_title := elem.MatchedObjectDescriptor.PositionTitle
+				result_url := elem.MatchedObjectDescriptor.PositionURI
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.SearchResult.SearchResultItems = append(
+				jsonJobs.SearchResult.SearchResultItems,
+				tempJson.SearchResult.SearchResultItems...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
+		}
+	}
+	return
+}
