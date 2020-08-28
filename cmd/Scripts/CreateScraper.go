@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Daimler"
+	scraper_name := "Siemens"
 	scraper_version := 1
-	jobs_url := "https://www.daimler.com/career"
-	host_url := "https://www.daimler.com"
+	jobs_url := "https://jobs.siemens.com"
+	host_url := "https://siemens.com"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }

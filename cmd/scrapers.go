@@ -11430,3 +11430,133 @@ func (runtime Runtime) Daimler(
 	}
 	return
 }
+
+func (runtime Runtime) Siemens(
+	version int, isLocal bool) (response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+        start_url := "https://jobs.siemens.com/api/jobs?page=%d&limit=100"
+        number_results_per_page := 100
+        counter := 1
+
+        type JsonJobs struct {
+            Jobs []struct {
+                Data struct {
+                    Slug         string   `json:"slug"`
+                    Language     string   `json:"language"`
+                    Languages    []string `json:"languages"`
+                    Title        string   `json:"title"`
+                    Description  string   `json:"description"`
+                    City         string   `json:"city"`
+                    State        string   `json:"state"`
+                    Country      string   `json:"country"`
+                    CountryCode  string   `json:"country_code"`
+                    PostalCode   string   `json:"postal_code"`
+                    LocationType string   `json:"location_type"`
+                    Latitude     float64  `json:"latitude"`
+                    Longitude    float64  `json:"longitude"`
+                    Categories   []struct {
+                        Name string `json:"name"`
+                    } `json:"categories"`
+                    Tags1            []string `json:"tags1"`
+                    Brand            string   `json:"brand"`
+                    PromotionValue   int      `json:"promotion_value"`
+                    ExperienceLevels []string `json:"experience_levels"`
+                    Source           string   `json:"source"`
+                    PostedDate       string   `json:"posted_date"`
+                    Internal         bool     `json:"internal"`
+                    Searchable       bool     `json:"searchable"`
+                    Applyable        bool     `json:"applyable"`
+                    LiEasyApplyable  bool     `json:"li_easy_applyable"`
+                    AtsCode          string   `json:"ats_code"`
+                    MetaData         struct {
+                        CanonicalURL string `json:"canonical_url"`
+                    } `json:"meta_data"`
+                    UpdateDate    string   `json:"update_date"`
+                    CreateDate    string   `json:"create_date"`
+                    Category      []string `json:"category"`
+                    FullLocation  string   `json:"full_location"`
+                    ShortLocation string   `json:"short_location"`
+                } `json:"data"`
+            } `json:"jobs"`
+            TotalCount int `json:"totalCount"`
+            Count      int `json:"count"`
+        }
+
+		var jsonJobs JsonJobs
+
+		c.OnResponse(func(r *colly.Response) {
+			var tempJsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJsonJobs.Jobs {
+
+				result_title := elem.Data.Title
+				result_url := elem.Data.MetaData.CanonicalURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
+
+			total_pages := tempJsonJobs.TotalCount / number_results_per_page
+
+			if counter > total_pages {
+				return
+			} else {
+                counter++
+                time.Sleep(SecondsSleep * time.Second)
+                c.Visit(fmt.Sprintf(start_url, counter))
+            }
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(fmt.Sprintf(start_url, 1))
+		}
+	}
+	return
+}
