@@ -35,15 +35,24 @@ func RunCheckQuery() {
                                         t.rank::text,
                                         t.countresults AS countresults
                                     FROM (
-                                        SELECT
-                                            s.id,
-                                            s.scraperid,
-                                            s.countresults,
-                                            rank() OVER(
-                                                PARTITION BY s.scraperid
-                                                ORDER BY s.id DESC
-                                            ) AS rank
-                                        FROM scrapings s) t
+										WITH
+										    max_results_per_day AS(
+										        SELECT
+										            s.createdat::date,
+										            s.scraperid,
+										            MAX(s.countresults) AS countresults,
+										            MAX(s.id) AS id
+										        FROM scrapings s
+										        GROUP BY 1, 2)
+										SELECT
+										    m.id,
+										    m.scraperid,
+										    m.countresults,
+										    rank() OVER(
+										        PARTITION BY m.scraperid
+										        ORDER BY m.id DESC
+										    ) AS rank
+										FROM max_results_per_day m) t
                                     LEFT JOIN scrapers s ON(t.scraperid = s.id)
                                     LEFT JOIN scrapings ss ON(t.id = ss.id)
                                     WHERE t.rank < 4
