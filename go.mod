@@ -8,12 +8,15 @@ require (
 	github.com/antchfx/xpath v1.1.10 // indirect
 	github.com/chromedp/chromedp v0.5.3
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/go-openapi/strfmt v0.19.5 // indirect
 	github.com/gocolly/colly v1.2.0
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/jawher/mow.cli v1.2.0 // indirect
+	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.7.0
 	github.com/logrusorgru/aurora v2.0.2+incompatible
+	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.3 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect

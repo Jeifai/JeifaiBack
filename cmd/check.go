@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/jedib0t/go-pretty/table"
 )
 
 var checkCmd = &cobra.Command{
@@ -68,6 +69,11 @@ func RunCheckQuery() {
 	if err != nil {
 		panic(err.Error())
 	}
+
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"Name", "Three_day_ago", "One_day_ago", "delta_perc"})
+
 	for rows.Next() {
 		var name string
 		var three_day_ago int
@@ -80,7 +86,12 @@ func RunCheckQuery() {
 			&delta_perc); err != nil {
 			panic(err.Error())
 		}
-		fmt.Println(name, three_day_ago, one_day_ago, delta_perc)
+
+		t.AppendRow([]interface{}{name, three_day_ago, one_day_ago, delta_perc})
+
 	}
+
+	t.Render()
+
 	rows.Close()
 }
