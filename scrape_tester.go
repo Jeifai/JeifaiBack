@@ -16,7 +16,6 @@ import (
 )
 
 func mainTest() {
-
 	/**
 	  t := &http.Transport{}
 	  t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
@@ -36,11 +35,7 @@ func mainTest() {
 	c.OnHTML(".html5", func(e *colly.HTMLElement) {
 		e.ForEach(".data-row", func(_ int, el *colly.HTMLElement) {
 			result_url := fmt.Sprintf(base_url, el.ChildAttr("a", "href"))
-			// result_title := el.ChildText("a")
-			// result_location := el.ChildText(".jobLocation.visible-phone")
 			fmt.Println(result_url)
-			// fmt.Println("\t", result_title)
-			// fmt.Println("\t\t", result_location)
 		})
 		// temp_pages := strings.Split(e.ChildText(".srHelp"), " ")
 		// s_temp_pages := temp_pages[len(temp_pages)-1]
