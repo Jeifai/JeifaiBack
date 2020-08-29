@@ -10822,7 +10822,7 @@ func (runtime Runtime) Infineon(
 		}
 
 		client := &http.Client{}
-		var data = strings.NewReader(`term=&offset=0&max_results=1000&lang=en`)
+		data := strings.NewReader(`term=&offset=0&max_results=1000&lang=en`)
 		req, err := http.NewRequest("POST", "https://www.infineon.com/search/jobs/jobs", data)
 		if err != nil {
 			panic(err.Error())
@@ -11123,38 +11123,38 @@ func (runtime Runtime) Mckinsey(
 
 		c := colly.NewCollector()
 
-        start_url := "https://mobileservices.mckinsey.com/services/ContentAPI/SearchAPI.svc/jobs/search?&pageSize=100&start=%d"
-        base_url := "https://www.mckinsey.com/careers/search-jobs/jobs/%s"
-        number_results_per_page := 100
-        counter := 0
+		start_url := "https://mobileservices.mckinsey.com/services/ContentAPI/SearchAPI.svc/jobs/search?&pageSize=100&start=%d"
+		base_url := "https://www.mckinsey.com/careers/search-jobs/jobs/%s"
+		number_results_per_page := 100
+		counter := 0
 
-        type JsonJobs struct {
-            Response struct {
-                NumFound int `json:"numFound"`
-                Start    int `json:"start"`
-                Docs     []struct {
-                    JobID                  string   `json:"jobID"`
-                    Title                  string   `json:"title"`
-                    RecordTypeName         []string `json:"recordTypeName"`
-                    JobSkillGroup          []string `json:"jobSkillGroup"`
-                    JobSkillCode           []string `json:"jobSkillCode"`
-                    Interest               string   `json:"interest"`
-                    InterestCategory       string   `json:"interestCategory"`
-                    Cities                 []string `json:"cities"`
-                    Countries              []string `json:"countries"`
-                    Continents             []string `json:"continents"`
-                    Functions              []string `json:"functions,omitempty"`
-                    Industries             []string `json:"industries,omitempty"`
-                    WhoYouWillWorkWith     string   `json:"whoYouWillWorkWith"`
-                    WhatYouWillDo          string   `json:"whatYouWillDo"`
-                    YourBackground         string   `json:"yourBackground"`
-                    LinkedInSeniorityLevel []string `json:"linkedInSeniorityLevel,omitempty"`
-                    JobApplyURL            string   `json:"jobApplyURL"`
-                    FriendlyURL            string   `json:"friendlyURL"`
-                    ShortJobSummary        string   `json:"shortJobSummary,omitempty"`
-                } `json:"docs"`
-            } `json:"response"`
-        }
+		type JsonJobs struct {
+			Response struct {
+				NumFound int `json:"numFound"`
+				Start    int `json:"start"`
+				Docs     []struct {
+					JobID                  string   `json:"jobID"`
+					Title                  string   `json:"title"`
+					RecordTypeName         []string `json:"recordTypeName"`
+					JobSkillGroup          []string `json:"jobSkillGroup"`
+					JobSkillCode           []string `json:"jobSkillCode"`
+					Interest               string   `json:"interest"`
+					InterestCategory       string   `json:"interestCategory"`
+					Cities                 []string `json:"cities"`
+					Countries              []string `json:"countries"`
+					Continents             []string `json:"continents"`
+					Functions              []string `json:"functions,omitempty"`
+					Industries             []string `json:"industries,omitempty"`
+					WhoYouWillWorkWith     string   `json:"whoYouWillWorkWith"`
+					WhatYouWillDo          string   `json:"whatYouWillDo"`
+					YourBackground         string   `json:"yourBackground"`
+					LinkedInSeniorityLevel []string `json:"linkedInSeniorityLevel,omitempty"`
+					JobApplyURL            string   `json:"jobApplyURL"`
+					FriendlyURL            string   `json:"friendlyURL"`
+					ShortJobSummary        string   `json:"shortJobSummary,omitempty"`
+				} `json:"docs"`
+			} `json:"response"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -11184,18 +11184,18 @@ func (runtime Runtime) Mckinsey(
 			}
 
 			jsonJobs.Response.Docs = append(
-                jsonJobs.Response.Docs,
-                tempJsonJobs.Response.Docs...)
+				jsonJobs.Response.Docs,
+				tempJsonJobs.Response.Docs...)
 
 			total_pages := tempJsonJobs.Response.NumFound / number_results_per_page
 
 			if counter >= total_pages {
 				return
 			} else {
-                counter++
-                time.Sleep(SecondsSleep * time.Second)
-                c.Visit(fmt.Sprintf(start_url, counter * number_results_per_page))
-            }
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, counter*number_results_per_page))
+			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
@@ -11241,30 +11241,30 @@ func (runtime Runtime) Sap(
 
 		c := colly.NewCollector()
 
-        start_url := "https://jobs.sap.com/search/?q=&sortColumn=referencedate&sortDirection=desc&startrow=%d"
-        base_url := "https://jobs.sap.com/%s"
-        number_results_per_page := 25
-        counter := 0
+		start_url := "https://jobs.sap.com/search/?q=&sortColumn=referencedate&sortDirection=desc&startrow=%d"
+		base_url := "https://jobs.sap.com/%s"
+		number_results_per_page := 25
+		counter := 0
 
 		type Job struct {
-			Title       string
-            Url         string
-            Location    string
+			Title    string
+			Url      string
+			Location string
 		}
 
-        c.OnHTML(".html5", func(e *colly.HTMLElement) {
-            e.ForEach(".data-row", func(_ int, el *colly.HTMLElement) {
-                result_url := fmt.Sprintf(base_url, el.ChildAttr("a", "href"))
-                result_title := el.ChildText("a")
-                result_location := el.ChildText(".jobLocation.visible-phone")
+		c.OnHTML(".html5", func(e *colly.HTMLElement) {
+			e.ForEach(".data-row", func(_ int, el *colly.HTMLElement) {
+				result_url := fmt.Sprintf(base_url, el.ChildAttr("a", "href"))
+				result_title := el.ChildText("a")
+				result_location := el.ChildText(".jobLocation.visible-phone")
 
 				_, err := netUrl.ParseRequestURI(result_url)
 				if err == nil {
 
 					temp_elem_json := Job{
 						result_title,
-                        result_url,
-                        result_location,
+						result_url,
+						result_location,
 					}
 
 					elem_json, err := json.Marshal(temp_elem_json)
@@ -11279,22 +11279,22 @@ func (runtime Runtime) Sap(
 						elem_json,
 					})
 				}
-            })
-            
-            temp_pages := strings.Split(e.ChildText(".srHelp"), " ")
-            s_temp_pages := temp_pages[len(temp_pages)-1]
-            total_pages, err := strconv.Atoi(s_temp_pages)
-            if err != nil {
-                panic(err.Error())
-            }
+			})
 
-            if counter > total_pages {
-                return
-            } else {
-                counter++
-                time.Sleep(SecondsSleep * time.Second)
-                c.Visit(fmt.Sprintf(start_url, counter * number_results_per_page))
-            }
+			temp_pages := strings.Split(e.ChildText(".srHelp"), " ")
+			s_temp_pages := temp_pages[len(temp_pages)-1]
+			total_pages, err := strconv.Atoi(s_temp_pages)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			if counter > total_pages {
+				return
+			} else {
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, counter*number_results_per_page))
+			}
 		})
 
 		c.OnResponse(func(r *colly.Response) {
@@ -11336,21 +11336,21 @@ func (runtime Runtime) Puma(
 
 		c := colly.NewCollector()
 
-        start_url := "https://about.puma.com/api/PUMA/Feature/JobFinder?loadMore=500"
-        base_url := "https://about.puma.com%s"
+		start_url := "https://about.puma.com/api/PUMA/Feature/JobFinder?loadMore=500"
+		base_url := "https://about.puma.com%s"
 
-        type JsonJobs struct {
-            NumberFound string `json:"numberFound"`
-            LoadMoreURL string `json:"loadMoreUrl"`
-            Teaser      []struct {
-                Jobitemid  string      `json:"jobitemid"`
-                URL        string      `json:"url"`
-                Title      string      `json:"title"`
-                Team       string      `json:"team"`
-                Location   string      `json:"location"`
-                LocationID interface{} `json:"locationId"`
-            } `json:"teaser"`
-        }
+		type JsonJobs struct {
+			NumberFound string `json:"numberFound"`
+			LoadMoreURL string `json:"loadMoreUrl"`
+			Teaser      []struct {
+				Jobitemid  string      `json:"jobitemid"`
+				URL        string      `json:"url"`
+				Title      string      `json:"title"`
+				Team       string      `json:"team"`
+				Location   string      `json:"location"`
+				LocationID interface{} `json:"locationId"`
+			} `json:"teaser"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -11427,31 +11427,31 @@ func (runtime Runtime) Daimler(
 
 		start_url := `https://global-jobboard-api.daimler.com/v3/search/{"SearchParameters":{"MatchedObjectDescriptor":["PositionID","PositionTitle","PositionURI","OrganizationName","PositionLocation.CityName","JobCategory.Name","CareerLevel.Name","Facet:PositionLocation.CityName","Facet:PositionLocation.CountryName","PublicationStartDate"],"FirstItem":0,"CountItem":1000000},"SearchCriteria":[{"CriterionName":"PublicationLanguage.Code","CriterionValue":["EN"]}]}`
 
-        type JsonJobs struct {
-            SearchResult struct {
-                SearchResultCount    int `json:"SearchResultCount"`
-                SearchResultCountAll int `json:"SearchResultCountAll"`
-                SearchResultItems    []struct {
-                    MatchedObjectID         string `json:"MatchedObjectId"`
-                    MatchedObjectDescriptor struct {
-                        PublicationStartDate string `json:"PublicationStartDate"`
-                        PositionTitle        string `json:"PositionTitle"`
-                        PositionURI          string `json:"PositionURI"`
-                        PositionLocation     []struct {
-                            CityName string `json:"CityName"`
-                        } `json:"PositionLocation"`
-                        OrganizationName string `json:"OrganizationName"`
-                        JobCategory      []struct {
-                            Name string `json:"Name"`
-                        } `json:"JobCategory"`
-                        CareerLevel []struct {
-                            Name string `json:"Name"`
-                        } `json:"CareerLevel"`
-                        PositionID string `json:"PositionID"`
-                    } `json:"MatchedObjectDescriptor"`
-                } `json:"SearchResultItems"`
-            } `json:"SearchResult"`
-        }
+		type JsonJobs struct {
+			SearchResult struct {
+				SearchResultCount    int `json:"SearchResultCount"`
+				SearchResultCountAll int `json:"SearchResultCountAll"`
+				SearchResultItems    []struct {
+					MatchedObjectID         string `json:"MatchedObjectId"`
+					MatchedObjectDescriptor struct {
+						PublicationStartDate string `json:"PublicationStartDate"`
+						PositionTitle        string `json:"PositionTitle"`
+						PositionURI          string `json:"PositionURI"`
+						PositionLocation     []struct {
+							CityName string `json:"CityName"`
+						} `json:"PositionLocation"`
+						OrganizationName string `json:"OrganizationName"`
+						JobCategory      []struct {
+							Name string `json:"Name"`
+						} `json:"JobCategory"`
+						CareerLevel []struct {
+							Name string `json:"Name"`
+						} `json:"CareerLevel"`
+						PositionID string `json:"PositionID"`
+					} `json:"MatchedObjectDescriptor"`
+				} `json:"SearchResultItems"`
+			} `json:"SearchResult"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -11527,53 +11527,53 @@ func (runtime Runtime) Siemens(
 
 		c := colly.NewCollector()
 
-        start_url := "https://jobs.siemens.com/api/jobs?page=%d&limit=100"
-        number_results_per_page := 100
-        counter := 1
+		start_url := "https://jobs.siemens.com/api/jobs?page=%d&limit=100"
+		number_results_per_page := 100
+		counter := 1
 
-        type JsonJobs struct {
-            Jobs []struct {
-                Data struct {
-                    Slug         string   `json:"slug"`
-                    Language     string   `json:"language"`
-                    Languages    []string `json:"languages"`
-                    Title        string   `json:"title"`
-                    Description  string   `json:"description"`
-                    City         string   `json:"city"`
-                    State        string   `json:"state"`
-                    Country      string   `json:"country"`
-                    CountryCode  string   `json:"country_code"`
-                    PostalCode   string   `json:"postal_code"`
-                    LocationType string   `json:"location_type"`
-                    Latitude     float64  `json:"latitude"`
-                    Longitude    float64  `json:"longitude"`
-                    Categories   []struct {
-                        Name string `json:"name"`
-                    } `json:"categories"`
-                    Tags1            []string `json:"tags1"`
-                    Brand            string   `json:"brand"`
-                    PromotionValue   int      `json:"promotion_value"`
-                    ExperienceLevels []string `json:"experience_levels"`
-                    Source           string   `json:"source"`
-                    PostedDate       string   `json:"posted_date"`
-                    Internal         bool     `json:"internal"`
-                    Searchable       bool     `json:"searchable"`
-                    Applyable        bool     `json:"applyable"`
-                    LiEasyApplyable  bool     `json:"li_easy_applyable"`
-                    AtsCode          string   `json:"ats_code"`
-                    MetaData         struct {
-                        CanonicalURL string `json:"canonical_url"`
-                    } `json:"meta_data"`
-                    UpdateDate    string   `json:"update_date"`
-                    CreateDate    string   `json:"create_date"`
-                    Category      []string `json:"category"`
-                    FullLocation  string   `json:"full_location"`
-                    ShortLocation string   `json:"short_location"`
-                } `json:"data"`
-            } `json:"jobs"`
-            TotalCount int `json:"totalCount"`
-            Count      int `json:"count"`
-        }
+		type JsonJobs struct {
+			Jobs []struct {
+				Data struct {
+					Slug         string   `json:"slug"`
+					Language     string   `json:"language"`
+					Languages    []string `json:"languages"`
+					Title        string   `json:"title"`
+					Description  string   `json:"description"`
+					City         string   `json:"city"`
+					State        string   `json:"state"`
+					Country      string   `json:"country"`
+					CountryCode  string   `json:"country_code"`
+					PostalCode   string   `json:"postal_code"`
+					LocationType string   `json:"location_type"`
+					Latitude     float64  `json:"latitude"`
+					Longitude    float64  `json:"longitude"`
+					Categories   []struct {
+						Name string `json:"name"`
+					} `json:"categories"`
+					Tags1            []string `json:"tags1"`
+					Brand            string   `json:"brand"`
+					PromotionValue   int      `json:"promotion_value"`
+					ExperienceLevels []string `json:"experience_levels"`
+					Source           string   `json:"source"`
+					PostedDate       string   `json:"posted_date"`
+					Internal         bool     `json:"internal"`
+					Searchable       bool     `json:"searchable"`
+					Applyable        bool     `json:"applyable"`
+					LiEasyApplyable  bool     `json:"li_easy_applyable"`
+					AtsCode          string   `json:"ats_code"`
+					MetaData         struct {
+						CanonicalURL string `json:"canonical_url"`
+					} `json:"meta_data"`
+					UpdateDate    string   `json:"update_date"`
+					CreateDate    string   `json:"create_date"`
+					Category      []string `json:"category"`
+					FullLocation  string   `json:"full_location"`
+					ShortLocation string   `json:"short_location"`
+				} `json:"data"`
+			} `json:"jobs"`
+			TotalCount int `json:"totalCount"`
+			Count      int `json:"count"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -11609,10 +11609,10 @@ func (runtime Runtime) Siemens(
 			if counter > total_pages {
 				return
 			} else {
-                counter++
-                time.Sleep(SecondsSleep * time.Second)
-                c.Visit(fmt.Sprintf(start_url, counter))
-            }
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, counter))
+			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
@@ -11660,36 +11660,36 @@ func (runtime Runtime) Continental(
 
 		start_url := `https://api.continental-jobs.com/search/?data={"LanguageCode":"EN","SearchParameters":{"FirstItem":1,"CountItem":2000,"Sort":[{"Criterion":"PublicationStartDate","Direction":"DESC"}],"MatchedObjectDescriptor":["ID","PositionID","PositionTitle","PositionURI","PositionLocation.CountryName","PositionLocation.CityName","PositionLocation.Longitude","PositionLocation.Latitude","PositionIndustry.Name","JobCategory.Name","PublicationStartDate","VacancyDivision"]},"SearchCriteria":[{"CriterionName":"PublicationLanguage.Code","CriterionValue":["EN"]},{"CriterionName":"PublicationChannel.Code","CriterionValue":["12"]}]}`
 
-        type JsonJobs struct {
-            SearchResult struct {
-                SearchResultCount    int `json:"SearchResultCount"`
-                SearchResultCountAll int `json:"SearchResultCountAll"`
-                SearchResultItems    []struct {
-                    MatchedObjectID         string `json:"MatchedObjectId"`
-                    MatchedObjectDescriptor struct {
-                        PositionIndustry struct {
-                            Name string `json:"Name"`
-                        } `json:"PositionIndustry"`
-                        PublicationStartDate string `json:"PublicationStartDate"`
-                        PositionTitle        string `json:"PositionTitle"`
-                        PositionLocation     []struct {
-                            CityName    string  `json:"CityName"`
-                            Longitude   float64 `json:"Longitude"`
-                            Latitude    float64 `json:"Latitude"`
-                            CountryName string  `json:"CountryName"`
-                        } `json:"PositionLocation"`
-                        PositionURI string `json:"PositionURI"`
-                        ID          int    `json:"ID"`
-                        JobCategory struct {
-                            Name string `json:"Name"`
-                        } `json:"JobCategory"`
-                        PositionID string `json:"PositionID"`
-                    } `json:"MatchedObjectDescriptor,omitempty"`
-                    RelevanceScore          int `json:"RelevanceScore"`
-                    RelevanceRank           int `json:"RelevanceRank"`
-                } `json:"SearchResultItems"`
-            } `json:"SearchResult"`
-        }
+		type JsonJobs struct {
+			SearchResult struct {
+				SearchResultCount    int `json:"SearchResultCount"`
+				SearchResultCountAll int `json:"SearchResultCountAll"`
+				SearchResultItems    []struct {
+					MatchedObjectID         string `json:"MatchedObjectId"`
+					MatchedObjectDescriptor struct {
+						PositionIndustry struct {
+							Name string `json:"Name"`
+						} `json:"PositionIndustry"`
+						PublicationStartDate string `json:"PublicationStartDate"`
+						PositionTitle        string `json:"PositionTitle"`
+						PositionLocation     []struct {
+							CityName    string  `json:"CityName"`
+							Longitude   float64 `json:"Longitude"`
+							Latitude    float64 `json:"Latitude"`
+							CountryName string  `json:"CountryName"`
+						} `json:"PositionLocation"`
+						PositionURI string `json:"PositionURI"`
+						ID          int    `json:"ID"`
+						JobCategory struct {
+							Name string `json:"Name"`
+						} `json:"JobCategory"`
+						PositionID string `json:"PositionID"`
+					} `json:"MatchedObjectDescriptor,omitempty"`
+					RelevanceScore int `json:"RelevanceScore"`
+					RelevanceRank  int `json:"RelevanceRank"`
+				} `json:"SearchResultItems"`
+			} `json:"SearchResult"`
+		}
 
 		var jsonJobs JsonJobs
 
@@ -11766,10 +11766,10 @@ func (runtime Runtime) Deliveryhero(
 
 		c := colly.NewCollector()
 
-        start_url := "https://careers.deliveryhero.com/global/en/search-results?s=1&from=%d"
-        base_job_url := "https://careers.deliveryhero.com/global/en/job/%s"
-        number_results_per_page := 50
-        counter := 0
+		start_url := "https://careers.deliveryhero.com/global/en/search-results?s=1&from=%d"
+		base_job_url := "https://careers.deliveryhero.com/global/en/job/%s"
+		number_results_per_page := 50
+		counter := 0
 
 		type JsonJobs struct {
 			EagerLoadRefineSearch struct {
@@ -11830,7 +11830,7 @@ func (runtime Runtime) Deliveryhero(
 			response_json := strings.Split(
 				strings.Split(
 					response_body, "phApp.ddo = ")[1], "; phApp.experimentData")[0]
-			
+
 			var tempJson JsonJobs
 			err := json.Unmarshal([]byte(response_json), &tempJson)
 			if err != nil {
@@ -11864,11 +11864,10 @@ func (runtime Runtime) Deliveryhero(
 			if counter > total_pages {
 				return
 			} else {
-	            counter++
-	            time.Sleep(SecondsSleep * time.Second)
-	            c.Visit(fmt.Sprintf(start_url, counter * number_results_per_page))
-	        }
-
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, counter*number_results_per_page))
+			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
