@@ -376,6 +376,7 @@ func GetNotifications(scrapers []Scraper) (notifications []Notification) {
                             FROM results r
                             LEFT JOIN matches m ON(r.id = m.resultid)
                             LEFT JOIN scrapers s ON(r.scraperid = s.id)
+                            LEFT JOIN userstargets ut ON(s.targetid = ut.targetid)
                             LEFT JOIN userstargetskeywords utk ON(m.keywordid = utk.keywordid)
                             LEFT JOIN users u ON(utk.userid = u.id)
                             LEFT JOIN notifications n ON(m.id = n.matchid)
