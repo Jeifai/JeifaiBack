@@ -365,26 +365,25 @@ func GetNotifications(scrapers []Scraper) (notifications []Notification) {
 		scraper_id := elem.Id
 
 		rows, err := Db.Query(`
-                            SELECT DISTINCT
-                                m.id,
-                                u.id,
+                            SELECT
+                                m.id AS matchid,
+                                utk.userid,
                                 u.username,
                                 u.email,
                                 s.name,
                                 r.title,
                                 r.url
-                            FROM results r
-                            LEFT JOIN matches m ON(r.id = m.resultid)
-                            LEFT JOIN scrapers s ON(r.scraperid = s.id)
-                            LEFT JOIN userstargets ut ON(s.targetid = ut.targetid)
-                            LEFT JOIN userstargetskeywords utk ON(m.keywordid = utk.keywordid)
-                            LEFT JOIN users u ON(utk.userid = u.id)
+                            FROM userstargetskeywords utk
+                            INNER JOIN matches m ON(utk.keywordid = m.keywordid)
+                            INNER JOIN results r ON(m.resultid = r.id)
+                            INNER JOIN scrapers s ON(r.scraperid = s.id)
+                            INNER JOIN users u ON(utk.userid = u.id)
                             LEFT JOIN notifications n ON(m.id = n.matchid)
                             WHERE m.createdat > current_date - interval '0' day
-                            AND utk.deletedat IS NULL
+                            AND s.targetid = utk.targetid
                             AND s.id = $1
                             AND n.id IS NULL
-                            ORDER BY 1 DESC;`, scraper_id)
+                            AND utk.deletedat IS NULL;`, scraper_id)
 		counter := 0
 		for rows.Next() {
 			notification := Notification{}
@@ -416,26 +415,26 @@ func GetUserNotifications(scrapers []Scraper, user string) (notifications []Noti
 		scraper_id := elem.Id
 
 		rows, err := Db.Query(`
-                            SELECT DISTINCT
-                                m.id,
-                                u.id,
+                            SELECT
+                                m.id AS matchid,
+                                utk.userid,
                                 u.username,
                                 u.email,
                                 s.name,
                                 r.title,
                                 r.url
-                            FROM results r
-                            LEFT JOIN matches m ON(r.id = m.resultid)
-                            LEFT JOIN scrapers s ON(r.scraperid = s.id)
-                            LEFT JOIN userstargetskeywords utk ON(m.keywordid = utk.keywordid)
-                            LEFT JOIN users u ON(utk.userid = u.id)
+                            FROM userstargetskeywords utk
+                            INNER JOIN matches m ON(utk.keywordid = m.keywordid)
+                            INNER JOIN results r ON(m.resultid = r.id)
+                            INNER JOIN scrapers s ON(r.scraperid = s.id)
+                            INNER JOIN users u ON(utk.userid = u.id)
                             LEFT JOIN notifications n ON(m.id = n.matchid)
                             WHERE m.createdat > current_date - interval '0' day
-                            AND utk.deletedat IS NULL
+                            AND s.targetid = utk.targetid
                             AND s.id = $1
+                            AND utk.userid = $2
                             AND n.id IS NULL
-                            AND u.id = $2
-                            ORDER BY 1 DESC;`, scraper_id, user)
+                            AND utk.deletedat IS NULL;`, scraper_id, user)
 		counter := 0
 		for rows.Next() {
 			notification := Notification{}
