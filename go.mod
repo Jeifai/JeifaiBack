@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/storage v1.10.0
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/antchfx/xpath v1.1.10 // indirect
+	github.com/basgys/goxml2json v1.1.0
 	github.com/chromedp/chromedp v0.5.3
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-openapi/strfmt v0.19.5 // indirect

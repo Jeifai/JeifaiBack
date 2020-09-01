@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	// "crypto/tls"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -18,6 +17,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"github.com/gocolly/colly/v2"
 	. "github.com/logrusorgru/aurora"
+	xj "github.com/basgys/goxml2json"
 )
 
 type Runtime struct {
@@ -7723,13 +7723,6 @@ func (runtime Runtime) Nen(
 			[]byte("{}"),
 		})
 
-		results = append(results, Result{
-			runtime.Name,
-			"AWS Lead",
-			"https://www.linkedin.com/jobs/view/1960300179",
-			[]byte("{}"),
-		})
-
 		results_marshal, err := json.Marshal(results)
 		if err != nil {
 			panic(err.Error())
@@ -11892,6 +11885,164 @@ func (runtime Runtime) Deliveryhero(
 			c.Visit("file:" + dir + "/response.html")
 		} else {
 			c.Visit(fmt.Sprintf(start_url, 0))
+		}
+	}
+	return
+}
+
+func (runtime Runtime) Volkswagen(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		start_url := "https://karriere.volkswagen.de/sap/opu/odata/sap/zaudi_ui_open_srv/JobSet?sap-client=100"
+		job_base_url := "https://karriere.volkswagen.de%s"
+
+
+		type Jobs struct {
+			Feed struct {
+				Entry []struct {
+					Properties struct {
+						ContentType           string `json:"ContentType"`
+						FilterContractTypes   string `json:"FilterContractTypes"`
+						FilterFunctionalAreas string `json:"FilterFunctionalAreas"`
+						ZLanguage             string `json:"ZLanguage"`
+						ZRecruiterEmail       string `json:"ZRecruiterEmail"`
+						Address               struct {
+							Type   string `json:"-type"`
+							Line07 string `json:"Line07"`
+							Line00 string `json:"Line00"`
+							Line01 string `json:"Line01"`
+							Line02 string `json:"Line02"`
+							Line03 string `json:"Line03"`
+							Line04 string `json:"Line04"`
+							Line05 string `json:"Line05"`
+							Line06 string `json:"Line06"`
+							Line08 string `json:"Line08"`
+							Line09 string `json:"Line09"`
+						} `json:"Address"`
+						ApplicationStatusTxt string `json:"ApplicationStatusTxt"`
+						Foot1                string `json:"Foot1"`
+						ZEmailApplication    string `json:"ZEmailApplication"`
+						FilterInterestGroups string `json:"FilterInterestGroups"`
+						ZRecruiterPhone      string `json:"ZRecruiterPhone"`
+						ZZCompanyWide        string `json:"ZZCompanyWide"`
+						ZPublicationDate     string `json:"ZPublicationDate"`
+						AdditionalInfo       string `json:"AdditionalInfo"`
+						FilterCompanies      string `json:"FilterCompanies"`
+						ZIsForeignCompany    string `json:"ZIsForeignCompany"`
+						Title                string `json:"Title"`
+						PostingAge           string `json:"PostingAge"`
+						ProjectDesc          string `json:"ProjectDesc"`
+						RefCode              string `json:"RefCode"`
+						TravelRatio          string `json:"TravelRatio"`
+						IsHotJob             string `json:"IsHotJob"`
+						DepartmentDesc       string `json:"DepartmentDesc"`
+						TaskDesc             string `json:"TaskDesc"`
+						D                    string `json:"-d"`
+						Posting              string `json:"Posting"`
+						ApplicationExists    string `json:"ApplicationExists"`
+						Department           string `json:"Department"`
+						Contact              string `json:"Contact"`
+						ZEmploymentStartDate struct {
+							Null string `json:"-null"`
+						} `json:"ZEmploymentStartDate"`
+						IsApplicationGroup    string `json:"IsApplicationGroup"`
+						Foot2                 string `json:"Foot2"`
+						EEOText               string `json:"EEOText"`
+						FilterLocations       string `json:"FilterLocations"`
+						M                     string `json:"-m"`
+						ApplicationURL        string `json:"ApplicationUrl"`
+						ReportingTo           string `json:"ReportingTo"`
+						JobID                 string `json:"JobID"`
+						FilterHierarchyLevels string `json:"FilterHierarchyLevels"`
+						ZEmploymentEndDate    struct {
+							Null string `json:"-null"`
+						} `json:"ZEmploymentEndDate"`
+						ZRecruiterFullName string `json:"ZRecruiterFullName"`
+						JobDetailsURL      string `json:"JobDetailsUrl"`
+						IsExpired          string `json:"IsExpired"`
+						ApplicationStatus  string `json:"ApplicationStatus"`
+						TravelReq          string `json:"TravelReq"`
+						ApplicationEndDate string `json:"ApplicationEndDate"`
+						Rank               string `json:"Rank"`
+						IsFavorite         string `json:"IsFavorite"`
+						CompanyDesc        string `json:"CompanyDesc"`
+					} `json:"properties"`
+				} `json:"entry"`
+			} `json:"feed"`
+		}
+
+		var jsonJobs Jobs
+
+		c.OnResponse(func(r *colly.Response) {
+
+			body_xml := strings.NewReader(string(r.Body))
+			body_json, err := xj.Convert(body_xml)
+			if err != nil {
+				panic("That's embarrassing...")
+			}
+
+			var tempJson Jobs
+			err = json.Unmarshal(body_json.Bytes(), &tempJson)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range tempJson.Feed.Entry {
+
+				result_title := elem.Properties.Title
+				result_url := fmt.Sprintf(job_base_url, elem.Properties.JobDetailsURL)
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+
+			jsonJobs.Feed.Entry = append(jsonJobs.Feed.Entry, tempJson.Feed.Entry...)
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			jsonJobs_marshal, err := json.Marshal(jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+			response = Response{[]byte(jsonJobs_marshal)}
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		if isLocal {
+			t := &http.Transport{}
+			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+			c.WithTransport(t)
+			dir, err := os.Getwd()
+			if err != nil {
+				panic(err.Error())
+			}
+			c.Visit("file:" + dir + "/response.html")
+		} else {
+			c.Visit(start_url)
 		}
 	}
 	return
