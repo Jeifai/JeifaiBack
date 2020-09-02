@@ -30,7 +30,6 @@ create table usersupdates (
   createdat     timestamp not null
 );
 
-
 create table targets (
   id            serial primary key,
   url           varchar(500) not null unique,
@@ -40,13 +39,11 @@ create table targets (
   linkedinurl   varchar(100)
 );
 
-
 create table userstargets (
   id            serial primary key,
-  uuid          varchar(64) not null unique;
-  userid	    integer references users(id),
+  userid	      integer references users(id),
   targetid      integer references targets(id),
-  createdat     timestamp not null
+  createdat     timestamp not null,
   deletedat     timestamp   
 );
 
@@ -83,6 +80,14 @@ create table keywords (
   deletedat     timestamp  
 );
 
+create table userskeywords (
+  id            serial primary key,
+  userid        integer references users(id),
+  keywordid     integer references keywords(id),
+  createdat     timestamp not null,
+  deletedat     timestamp   
+);
+
 create table userstargetskeywords (
   id            serial primary key,
   userid        integer references users(id),
@@ -98,7 +103,7 @@ create table matchings (
   id            serial primary key,
   scraperid     integer references scrapers(id),
   createdat     timestamp not null
-)
+);
 
 create table matches (
   id            serial primary key,
@@ -107,20 +112,20 @@ create table matches (
   matchingid    integer references matchings(id),
   createdat     timestamp not null,
   UNIQUE (keywordid, resultid)
-)
+);
 
 create table notifiers (
   id            serial primary key,
   userid        integer references users(id),
   createdat     timestamp not null
-)
+);
 
 create table notifications (
   id            serial primary key,
   matchid       integer references matches(id),
   notifierid    integer references notifiers(id),
   createdat     timestamp not null
-)
+);
 
 create table invitations (
   id               serial primary key,
@@ -133,7 +138,7 @@ create table invitations (
   anythingelse     varchar(1000),
   createdat        timestamp not null,
   usedat           timestamp
-)
+);
 
 create table resetpasswords (
   id              serial primary key,
@@ -142,14 +147,14 @@ create table resetpasswords (
   createdat       timestamp not null,
   expiredat       timestamp,
   consumedat      timestamp
-)
+);
 
 create table sentemails (
   id              serial primary key,
   email           varchar(255),
   action          varchar(255),
   sentat          timestamp not null
-)
+);
 
 create table linkedin (
   id              serial primary key,
@@ -160,4 +165,4 @@ create table linkedin (
   industry        varchar(100),
   companysize     varchar(50),
   createdat       timestamp not null
-)
+);
