@@ -75,7 +75,6 @@ LEFT JOIN scrapers s ON(r.scraperid = s.id)
 WHERE s.name = 'Microsoft'
 ORDER BY r.updatedat DESC
 LIMIT 10;
-<
 
 /* Update targets CASCADE */
 INSERT INTO targets (url, host, createdat, name) VALUES('https://boards.greenhouse.io/urbansportsclub/', 'https://urbansportsclub.com', current_timestamp, 'Urbansport');
@@ -87,3 +86,15 @@ DELETE FROM targets WHERE id = 241;
 SELECT CASE WHEN count(distinct id)= count(id)
 THEN 'column values are unique' ELSE 'column values are NOT unique' END
 FROM results;
+
+
+/* Massive insert into */
+INSERT INTO userskeywords(userid, keywordid, createdat)
+SELECT DISTINCT
+	utk.userid,
+	utk.keywordid,
+	MAX(utk.createdat)
+FROM userstargetskeywords utk
+WHERE utk.deletedat IS NULL
+GROUP BY 1, 2
+ORDER BY 1, 2, 3;

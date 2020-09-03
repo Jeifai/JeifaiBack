@@ -99,6 +99,14 @@ create table userstargetskeywords (
   UNIQUE (userid, targetid, keywordid)
 );
 
+create table userstargetskeywords2 (
+  id              serial primary key,
+  usertargetid    integer references userstargets(id),
+  userkeywordid   integer references userskeywords(id),
+  createdat       timestamp not null,
+  deletedat       timestamp
+);
+
 create table matchings (
   id            serial primary key,
   scraperid     integer references scrapers(id),
