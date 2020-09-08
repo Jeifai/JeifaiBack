@@ -14,10 +14,10 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	xj "github.com/basgys/goxml2json"
 	"github.com/chromedp/chromedp"
 	"github.com/gocolly/colly/v2"
 	. "github.com/logrusorgru/aurora"
-	xj "github.com/basgys/goxml2json"
 )
 
 type Runtime struct {
@@ -7716,14 +7716,12 @@ func (runtime Runtime) Nen(
 	switch version {
 	case 1:
 
-        /**
 		results = append(results, Result{
 			runtime.Name,
 			"Salesforce Lead",
 			"https://www.linkedin.com/jobs/view/1947567619",
 			[]byte("{}"),
-        })
-        */
+		})
 
 		results_marshal, err := json.Marshal(results)
 		if err != nil {
@@ -11903,7 +11901,6 @@ func (runtime Runtime) Volkswagen(
 		start_url := "https://karriere.volkswagen.de/sap/opu/odata/sap/zaudi_ui_open_srv/JobSet?sap-client=100"
 		job_base_url := "https://karriere.volkswagen.de%s"
 
-
 		type Jobs struct {
 			Feed struct {
 				Entry []struct {
@@ -12046,6 +12043,101 @@ func (runtime Runtime) Volkswagen(
 		} else {
 			c.Visit(start_url)
 		}
+	}
+	return
+}
+
+func (runtime Runtime) Tesla(
+	version int, isLocal bool) (
+	response Response, results []Result) {
+	switch version {
+	case 1:
+
+		start_url := "https://www.tesla.com/de_DE/careers/search#/"
+		base_url := "https://www.tesla.com/careers/%s"
+		file_name := "tesla.html"
+
+		type Job struct {
+			Title      string
+			Url        string
+			Department string
+			Location   string
+			Date       string
+		}
+
+		ctx, cancel := chromedp.NewContext(context.Background())
+		defer cancel()
+		var initialResponse string
+		if err := chromedp.Run(ctx,
+			chromedp.Navigate(start_url),
+			chromedp.Sleep(5*time.Second),
+			chromedp.OuterHTML("html", &initialResponse),
+		); err != nil {
+			panic(err)
+		}
+		SaveResponseToFileWithFileName(initialResponse, file_name)
+
+		c := colly.NewCollector()
+
+		c.OnHTML("html", func(e *colly.HTMLElement) {
+			e.ForEach(".table-row", func(_ int, el *colly.HTMLElement) {
+				result_title := el.ChildText("a")
+				result_url := fmt.Sprintf(base_url, el.ChildAttr("a", "href"))
+				result_department := el.ChildText(".listing-department")
+				result_location := el.ChildText(".listing-location")
+				result_date := el.ChildText(".listing-dateposted")
+
+				_, err := netUrl.ParseRequestURI(result_url)
+				if err == nil {
+
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_department,
+						result_location,
+						result_date,
+					}
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
+					}
+
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
+				}
+			})
+		})
+
+		c.OnResponse(func(r *colly.Response) {
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnScraped(func(r *colly.Response) {
+			RemoveFileWithFileName(file_name)
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		t := &http.Transport{}
+		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+		dir, err := os.Getwd()
+		if err != nil {
+			panic(err.Error())
+		}
+		c.WithTransport(t)
+		c.Visit("file:" + dir + "/tesla.html")
 	}
 	return
 }
