@@ -7716,12 +7716,14 @@ func (runtime Runtime) Nen(
 	switch version {
 	case 1:
 
+        /**
 		results = append(results, Result{
 			runtime.Name,
 			"Salesforce Lead",
 			"https://www.linkedin.com/jobs/view/1947567619",
 			[]byte("{}"),
-		})
+        })
+        */
 
 		results_marshal, err := json.Marshal(results)
 		if err != nil {
