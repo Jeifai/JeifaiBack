@@ -37,27 +37,21 @@ type Result struct {
 
 const SecondsSleep = 2 // Seconds between pagination
 
-func Extract(
-	scraper_name string, scraper_version int, isLocal bool) (
-	response Response, results []Result) {
+func Extract(scraper_name string, scraper_version int) (results []Result) {
 	fmt.Println(Gray(8-1, "Starting Scrape..."))
 	runtime := Runtime{scraper_name}
 	strucReflected := reflect.ValueOf(runtime)
 	method := strucReflected.MethodByName(scraper_name)
 	params := []reflect.Value{
 		reflect.ValueOf(scraper_version),
-		reflect.ValueOf(isLocal),
 	}
 	function_output := method.Call(params)
-	response = function_output[0].Interface().(Response)
-	results = function_output[1].Interface().([]Result)
+	results = function_output[0].Interface().([]Result)
 	results = Unique(results)
 	return
 }
 
-func (runtime Runtime) Dreamingjobs(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Dreamingjobs(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -117,10 +111,6 @@ func (runtime Runtime) Dreamingjobs(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -132,25 +122,13 @@ func (runtime Runtime) Dreamingjobs(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
+
 	return
 }
 
-func (runtime Runtime) Kununu(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Kununu(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -200,10 +178,6 @@ func (runtime Runtime) Kununu(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -215,25 +189,13 @@ func (runtime Runtime) Kununu(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
+
 	return
 }
 
-func (runtime Runtime) Mitte(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Mitte(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -263,16 +225,14 @@ func (runtime Runtime) Mitte(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -289,20 +249,10 @@ func (runtime Runtime) Mitte(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -312,25 +262,12 @@ func (runtime Runtime) Mitte(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(s_start_url)
-		}
+		c.Visit(s_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) IMusician(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) IMusician(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -383,10 +320,6 @@ func (runtime Runtime) IMusician(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -398,25 +331,12 @@ func (runtime Runtime) IMusician(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Babelforce(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Babelforce(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -462,10 +382,6 @@ func (runtime Runtime) Babelforce(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -477,24 +393,12 @@ func (runtime Runtime) Babelforce(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Zalando(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Zalando(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -526,16 +430,14 @@ func (runtime Runtime) Zalando(
 			Next  string `json:"next"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJsonJobs Jobs
-			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJsonJobs.Data {
+			for _, elem := range jsonJobs.Data {
 
 				result_title := elem.Title
 				result_url := z_base_result_url + strconv.Itoa(elem.ID)
@@ -553,24 +455,14 @@ func (runtime Runtime) Zalando(
 				})
 			}
 
-			jsonJobs.Data = append(jsonJobs.Data, tempJsonJobs.Data...)
-
-			if tempJsonJobs.Next != "" {
+			if jsonJobs.Next != "" {
 				time.Sleep(SecondsSleep * time.Second)
-				c.Visit(z_base_url + tempJsonJobs.Next)
+				c.Visit(z_base_url + jsonJobs.Next)
 			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -580,24 +472,13 @@ func (runtime Runtime) Zalando(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(z_start_url)
-		}
+		c.Visit(z_start_url)
 	}
+
 	return
 }
 
-func (runtime Runtime) Google(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Google(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -625,16 +506,14 @@ func (runtime Runtime) Google(
 			PageSize int `json:"page_size"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJsonJobs JsonJobs
-			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJsonJobs.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.JobTitle
 				result_url := g_base_result_url + strings.Split(elem.JobID, "/")[1]
@@ -652,15 +531,13 @@ func (runtime Runtime) Google(
 				})
 			}
 
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
-
 			/**
-						total_count, err := strconv.Atoi(tempJsonJobs.Count)
+						total_count, err := strconv.Atoi(jsonJobs.Count)
 						if err != nil {
 							total_count = 0
 						}
 
-						next_page, err := strconv.Atoi(tempJsonJobs.NextPage)
+						next_page, err := strconv.Atoi(jsonJobs.NextPage)
 						if err != nil {
 							next_page = 0
 						}
@@ -672,32 +549,24 @@ func (runtime Runtime) Google(
 
 						if next_page != 0 {
 							time.Sleep(SecondsSleep * time.Second)
-							c.Visit(g_base_url + tempJsonJobs.NextPage)
+							c.Visit(g_base_url + jsonJobs.NextPage)
 			            }
 			*/
 
-			total_pages := tempJsonJobs.Count/number_results_per_page + 2
+			total_pages := jsonJobs.Count/number_results_per_page + 2
 
-			if total_pages <= tempJsonJobs.NextPage {
+			if total_pages <= jsonJobs.NextPage {
 				return
 			}
 
-			if tempJsonJobs.NextPage != 0 {
+			if jsonJobs.NextPage != 0 {
 				time.Sleep(SecondsSleep * time.Second)
-				c.Visit(g_base_url + strconv.Itoa(tempJsonJobs.NextPage))
+				c.Visit(g_base_url + strconv.Itoa(jsonJobs.NextPage))
 			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -707,25 +576,13 @@ func (runtime Runtime) Google(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(g_start_url)
-		}
+		c.Visit(g_start_url)
 	}
+
 	return
 }
 
-func (runtime Runtime) Soundcloud(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Soundcloud(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -782,10 +639,6 @@ func (runtime Runtime) Soundcloud(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -797,25 +650,12 @@ func (runtime Runtime) Soundcloud(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Microsoft(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Microsoft(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -869,25 +709,18 @@ func (runtime Runtime) Microsoft(
 			Eid string `json:"eid"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var resultsJson []byte
-			if isLocal {
-				resultsJson = r.Body
-			} else {
-				temp_resultsJson := strings.Split(string(r.Body), first_part_json)[1]
-				s_resultsJson := strings.Split(temp_resultsJson, second_part_json)[0]
-				resultsJson = []byte(s_resultsJson)
-			}
+			temp_resultsJson := strings.Split(string(r.Body), first_part_json)[1]
+			s_resultsJson := strings.Split(temp_resultsJson, second_part_json)[0]
+			resultsJson := []byte(s_resultsJson)
 
-			var tempJsonJobs JsonJobs
-			err := json.Unmarshal(resultsJson, &tempJsonJobs)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(resultsJson, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJsonJobs.Data.Jobs {
+			for _, elem := range jsonJobs.Data.Jobs {
 
 				result_title := elem.Title
 				result_url := m_base_result_url + elem.JobID
@@ -905,34 +738,20 @@ func (runtime Runtime) Microsoft(
 				})
 			}
 
-			jsonJobs.Data.Jobs = append(jsonJobs.Data.Jobs, tempJsonJobs.Data.Jobs...)
+			total_pages := jsonJobs.TotalHits/number_results_per_page + 2
 
-			total_pages := tempJsonJobs.TotalHits/number_results_per_page + 2
-
-			if isLocal {
+			if counter >= total_pages {
 				return
 			} else {
-				if counter >= total_pages {
-					return
-				} else {
-					counter++
-					time.Sleep(SecondsSleep * time.Second)
-					temp_m_url := m_base_url + strconv.Itoa(counter*number_results_per_page)
-					c.Visit(temp_m_url)
-				}
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				temp_m_url := m_base_url + strconv.Itoa(counter*number_results_per_page)
+				c.Visit(temp_m_url)
 			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -942,24 +761,12 @@ func (runtime Runtime) Microsoft(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(m_start_url)
-		}
+		c.Visit(m_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Twitter(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Twitter(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -990,16 +797,14 @@ func (runtime Runtime) Twitter(
 			TotalCount int `json:"totalCount"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJsonJobs Jobs
-			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJsonJobs.Results {
+			for _, elem := range jsonJobs.Results {
 
 				result_title := elem.Title
 				result_url := elem.URL
@@ -1017,34 +822,20 @@ func (runtime Runtime) Twitter(
 				})
 			}
 
-			jsonJobs.Results = append(jsonJobs.Results, tempJsonJobs.Results...)
+			total_pages := jsonJobs.TotalCount/number_results_per_page + 1
 
-			total_pages := tempJsonJobs.TotalCount/number_results_per_page + 1
-
-			if isLocal {
+			if counter >= total_pages {
 				return
 			} else {
-				if counter >= total_pages {
-					return
-				} else {
-					counter++
-					time.Sleep(SecondsSleep * time.Second)
-					temp_t_url := t_base_url + strconv.Itoa(counter*100)
-					c.Visit(temp_t_url)
-				}
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				temp_t_url := t_base_url + strconv.Itoa(counter*100)
+				c.Visit(temp_t_url)
 			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -1054,25 +845,12 @@ func (runtime Runtime) Twitter(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(t_start_url)
-		}
+		c.Visit(t_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Shopify(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Shopify(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -1102,16 +880,14 @@ func (runtime Runtime) Shopify(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -1128,20 +904,10 @@ func (runtime Runtime) Shopify(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -1151,25 +917,12 @@ func (runtime Runtime) Shopify(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(s_start_url)
-		}
+		c.Visit(s_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Urbansport(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Urbansport(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -1226,10 +979,6 @@ func (runtime Runtime) Urbansport(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -1241,25 +990,12 @@ func (runtime Runtime) Urbansport(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) N26(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) N26(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -1283,39 +1019,8 @@ func (runtime Runtime) N26(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			if isLocal {
-				type JsonJob struct {
-					CompanyName string          `json:"CompanyName"`
-					Title       string          `json:"Title"`
-					Url         string          `json:"ResultUrl"`
-					Data        json.RawMessage `json:"Data"`
-				}
-
-				jobs := make([]JsonJob, 0)
-				json.Unmarshal(r.Body, &jobs)
-
-				for _, elem := range jobs {
-					results = append(results, Result{
-						runtime.Name,
-						elem.Title,
-						elem.Url,
-						elem.Data,
-					})
-				}
-			}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			response_json, err := json.Marshal(results)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(response_json)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -1379,18 +1084,8 @@ func (runtime Runtime) N26(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(n_start_url)
-		}
+		c.Visit(n_start_url)
+
 	case 2:
 
 		c := colly.NewCollector()
@@ -1410,39 +1105,8 @@ func (runtime Runtime) N26(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			if isLocal {
-				type JsonJob struct {
-					CompanyName string          `json:"CompanyName"`
-					Title       string          `json:"Title"`
-					Url         string          `json:"ResultUrl"`
-					Data        json.RawMessage `json:"Data"`
-				}
-
-				jobs := make([]JsonJob, 0)
-				json.Unmarshal(r.Body, &jobs)
-
-				for _, elem := range jobs {
-					results = append(results, Result{
-						runtime.Name,
-						elem.Title,
-						elem.Url,
-						elem.Data,
-					})
-				}
-			}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			response_json, err := json.Marshal(results)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(response_json)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -1505,25 +1169,12 @@ func (runtime Runtime) N26(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(n_start_url)
-		}
+		c.Visit(n_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Blinkist(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Blinkist(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -1553,16 +1204,14 @@ func (runtime Runtime) Blinkist(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -1579,20 +1228,10 @@ func (runtime Runtime) Blinkist(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -1602,25 +1241,12 @@ func (runtime Runtime) Blinkist(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(s_start_url)
-		}
+		c.Visit(s_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Deutschebahn(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Deutschebahn(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -1696,40 +1322,8 @@ func (runtime Runtime) Deutschebahn(
 			e.Request.Visit(next_page_url)
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			if isLocal {
-
-				type JsonJob struct {
-					CompanyName string
-					Title       string
-					Url         string
-					Data        json.RawMessage
-				}
-
-				jobs := make([]JsonJob, 0)
-				json.Unmarshal(r.Body, &jobs)
-
-				for _, elem := range jobs {
-					results = append(results, Result{
-						runtime.Name,
-						elem.Title,
-						elem.Url,
-						elem.Data,
-					})
-				}
-			}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			response_json, err := json.Marshal(results)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(response_json)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -1739,25 +1333,12 @@ func (runtime Runtime) Deutschebahn(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(d_start_url)
-		}
+		c.Visit(d_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Celo(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Celo(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -1787,16 +1368,14 @@ func (runtime Runtime) Celo(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -1813,20 +1392,10 @@ func (runtime Runtime) Celo(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -1836,25 +1405,12 @@ func (runtime Runtime) Celo(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Penta(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Penta(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -1906,16 +1462,14 @@ func (runtime Runtime) Penta(
 			} `json:"offers"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Offers {
+			for _, elem := range jsonJobs.Offers {
 
 				result_title := elem.Title
 				result_url := elem.CareersURL
@@ -1932,20 +1486,10 @@ func (runtime Runtime) Penta(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Offers = append(jsonJobs.Offers, tempJson.Offers...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -1955,18 +1499,7 @@ func (runtime Runtime) Penta(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(p_start_url)
-		}
+		c.Visit(p_start_url)
 
 	case 2:
 
@@ -2023,10 +1556,6 @@ func (runtime Runtime) Penta(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -2038,25 +1567,12 @@ func (runtime Runtime) Penta(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Contentful(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Contentful(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -2113,10 +1629,6 @@ func (runtime Runtime) Contentful(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -2128,25 +1640,12 @@ func (runtime Runtime) Contentful(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Gympass(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Gympass(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -2203,10 +1702,6 @@ func (runtime Runtime) Gympass(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -2218,25 +1713,12 @@ func (runtime Runtime) Gympass(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Hometogo(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Hometogo(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -2274,16 +1756,14 @@ func (runtime Runtime) Hometogo(
 			} `json:"meta"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Data {
+			for _, elem := range jsonJobs.Data {
 
 				result_title := elem.JobTitle
 				result_url := h_job_url + elem.ID + "/apply"
@@ -2300,20 +1780,10 @@ func (runtime Runtime) Hometogo(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Data = append(jsonJobs.Data, tempJson.Data...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -2323,24 +1793,12 @@ func (runtime Runtime) Hometogo(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(h_start_url)
-		}
+		c.Visit(h_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Amazon(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Amazon(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -2406,16 +1864,14 @@ func (runtime Runtime) Amazon(
 			} `json:"jobs"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJsonJobs JsonJobs
-			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJsonJobs.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := a_job_url + elem.JobPath
@@ -2433,31 +1889,17 @@ func (runtime Runtime) Amazon(
 				})
 			}
 
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
-
-			if isLocal {
-				return
-			} else {
-				total_pages := tempJsonJobs.Hits / number_results_per_page
-				if counter < total_pages+1 {
-					counter++
-					next_page := a_start_url + strconv.Itoa(counter*1000)
-					time.Sleep(SecondsSleep * time.Second)
-					c.Visit(next_page)
-				}
+			total_pages := jsonJobs.Hits / number_results_per_page
+			if counter < total_pages+1 {
+				counter++
+				next_page := a_start_url + strconv.Itoa(counter*1000)
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(next_page)
 			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -2467,25 +1909,12 @@ func (runtime Runtime) Amazon(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(a_start_url + "0")
-		}
+		c.Visit(a_start_url + "0")
 	}
 	return
 }
 
-func (runtime Runtime) Lanalabs(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Lanalabs(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -2545,10 +1974,6 @@ func (runtime Runtime) Lanalabs(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -2560,25 +1985,12 @@ func (runtime Runtime) Lanalabs(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Slack(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Slack(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -2633,10 +2045,6 @@ func (runtime Runtime) Slack(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -2648,25 +2056,12 @@ func (runtime Runtime) Slack(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Revolut(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Revolut(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -2696,16 +2091,14 @@ func (runtime Runtime) Revolut(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -2722,20 +2115,10 @@ func (runtime Runtime) Revolut(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -2745,25 +2128,12 @@ func (runtime Runtime) Revolut(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Mollie(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Mollie(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -2793,16 +2163,14 @@ func (runtime Runtime) Mollie(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -2819,20 +2187,10 @@ func (runtime Runtime) Mollie(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -2842,25 +2200,12 @@ func (runtime Runtime) Mollie(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Circleci(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Circleci(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -2915,10 +2260,6 @@ func (runtime Runtime) Circleci(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -2930,25 +2271,12 @@ func (runtime Runtime) Circleci(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Blacklane(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Blacklane(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3004,10 +2332,6 @@ func (runtime Runtime) Blacklane(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -3019,24 +2343,12 @@ func (runtime Runtime) Blacklane(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Auto1(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Auto1(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3096,16 +2408,14 @@ func (runtime Runtime) Auto1(
 			} `json:"jobs"`
 		}
 
-		var jsonJobs Auto1Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJsonJobs Auto1Jobs
-			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			var jsonJobs Auto1Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJsonJobs.Jobs.Hits.Hits {
+			for _, elem := range jsonJobs.Jobs.Hits.Hits {
 
 				result_title := elem.Source.Title
 				result_url := a_base_job_url + elem.Source.URL
@@ -3123,9 +2433,7 @@ func (runtime Runtime) Auto1(
 				})
 			}
 
-			jsonJobs.Jobs.Hits.Hits = append(jsonJobs.Jobs.Hits.Hits, tempJsonJobs.Jobs.Hits.Hits...)
-
-			total_pages := tempJsonJobs.Jobs.Hits.Total/number_results_per_page + 2
+			total_pages := jsonJobs.Jobs.Hits.Total/number_results_per_page + 2
 
 			if current_page > total_pages {
 				return
@@ -3140,14 +2448,6 @@ func (runtime Runtime) Auto1(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
-		})
-
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
 				Red("Request URL:"), Red(r.Request.URL),
@@ -3155,25 +2455,13 @@ func (runtime Runtime) Auto1(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(a_base_url + strconv.Itoa(current_page))
-		}
+		c.Visit(a_base_url + strconv.Itoa(current_page))
 	}
+
 	return
 }
 
-func (runtime Runtime) Flixbus(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Flixbus(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3222,16 +2510,14 @@ func (runtime Runtime) Flixbus(
 			} `json:"meta"`
 		}
 
-		var jsonJobs FlixbusJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson FlixbusJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs FlixbusJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -3248,20 +2534,10 @@ func (runtime Runtime) Flixbus(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -3271,25 +2547,12 @@ func (runtime Runtime) Flixbus(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Quora(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Quora(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3347,10 +2610,6 @@ func (runtime Runtime) Quora(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -3362,25 +2621,12 @@ func (runtime Runtime) Quora(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Greenhouse(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Greenhouse(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3434,10 +2680,6 @@ func (runtime Runtime) Greenhouse(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -3449,25 +2691,12 @@ func (runtime Runtime) Greenhouse(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Docker(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Docker(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3511,10 +2740,6 @@ func (runtime Runtime) Docker(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -3526,25 +2751,12 @@ func (runtime Runtime) Docker(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(d_start_url)
-		}
+		c.Visit(d_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Zapier(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Zapier(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3599,10 +2811,6 @@ func (runtime Runtime) Zapier(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -3614,25 +2822,12 @@ func (runtime Runtime) Zapier(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(z_start_url)
-		}
+		c.Visit(z_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Datadog(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Datadog(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3669,16 +2864,14 @@ func (runtime Runtime) Datadog(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -3695,20 +2888,10 @@ func (runtime Runtime) Datadog(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -3718,25 +2901,12 @@ func (runtime Runtime) Datadog(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Stripe(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Stripe(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3773,16 +2943,14 @@ func (runtime Runtime) Stripe(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -3799,20 +2967,10 @@ func (runtime Runtime) Stripe(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -3822,25 +2980,12 @@ func (runtime Runtime) Stripe(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Github(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Github(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3877,16 +3022,14 @@ func (runtime Runtime) Github(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -3903,20 +3046,10 @@ func (runtime Runtime) Github(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -3926,25 +3059,12 @@ func (runtime Runtime) Github(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Getyourguide(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Getyourguide(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -3981,16 +3101,14 @@ func (runtime Runtime) Getyourguide(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -4007,20 +3125,10 @@ func (runtime Runtime) Getyourguide(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4030,25 +3138,12 @@ func (runtime Runtime) Getyourguide(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Wefox(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Wefox(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -4085,16 +3180,14 @@ func (runtime Runtime) Wefox(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -4111,20 +3204,10 @@ func (runtime Runtime) Wefox(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4134,25 +3217,12 @@ func (runtime Runtime) Wefox(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Celonis(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Celonis(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -4189,16 +3259,14 @@ func (runtime Runtime) Celonis(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -4215,20 +3283,10 @@ func (runtime Runtime) Celonis(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4238,25 +3296,12 @@ func (runtime Runtime) Celonis(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Omio(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Omio(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -4324,16 +3369,14 @@ func (runtime Runtime) Omio(
 			} `json:"content"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Content {
+			for _, elem := range jsonJobs.Content {
 
 				result_title := elem.Name
 				result_url := base_job_url + elem.ID
@@ -4350,20 +3393,10 @@ func (runtime Runtime) Omio(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Content = append(jsonJobs.Content, tempJson.Content...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4373,25 +3406,12 @@ func (runtime Runtime) Omio(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Aboutyou(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Aboutyou(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -4414,16 +3434,14 @@ func (runtime Runtime) Aboutyou(
 			TotalCount int `json:"totalCount"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Posts {
+			for _, elem := range jsonJobs.Posts {
 
 				result_title := elem.Title
 				result_url := elem.URL
@@ -4440,20 +3458,10 @@ func (runtime Runtime) Aboutyou(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Posts = append(jsonJobs.Posts, tempJson.Posts...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4463,25 +3471,12 @@ func (runtime Runtime) Aboutyou(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Depositsolutions(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Depositsolutions(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -4518,16 +3513,14 @@ func (runtime Runtime) Depositsolutions(
 			} `json:"results"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Results {
+			for _, elem := range jsonJobs.Results {
 
 				result_title := elem.Title
 				result_url := base_job_url + elem.Shortcode
@@ -4544,20 +3537,10 @@ func (runtime Runtime) Depositsolutions(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Results = append(jsonJobs.Results, tempJson.Results...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4567,31 +3550,18 @@ func (runtime Runtime) Depositsolutions(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Request(
-				"POST",
-				start_url,
-				strings.NewReader(""),
-				nil,
-				http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
-			)
-		}
+		c.Request(
+			"POST",
+			start_url,
+			strings.NewReader(""),
+			nil,
+			http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
+		)
 	}
 	return
 }
 
-func (runtime Runtime) Taxfix(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Taxfix(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -4628,16 +3598,14 @@ func (runtime Runtime) Taxfix(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -4654,20 +3622,10 @@ func (runtime Runtime) Taxfix(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4677,25 +3635,12 @@ func (runtime Runtime) Taxfix(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Moonfare(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Moonfare(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -4732,16 +3677,14 @@ func (runtime Runtime) Moonfare(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -4758,20 +3701,10 @@ func (runtime Runtime) Moonfare(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4781,25 +3714,12 @@ func (runtime Runtime) Moonfare(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Fincompare(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Fincompare(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -4829,16 +3749,14 @@ func (runtime Runtime) Fincompare(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -4855,20 +3773,10 @@ func (runtime Runtime) Fincompare(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4878,25 +3786,12 @@ func (runtime Runtime) Fincompare(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Billie(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Billie(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -4933,16 +3828,14 @@ func (runtime Runtime) Billie(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -4959,20 +3852,10 @@ func (runtime Runtime) Billie(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -4982,25 +3865,12 @@ func (runtime Runtime) Billie(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Pairfinance(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Pairfinance(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -5037,16 +3907,14 @@ func (runtime Runtime) Pairfinance(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -5063,20 +3931,10 @@ func (runtime Runtime) Pairfinance(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -5086,25 +3944,12 @@ func (runtime Runtime) Pairfinance(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Getsafe(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Getsafe(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -5157,10 +4002,6 @@ func (runtime Runtime) Getsafe(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -5172,25 +4013,12 @@ func (runtime Runtime) Getsafe(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Liqid(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Liqid(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -5244,10 +4072,6 @@ func (runtime Runtime) Liqid(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -5259,25 +4083,12 @@ func (runtime Runtime) Liqid(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Elementinsurance(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Elementinsurance(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -5321,16 +4132,14 @@ func (runtime Runtime) Elementinsurance(
 			} `json:"offers"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Offers {
+			for _, elem := range jsonJobs.Offers {
 
 				result_title := elem.Title
 				result_url := elem.CareersURL
@@ -5347,20 +4156,10 @@ func (runtime Runtime) Elementinsurance(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Offers = append(jsonJobs.Offers, tempJson.Offers...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -5370,25 +4169,12 @@ func (runtime Runtime) Elementinsurance(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(p_start_url)
-		}
+		c.Visit(p_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Freeda(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Freeda(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -5425,16 +4211,14 @@ func (runtime Runtime) Freeda(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -5451,20 +4235,10 @@ func (runtime Runtime) Freeda(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -5474,25 +4248,12 @@ func (runtime Runtime) Freeda(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Talentgarden(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Talentgarden(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -5551,10 +4312,6 @@ func (runtime Runtime) Talentgarden(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -5566,25 +4323,12 @@ func (runtime Runtime) Talentgarden(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Facileit(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Facileit(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -5601,150 +4345,89 @@ func (runtime Runtime) Facileit(
 			Description string
 		}
 
-		if !isLocal {
+		c.OnHTML(tag_main, func(e *colly.HTMLElement) {
+			script_url := e.ChildAttr("script", "src")
+			k := strings.Split(strings.Split(script_url, "&k=")[1], "&LAC")[0]
+			base_url := "https://inrecruiting.intervieweb.it/app.php?module=iframeAnnunci&k=" + k + "&LAC=Facileit&act1=23"
+			l.Visit(base_url)
+		})
 
-			c.OnHTML(tag_main, func(e *colly.HTMLElement) {
-				script_url := e.ChildAttr("script", "src")
-				k := strings.Split(strings.Split(script_url, "&k=")[1], "&LAC")[0]
-				base_url := "https://inrecruiting.intervieweb.it/app.php?module=iframeAnnunci&k=" + k + "&LAC=Facileit&act1=23"
-				l.Visit(base_url)
-			})
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
 
-			c.OnResponse(func(r *colly.Response) {
-				response = Response{r.Body}
-			})
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
 
-			c.OnRequest(func(r *colly.Request) {
-				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-			})
+		l.OnResponse(func(r *colly.Response) {
+			responseText := string(r.Body)
+			url := strings.Split(strings.Split(responseText, "$.post('")[1], "',")[0]
+			cookie := c.Cookies(r.Request.URL.String())[0].Raw
 
-			c.OnError(func(r *colly.Response, err error) {
-				fmt.Println(
-					Red("Request URL:"), Red(r.Request.URL),
-					Red("failed with response:"), Red(r),
-					Red("\nError:"), Red(err))
-			})
-
-			var jsonJobs []Job
-
-			l.OnResponse(func(r *colly.Response) {
-				responseText := string(r.Body)
-				url := strings.Split(strings.Split(responseText, "$.post('")[1], "',")[0]
-				cookie := c.Cookies(r.Request.URL.String())[0].Raw
-
-				client := &http.Client{}
-				data := strings.NewReader(`orderBy=byfunction&descEn=1`)
-				req, _ := http.NewRequest("POST", url, data)
-				req.Header.Set("content-type", "application/x-www-form-urlencoded")
-				req.Header.Set("cookie", cookie)
-				resp, _ := client.Do(req)
-				bodyText, _ := ioutil.ReadAll(resp.Body)
-				doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(bodyText)))
-				if err != nil {
-					panic(err.Error())
-				}
-
-				var titles []string
-				var urls []string
-				var locations []string
-				doc.Find("dt").Each(func(i int, s *goquery.Selection) {
-					response_title := strings.TrimSpace(s.Find("a").Text())
-					temp_response_url, _ := s.Find("a").Attr("href")
-					response_url := strings.ReplaceAll(temp_response_url, "defgroup=", "defgroup=function") + "400&d=jobs.facile.it"
-					response_location := strings.TrimSpace(s.Find("span[class=location_annuncio]").Text())
-					titles = append(titles, response_title)
-					urls = append(urls, response_url)
-					locations = append(locations, response_location)
-				})
-
-				var descriptions []string
-				doc.Find("dd").Each(func(i int, s *goquery.Selection) {
-					response_description := strings.TrimSpace(s.Find("p[class=description]").Text())
-					descriptions = append(descriptions, response_description)
-				})
-
-				for i := range titles {
-					temp_elem_json := Job{
-						titles[i],
-						urls[i],
-						locations[i],
-						descriptions[i],
-					}
-
-					elem_json, err := json.Marshal(temp_elem_json)
-					if err != nil {
-						panic(err.Error())
-					}
-
-					results = append(results, Result{
-						runtime.Name,
-						titles[i],
-						urls[i],
-						elem_json,
-					})
-
-					jsonJobs = append(jsonJobs, temp_elem_json)
-				}
-			})
-
-			l.OnScraped(func(r *colly.Response) {
-				jsonJobs_marshal, err := json.Marshal(jsonJobs)
-				if err != nil {
-					panic(err.Error())
-				}
-				response = Response{[]byte(jsonJobs_marshal)}
-			})
-
-			c.Visit(url)
-		} else {
-
-			var jsonJobs []Job
-
-			c.OnResponse(func(r *colly.Response) {
-				err := json.Unmarshal(r.Body, &jsonJobs)
-				if err != nil {
-					panic(err.Error())
-				}
-
-				for _, elem := range jsonJobs {
-
-					elem_json, err := json.Marshal(elem)
-					if err != nil {
-						panic(err.Error())
-					}
-
-					results = append(results, Result{
-						runtime.Name,
-						elem.Url,
-						elem.Title,
-						elem_json,
-					})
-				}
-			})
-
-			c.OnScraped(func(r *colly.Response) {
-				jsonJobs_marshal, err := json.Marshal(jsonJobs)
-				if err != nil {
-					panic(err.Error())
-				}
-				response = Response{[]byte(jsonJobs_marshal)}
-			})
-
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
+			client := &http.Client{}
+			data := strings.NewReader(`orderBy=byfunction&descEn=1`)
+			req, _ := http.NewRequest("POST", url, data)
+			req.Header.Set("content-type", "application/x-www-form-urlencoded")
+			req.Header.Set("cookie", cookie)
+			resp, _ := client.Do(req)
+			bodyText, _ := ioutil.ReadAll(resp.Body)
+			doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(bodyText)))
 			if err != nil {
 				panic(err.Error())
 			}
-			c.Visit("file:" + dir + "/response.html")
-		}
+
+			var titles []string
+			var urls []string
+			var locations []string
+			doc.Find("dt").Each(func(i int, s *goquery.Selection) {
+				response_title := strings.TrimSpace(s.Find("a").Text())
+				temp_response_url, _ := s.Find("a").Attr("href")
+				response_url := strings.ReplaceAll(temp_response_url, "defgroup=", "defgroup=function") + "400&d=jobs.facile.it"
+				response_location := strings.TrimSpace(s.Find("span[class=location_annuncio]").Text())
+				titles = append(titles, response_title)
+				urls = append(urls, response_url)
+				locations = append(locations, response_location)
+			})
+
+			var descriptions []string
+			doc.Find("dd").Each(func(i int, s *goquery.Selection) {
+				response_description := strings.TrimSpace(s.Find("p[class=description]").Text())
+				descriptions = append(descriptions, response_description)
+			})
+
+			for i := range titles {
+				temp_elem_json := Job{
+					titles[i],
+					urls[i],
+					locations[i],
+					descriptions[i],
+				}
+
+				elem_json, err := json.Marshal(temp_elem_json)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					titles[i],
+					urls[i],
+					elem_json,
+				})
+			}
+		})
+
+		c.Visit(url)
 	}
+
 	return
 }
 
-func (runtime Runtime) Vodafone(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Vodafone(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -5767,8 +4450,6 @@ func (runtime Runtime) Vodafone(
 			Location string
 			Date     string
 		}
-
-		var jsonJobs []Job
 
 		c.OnHTML(".html5", func(e *colly.HTMLElement) {
 			e.ForEach(".data-row", func(_ int, el *colly.HTMLElement) {
@@ -5810,30 +4491,18 @@ func (runtime Runtime) Vodafone(
 
 			total_pages := total_results/number_results_per_page + 2
 
-			if isLocal {
+			if counter >= total_pages {
 				return
 			} else {
-				if counter >= total_pages {
-					return
-				} else {
-					counter++
-					time.Sleep(SecondsSleep * time.Second)
-					temp_v_url := fmt.Sprintf(v_start_url, counter*number_results_per_page)
-					c.Visit(temp_v_url)
-				}
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				temp_v_url := fmt.Sprintf(v_start_url, counter*number_results_per_page)
+				c.Visit(temp_v_url)
 			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -5843,25 +4512,12 @@ func (runtime Runtime) Vodafone(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(fmt.Sprintf(v_start_url, 0))
-		}
+		c.Visit(fmt.Sprintf(v_start_url, 0))
 	}
 	return
 }
 
-func (runtime Runtime) Glovo(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Glovo(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -5898,16 +4554,14 @@ func (runtime Runtime) Glovo(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -5924,20 +4578,10 @@ func (runtime Runtime) Glovo(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -5947,25 +4591,12 @@ func (runtime Runtime) Glovo(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Glickon(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Glickon(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -6015,8 +4646,6 @@ func (runtime Runtime) Glickon(
 			} `json:"challenges"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
 			var departments Departments
 			err := json.Unmarshal(r.Body, &departments)
@@ -6034,14 +4663,6 @@ func (runtime Runtime) Glickon(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
-		})
-
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
 				Red("Request URL:"), Red(r.Request.URL),
@@ -6055,7 +4676,6 @@ func (runtime Runtime) Glickon(
 			if err != nil {
 				panic(err.Error())
 			}
-			jsonJobs.Challenges = append(jsonJobs.Challenges, tempJsonJobs.Challenges...)
 
 			for _, elem := range tempJsonJobs.Challenges {
 				result_title := elem.Name
@@ -6074,25 +4694,12 @@ func (runtime Runtime) Glickon(
 			}
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(section_url)
-		}
+		c.Visit(section_url)
 	}
 	return
 }
 
-func (runtime Runtime) Satispay(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Satispay(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -6152,10 +4759,6 @@ func (runtime Runtime) Satispay(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -6167,25 +4770,12 @@ func (runtime Runtime) Satispay(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Medtronic(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Medtronic(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -6349,33 +4939,12 @@ func (runtime Runtime) Medtronic(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		x.OnScraped(func(r *colly.Response) {
-			results_marshal, err := json.Marshal(results)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(results_marshal)}
-		})
-
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Bendingspoons(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Bendingspoons(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -6419,16 +4988,14 @@ func (runtime Runtime) Bendingspoons(
 			LongDescription string `json:"long_description"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Title
 				result_url := job_url + elem.ID
@@ -6445,20 +5012,10 @@ func (runtime Runtime) Bendingspoons(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -6468,24 +5025,12 @@ func (runtime Runtime) Bendingspoons(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Bcg(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Bcg(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -6497,90 +5042,55 @@ func (runtime Runtime) Bcg(
 			Description string
 		}
 
-		if !isLocal {
+		ctx, cancel := chromedp.NewContext(context.Background())
+		defer cancel()
 
-			ctx, cancel := chromedp.NewContext(context.Background())
-			defer cancel()
+		b_start_url := "https://talent.bcg.com/en_US/apply/SearchJobs/?folderOffset=%d"
+		start_offset := 0
+		number_results_per_page := 20
+		_ = number_results_per_page
 
-			b_start_url := "https://talent.bcg.com/en_US/apply/SearchJobs/?folderOffset=%d"
-			start_offset := 0
-			number_results_per_page := 20
-			_ = number_results_per_page
+		var initialResponse string
+		if err := chromedp.Run(ctx,
+			chromedp.Navigate(fmt.Sprintf(b_start_url, start_offset)),
+			chromedp.OuterHTML(".body_Chrome", &initialResponse),
+		); err != nil {
+			panic(err)
+		}
 
-			var initialResponse string
+		temp_total_results := strings.Split(
+			strings.Split(
+				strings.Split(initialResponse, `jobPaginationLegend`)[1], "</span>")[0], " ")
+		total_results, _ := strconv.Atoi(temp_total_results[len(temp_total_results)-1])
+
+		for i := 0; i <= total_results; i += number_results_per_page {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, fmt.Sprintf(b_start_url, i)))
+			var pageResponse string
 			if err := chromedp.Run(ctx,
-				chromedp.Navigate(fmt.Sprintf(b_start_url, start_offset)),
-				chromedp.OuterHTML(".body_Chrome", &initialResponse),
+				chromedp.Navigate(fmt.Sprintf(b_start_url, i)),
+				chromedp.OuterHTML(".body_Chrome", &pageResponse),
 			); err != nil {
 				panic(err)
 			}
 
-			temp_total_results := strings.Split(
-				strings.Split(
-					strings.Split(initialResponse, `jobPaginationLegend`)[1], "</span>")[0], " ")
-			total_results, _ := strconv.Atoi(temp_total_results[len(temp_total_results)-1])
+			results_sections := strings.Split(pageResponse, `<li class="listSingleColumnItem">`)
+			for q := 1; q < len(results_sections); q++ {
+				elem := results_sections[q]
+				result_title := strings.Split(strings.Split(strings.Split(elem, `<a href="`)[1], `">`)[1], `</a>`)[0]
+				result_url := strings.Split(strings.Split(elem, `<a href="`)[1], `"`)[0]
+				result_location := strings.Split(strings.Split(elem, `<span class="listSingleColumnItemMiscDataItem">`)[1], `</span>`)[0]
+				result_date := strings.Split(strings.Split(elem, `Posted `)[1], `</span>`)[0]
+				result_description := strings.Split(strings.Split(elem, `<div class="listSingleColumnItemDescription">`)[1], `<a`)[0]
 
-			for i := 0; i <= total_results; i += number_results_per_page {
-				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, fmt.Sprintf(b_start_url, i)))
-				var pageResponse string
-				if err := chromedp.Run(ctx,
-					chromedp.Navigate(fmt.Sprintf(b_start_url, i)),
-					chromedp.OuterHTML(".body_Chrome", &pageResponse),
-				); err != nil {
-					panic(err)
+				temp_elem_json := Job{
+					result_title,
+					result_url,
+					result_location,
+					result_date,
+					result_description,
 				}
 
-				results_sections := strings.Split(pageResponse, `<li class="listSingleColumnItem">`)
-				for q := 1; q < len(results_sections); q++ {
-					elem := results_sections[q]
-					result_title := strings.Split(strings.Split(strings.Split(elem, `<a href="`)[1], `">`)[1], `</a>`)[0]
-					result_url := strings.Split(strings.Split(elem, `<a href="`)[1], `"`)[0]
-					result_location := strings.Split(strings.Split(elem, `<span class="listSingleColumnItemMiscDataItem">`)[1], `</span>`)[0]
-					result_date := strings.Split(strings.Split(elem, `Posted `)[1], `</span>`)[0]
-					result_description := strings.Split(strings.Split(elem, `<div class="listSingleColumnItemDescription">`)[1], `<a`)[0]
-
-					temp_elem_json := Job{
-						result_title,
-						result_url,
-						result_location,
-						result_date,
-						result_description,
-					}
-
-					elem_json, err := json.Marshal(temp_elem_json)
-					if err != nil {
-						panic(err.Error())
-					}
-
-					results = append(results, Result{
-						runtime.Name,
-						result_title,
-						result_url,
-						elem_json,
-					})
-				}
-			}
-			results_marshal, err := json.Marshal(results)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(results_marshal)}
-
-		} else {
-			file, _ := os.Open("response.html")
-			pageResponse, _ := ioutil.ReadAll(file)
-			var jobs []Job
-			err := json.Unmarshal(pageResponse, &jobs)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			for _, elem := range jobs {
-
-				result_title := elem.Title
-				result_url := elem.Url
-
-				elem_json, err := json.Marshal(elem)
+				elem_json, err := json.Marshal(temp_elem_json)
 				if err != nil {
 					panic(err.Error())
 				}
@@ -6594,13 +5104,20 @@ func (runtime Runtime) Bcg(
 			}
 		}
 	}
+
 	return
 }
 
-func (runtime Runtime) Deloitte(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Deloitte(version int) (results []Result) {
 	switch version {
 	case 1:
+
+		t := &http.Transport{}
+		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+		dir, err := os.Getwd()
+		if err != nil {
+			panic(err.Error())
+		}
 
 		initial_file_name := "deloitteDepartments.html"
 
@@ -6616,189 +5133,53 @@ func (runtime Runtime) Deloitte(
 			Description string
 		}
 
-		if !isLocal {
+		ctx, cancel := chromedp.NewContext(context.Background())
+		defer cancel()
 
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
+		var res []byte
+		var initialResponse string
+		if err := chromedp.Run(ctx,
+			chromedp.Navigate("https://jobs2.deloitte.com/us/en/c/analytics-jobs"),
+			chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
+			chromedp.EvaluateAsDevTools(`document.getElementsByClassName("clearall")[0].click()`, &res),
+			chromedp.Sleep(SecondsSleep*time.Second),
+			chromedp.WaitReady(`.phs-jobs-block`, chromedp.ByQuery),
+			chromedp.OuterHTML("html", &initialResponse),
+		); err != nil {
+			panic(err)
+		}
+		SaveResponseToFileWithFileName(initialResponse, initial_file_name)
 
-			ctx, cancel := chromedp.NewContext(context.Background())
-			defer cancel()
+		c := colly.NewCollector()
+		c.WithTransport(t)
+		x := c.Clone()
+		x.WithTransport(t)
 
-			var res []byte
-			var initialResponse string
-			if err := chromedp.Run(ctx,
-				chromedp.Navigate("https://jobs2.deloitte.com/us/en/c/analytics-jobs"),
-				chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
-				chromedp.EvaluateAsDevTools(`document.getElementsByClassName("clearall")[0].click()`, &res),
-				chromedp.Sleep(SecondsSleep*time.Second),
-				chromedp.WaitReady(`.phs-jobs-block`, chromedp.ByQuery),
-				chromedp.OuterHTML("html", &initialResponse),
-			); err != nil {
-				panic(err)
-			}
-			SaveResponseToFileWithFileName(initialResponse, initial_file_name)
+		c.OnHTML("html", func(e *colly.HTMLElement) {
+			e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
+				result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
+				result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
+				result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
+				result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
+				result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
+				result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
+				result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
+				result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
+				result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
 
-			c := colly.NewCollector()
-			c.WithTransport(t)
-			x := c.Clone()
-			x.WithTransport(t)
-
-			c.OnHTML("html", func(e *colly.HTMLElement) {
-				e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
-					result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
-					result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
-					result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
-					result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
-					result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
-					result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
-					result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
-					result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
-					result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
-
-					temp_elem_json := Job{
-						result_url,
-						result_title,
-						result_company,
-						result_entity,
-						result_department,
-						result_id,
-						result_type,
-						result_date,
-						result_description,
-					}
-
-					elem_json, err := json.Marshal(temp_elem_json)
-					if err != nil {
-						panic(err.Error())
-					}
-
-					results = append(results, Result{
-						runtime.Name,
-						result_title,
-						result_url,
-						elem_json,
-					})
-				})
-
-				temp_number_of_jobs := e.ChildAttr(".search-bottom-count", "data-ph-at-total-jobs-text")
-				number_of_jobs, _ := strconv.Atoi(temp_number_of_jobs)
-
-				number_results_per_page := 50
-				jobs_base_url := e.ChildAttr(`meta[property="og:url"]`, "content") + "?s=1&from=%d"
-
-				for i := number_results_per_page; i <= number_of_jobs; i += number_results_per_page {
-
-					sub_department_url := fmt.Sprintf(jobs_base_url, i)
-
-					var departmentSubPageResponse string
-					if err := chromedp.Run(ctx,
-						chromedp.Navigate(sub_department_url),
-						chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
-						chromedp.OuterHTML("html", &departmentSubPageResponse),
-					); err != nil {
-						panic(err)
-					}
-
-					sub_file_name := fmt.Sprintf("sub_department_url%d.html", i)
-					SaveResponseToFileWithFileName(departmentSubPageResponse, sub_file_name)
-					x.Visit("file:" + dir + "/" + sub_file_name)
-					time.Sleep(SecondsSleep * time.Second)
-
-					RemoveFileWithFileName(sub_file_name)
+				temp_elem_json := Job{
+					result_url,
+					result_title,
+					result_company,
+					result_entity,
+					result_department,
+					result_id,
+					result_type,
+					result_date,
+					result_description,
 				}
-			})
 
-			c.OnRequest(func(r *colly.Request) {
-				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-			})
-
-			c.OnError(func(r *colly.Response, err error) {
-				fmt.Println(
-					Red("Request URL:"), Red(r.Request.URL),
-					Red("failed with response:"), Red(r),
-					Red("\nError:"), Red(err))
-			})
-
-			c.OnScraped(func(r *colly.Response) {
-				results_marshal, err := json.Marshal(results)
-				if err != nil {
-					panic(err.Error())
-				}
-				response = Response{[]byte(results_marshal)}
-
-				RemoveFileWithFileName(initial_file_name)
-			})
-
-			x.OnHTML("html", func(e *colly.HTMLElement) {
-				e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
-					result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
-					result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
-					result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
-					result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
-					result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
-					result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
-					result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
-					result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
-					result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
-
-					temp_elem_json := Job{
-						result_url,
-						result_title,
-						result_company,
-						result_entity,
-						result_department,
-						result_id,
-						result_type,
-						result_date,
-						result_description,
-					}
-
-					elem_json, err := json.Marshal(temp_elem_json)
-					if err != nil {
-						panic(err.Error())
-					}
-
-					results = append(results, Result{
-						runtime.Name,
-						result_title,
-						result_url,
-						elem_json,
-					})
-				})
-			})
-
-			x.OnRequest(func(r *colly.Request) {
-				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-			})
-
-			x.OnError(func(r *colly.Response, err error) {
-				fmt.Println(
-					Red("Request URL:"), Red(r.Request.URL),
-					Red("failed with response:"), Red(r),
-					Red("\nError:"), Red(err))
-			})
-
-			c.WithTransport(t)
-			c.Visit("file:" + dir + "/" + initial_file_name)
-		} else {
-			file, _ := os.Open("response.html")
-			pageResponse, _ := ioutil.ReadAll(file)
-			var jobs []Job
-			err := json.Unmarshal(pageResponse, &jobs)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			for _, elem := range jobs {
-
-				result_title := elem.Title
-				result_url := elem.Url
-
-				elem_json, err := json.Marshal(elem)
+				elem_json, err := json.Marshal(temp_elem_json)
 				if err != nil {
 					panic(err.Error())
 				}
@@ -6809,15 +5190,104 @@ func (runtime Runtime) Deloitte(
 					result_url,
 					elem_json,
 				})
+			})
+
+			temp_number_of_jobs := e.ChildAttr(".search-bottom-count", "data-ph-at-total-jobs-text")
+			number_of_jobs, _ := strconv.Atoi(temp_number_of_jobs)
+
+			number_results_per_page := 50
+			jobs_base_url := e.ChildAttr(`meta[property="og:url"]`, "content") + "?s=1&from=%d"
+
+			for i := number_results_per_page; i <= number_of_jobs; i += number_results_per_page {
+
+				sub_department_url := fmt.Sprintf(jobs_base_url, i)
+
+				var departmentSubPageResponse string
+				if err := chromedp.Run(ctx,
+					chromedp.Navigate(sub_department_url),
+					chromedp.WaitReady(`.jobs-list-item`, chromedp.ByQuery),
+					chromedp.OuterHTML("html", &departmentSubPageResponse),
+				); err != nil {
+					panic(err)
+				}
+
+				sub_file_name := fmt.Sprintf("sub_department_url%d.html", i)
+				SaveResponseToFileWithFileName(departmentSubPageResponse, sub_file_name)
+				x.Visit("file:" + dir + "/" + sub_file_name)
+				time.Sleep(SecondsSleep * time.Second)
+
+				RemoveFileWithFileName(sub_file_name)
 			}
-		}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		x.OnHTML("html", func(e *colly.HTMLElement) {
+			e.ForEach(".jobs-list-item", func(_ int, el *colly.HTMLElement) {
+				result_url := strings.Join(strings.Fields(strings.TrimSpace(el.ChildAttr("a", "href"))), " ")
+				result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText("h4"))), " ")
+				result_company := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberfirm"))), " ")
+				result_entity := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".memberentity"))), " ")
+				result_department := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-category"))), " ")
+				result_id := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-id"))), " ")
+				result_type := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-type"))), " ")
+				result_date := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-postdate"))), " ")
+				result_description := strings.Join(strings.Fields(strings.TrimSpace(el.ChildText(".job-description"))), " ")
+
+				temp_elem_json := Job{
+					result_url,
+					result_title,
+					result_company,
+					result_entity,
+					result_department,
+					result_id,
+					result_type,
+					result_date,
+					result_description,
+				}
+
+				elem_json, err := json.Marshal(temp_elem_json)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			})
+		})
+
+		x.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		x.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		c.WithTransport(t)
+		c.Visit("file:" + dir + "/" + initial_file_name)
 	}
 
 	return
 }
 
-func (runtime Runtime) Bayer(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Bayer(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -6840,116 +5310,67 @@ func (runtime Runtime) Bayer(
 			Location string
 		}
 
-		var jsonJobs []Job
+		c.OnHTML(".content", func(e *colly.HTMLElement) {
+			e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
+				result_title := el.ChildText(tag_title)
+				result_url := fmt.Sprintf(base_job_url, el.ChildAttr(tag_title, "href"))
+				result_date := el.ChildText(tag_date)
+				result_country := el.ChildText(tag_country)
+				result_location := el.ChildText(tag_location)
 
-		if !isLocal {
+				_, err := netUrl.ParseRequestURI(result_url)
+				if err == nil {
 
-			c.OnHTML(".content", func(e *colly.HTMLElement) {
-				e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
-					result_title := el.ChildText(tag_title)
-					result_url := fmt.Sprintf(base_job_url, el.ChildAttr(tag_title, "href"))
-					result_date := el.ChildText(tag_date)
-					result_country := el.ChildText(tag_country)
-					result_location := el.ChildText(tag_location)
-
-					_, err := netUrl.ParseRequestURI(result_url)
-					if err == nil {
-
-						temp_elem_json := Job{
-							result_title,
-							result_url,
-							result_date,
-							result_country,
-							result_location,
-						}
-
-						elem_json, err := json.Marshal(temp_elem_json)
-						if err != nil {
-							panic(err.Error())
-						}
-
-						results = append(results, Result{
-							runtime.Name,
-							result_title,
-							result_url,
-							elem_json,
-						})
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_date,
+						result_country,
+						result_location,
 					}
-				})
 
-				goqueryselect := e.DOM
-				temp_last_page, _ := goqueryselect.Find(tag_last_page).Find("a").Attr("href")
-				split_temp_last_page := strings.Split(temp_last_page, "=")
-				last_page, _ := strconv.Atoi(split_temp_last_page[len(split_temp_last_page)-1])
-				if counter <= last_page {
-					counter++
-					time.Sleep(SecondsSleep * time.Second)
-					c.Visit(fmt.Sprintf(start_url, counter))
-				}
-			})
-
-			c.OnRequest(func(r *colly.Request) {
-				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-			})
-
-			c.OnScraped(func(r *colly.Response) {
-				jsonJobs_marshal, err := json.Marshal(jsonJobs)
-				if err != nil {
-					panic(err.Error())
-				}
-				response = Response{[]byte(jsonJobs_marshal)}
-			})
-
-			c.OnError(func(r *colly.Response, err error) {
-				fmt.Println(
-					Red("Request URL:"), Red(r.Request.URL),
-					Red("failed with response:"), Red(r),
-					Red("\nError:"), Red(err))
-			})
-			c.Visit(fmt.Sprintf(start_url, 0))
-		} else {
-			var jsonJobs []Job
-			c.OnResponse(func(r *colly.Response) {
-				err := json.Unmarshal(r.Body, &jsonJobs)
-				if err != nil {
-					panic(err.Error())
-				}
-				for _, elem := range jsonJobs {
-					elem_json, err := json.Marshal(elem)
+					elem_json, err := json.Marshal(temp_elem_json)
 					if err != nil {
 						panic(err.Error())
 					}
+
 					results = append(results, Result{
 						runtime.Name,
-						elem.Url,
-						elem.Title,
+						result_title,
+						result_url,
 						elem_json,
 					})
 				}
 			})
-			c.OnScraped(func(r *colly.Response) {
-				jsonJobs_marshal, err := json.Marshal(jsonJobs)
-				if err != nil {
-					panic(err.Error())
-				}
-				response = Response{[]byte(jsonJobs_marshal)}
-			})
 
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
+			goqueryselect := e.DOM
+			temp_last_page, _ := goqueryselect.Find(tag_last_page).Find("a").Attr("href")
+			split_temp_last_page := strings.Split(temp_last_page, "=")
+			last_page, _ := strconv.Atoi(split_temp_last_page[len(split_temp_last_page)-1])
+			if counter <= last_page {
+				counter++
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, counter))
 			}
-			c.Visit("file:" + dir + "/response.html")
-		}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		c.Visit(fmt.Sprintf(start_url, 0))
 	}
 	return
 }
 
-func (runtime Runtime) Roche(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Roche(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -6986,16 +5407,14 @@ func (runtime Runtime) Roche(
 			} `json:"jobs"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJsonJobs JsonJobs
-			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJsonJobs.Jobs.Items {
+			for _, elem := range jsonJobs.Jobs.Items {
 
 				result_title := elem.Title
 				result_url := fmt.Sprintf(base_url, elem.DetailsURL)
@@ -7013,9 +5432,7 @@ func (runtime Runtime) Roche(
 				})
 			}
 
-			jsonJobs.Jobs.Items = append(jsonJobs.Jobs.Items, tempJsonJobs.Jobs.Items...)
-
-			total_matches := tempJsonJobs.Jobs.TotalMatches
+			total_matches := jsonJobs.Jobs.TotalMatches
 			total_pages := total_matches / number_results_per_page
 			for i := 1; i <= total_pages; i++ {
 				time.Sleep(SecondsSleep * time.Second)
@@ -7027,14 +5444,6 @@ func (runtime Runtime) Roche(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
-		})
-
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
 				Red("Request URL:"), Red(r.Request.URL),
@@ -7042,24 +5451,12 @@ func (runtime Runtime) Roche(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(fmt.Sprintf(start_url, number_results_per_page, 0))
-		}
+		c.Visit(fmt.Sprintf(start_url, number_results_per_page, 0))
 	}
 	return
 }
 
-func (runtime Runtime) Msd(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Msd(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -7111,97 +5508,56 @@ func (runtime Runtime) Msd(
 		start_url := "https://jobs.msd.com/gb/en/search-results?s=1&from=%d"
 		base_job_url := "https://jobs.msd.com/gb/en/job/%s"
 
+		ctx, cancel := chromedp.NewContext(context.Background())
+		defer cancel()
+
+		var initialResponse string
+		if err := chromedp.Run(ctx,
+			chromedp.Navigate(fmt.Sprintf(start_url, 0)),
+			chromedp.OuterHTML(".desktop", &initialResponse),
+		); err != nil {
+			panic(err)
+		}
+
+		temp_jsonjob_section := strings.Split(
+			strings.Split(
+				initialResponse, `"eagerLoadRefineSearch":`)[1], `,"jobwidgetsettings`)[0]
+		jsonjobs_sections := `{"eagerLoadRefineSearch":` + temp_jsonjob_section + "}"
+
 		var jsonJobs JsonJobs
+		err := json.Unmarshal([]byte(jsonjobs_sections), &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
 
-		if !isLocal {
+		items_per_page := jsonJobs.EagerLoadRefineSearch.Hits
+		total_matches := jsonJobs.EagerLoadRefineSearch.TotalHits
+		total_pages := total_matches / items_per_page
+		for i := 1; i <= total_pages+1; i++ {
 
-			ctx, cancel := chromedp.NewContext(context.Background())
-			defer cancel()
+			jobs_url := fmt.Sprintf(start_url, i*items_per_page)
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, jobs_url))
 
-			var initialResponse string
+			var jobResponse string
 			if err := chromedp.Run(ctx,
-				chromedp.Navigate(fmt.Sprintf(start_url, 0)),
-				chromedp.OuterHTML(".desktop", &initialResponse),
+				chromedp.Navigate(jobs_url),
+				chromedp.OuterHTML(".desktop", &jobResponse),
 			); err != nil {
 				panic(err)
 			}
 
 			temp_jsonjob_section := strings.Split(
 				strings.Split(
-					initialResponse, `"eagerLoadRefineSearch":`)[1], `,"jobwidgetsettings`)[0]
+					jobResponse, `"eagerLoadRefineSearch":`)[1], `,"jobwidgetsettings`)[0]
 			jsonjobs_sections := `{"eagerLoadRefineSearch":` + temp_jsonjob_section + "}"
 
-			var tempJsonJobs JsonJobs
-			err := json.Unmarshal([]byte(jsonjobs_sections), &tempJsonJobs)
+			var tempJson JsonJobs
+			err := json.Unmarshal([]byte(jsonjobs_sections), &tempJson)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			items_per_page := tempJsonJobs.EagerLoadRefineSearch.Hits
-			total_matches := tempJsonJobs.EagerLoadRefineSearch.TotalHits
-			total_pages := total_matches / items_per_page
-			for i := 1; i <= total_pages+1; i++ {
-
-				jobs_url := fmt.Sprintf(start_url, i*items_per_page)
-				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, jobs_url))
-
-				var jobResponse string
-				if err := chromedp.Run(ctx,
-					chromedp.Navigate(jobs_url),
-					chromedp.OuterHTML(".desktop", &jobResponse),
-				); err != nil {
-					panic(err)
-				}
-
-				temp_jsonjob_section := strings.Split(
-					strings.Split(
-						jobResponse, `"eagerLoadRefineSearch":`)[1], `,"jobwidgetsettings`)[0]
-				jsonjobs_sections := `{"eagerLoadRefineSearch":` + temp_jsonjob_section + "}"
-
-				var tempJson JsonJobs
-				err := json.Unmarshal([]byte(jsonjobs_sections), &tempJson)
-				if err != nil {
-					panic(err.Error())
-				}
-
-				for _, elem := range tempJson.EagerLoadRefineSearch.Data.Jobs {
-
-					result_title := elem.Title
-					result_url := fmt.Sprintf(base_job_url, elem.JobID)
-
-					elem_json, err := json.Marshal(elem)
-					if err != nil {
-						panic(err.Error())
-					}
-
-					results = append(results, Result{
-						runtime.Name,
-						result_title,
-						result_url,
-						elem_json,
-					})
-				}
-
-				jsonJobs.EagerLoadRefineSearch.Data.Jobs = append(
-					jsonJobs.EagerLoadRefineSearch.Data.Jobs,
-					tempJson.EagerLoadRefineSearch.Data.Jobs...)
-			}
-
-			results_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(results_marshal)}
-		} else {
-			file, _ := os.Open("response.html")
-			pageResponse, _ := ioutil.ReadAll(file)
-			var jsonJobs JsonJobs
-			err := json.Unmarshal(pageResponse, &jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			for _, elem := range jsonJobs.EagerLoadRefineSearch.Data.Jobs {
+			for _, elem := range tempJson.EagerLoadRefineSearch.Data.Jobs {
 
 				result_title := elem.Title
 				result_url := fmt.Sprintf(base_job_url, elem.JobID)
@@ -7223,8 +5579,7 @@ func (runtime Runtime) Msd(
 	return
 }
 
-func (runtime Runtime) Subitoit(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Subitoit(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -7276,10 +5631,6 @@ func (runtime Runtime) Subitoit(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
 				Red("Request URL:"), Red(r.Request.URL),
@@ -7287,24 +5638,12 @@ func (runtime Runtime) Subitoit(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Square(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Square(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -7371,16 +5710,14 @@ func (runtime Runtime) Square(
 			} `json:"content"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Content {
+			for _, elem := range jsonJobs.Content {
 
 				result_title := elem.Name
 				result_url := fmt.Sprintf(base_job_url, elem.ID)
@@ -7398,30 +5735,16 @@ func (runtime Runtime) Square(
 				})
 			}
 
-			jsonJobs.Content = append(jsonJobs.Content, tempJson.Content...)
-
-			if isLocal {
-				return
-			} else {
-				total_matches := tempJson.TotalFound
-				total_pages := total_matches / number_results_per_page
-				for i := 1; i <= total_pages; i++ {
-					time.Sleep(SecondsSleep * time.Second)
-					c.Visit(fmt.Sprintf(start_url, number_results_per_page*i))
-				}
+			total_matches := jsonJobs.TotalFound
+			total_pages := total_matches / number_results_per_page
+			for i := 1; i <= total_pages; i++ {
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, number_results_per_page*i))
 			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -7431,24 +5754,12 @@ func (runtime Runtime) Square(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(fmt.Sprintf(start_url, 0))
-		}
+		c.Visit(fmt.Sprintf(start_url, 0))
 	}
 	return
 }
 
-func (runtime Runtime) Facebook(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Facebook(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -7465,111 +5776,72 @@ func (runtime Runtime) Facebook(
 			Info     string
 		}
 
-		if !isLocal {
+		c.OnHTML("#search_result", func(e *colly.HTMLElement) {
+			e.ForEach("a", func(_ int, el *colly.HTMLElement) {
+				goqueryselector := el.DOM
+				result_url := fmt.Sprintf(base_job_url, el.Attr("href"))
+				result_title := el.ChildText("._8sel")
+				result_location := goqueryselector.Find("._97fe ._8sen").Find("span").Text()
 
-			c.OnHTML("#search_result", func(e *colly.HTMLElement) {
-				e.ForEach("a", func(_ int, el *colly.HTMLElement) {
-					goqueryselector := el.DOM
-					result_url := fmt.Sprintf(base_job_url, el.Attr("href"))
-					result_title := el.ChildText("._8sel")
-					result_location := goqueryselector.Find("._97fe ._8sen").Find("span").Text()
+				var result_info []string
+				temp_result_info := el.ChildTexts("._8see")
+				for _, elem := range temp_result_info {
+					if !strings.Contains(elem, "+") {
+						result_info = append(result_info, elem)
+					}
+				}
 
-					var result_info []string
-					temp_result_info := el.ChildTexts("._8see")
-					for _, elem := range temp_result_info {
-						if !strings.Contains(elem, "+") {
-							result_info = append(result_info, elem)
-						}
+				_, err := netUrl.ParseRequestURI(result_url)
+				if err == nil {
+					temp_elem_json := Job{
+						result_title,
+						result_url,
+						result_location,
+						strings.Join(result_info, " - "),
 					}
 
-					_, err := netUrl.ParseRequestURI(result_url)
-					if err == nil {
-						temp_elem_json := Job{
-							result_title,
-							result_url,
-							result_location,
-							strings.Join(result_info, " - "),
-						}
-
-						elem_json, err := json.Marshal(temp_elem_json)
-						if err != nil {
-							panic(err.Error())
-						}
-
-						results = append(results, Result{
-							runtime.Name,
-							result_title,
-							result_url,
-							elem_json,
-						})
+					elem_json, err := json.Marshal(temp_elem_json)
+					if err != nil {
+						panic(err.Error())
 					}
-				})
 
-				array_number_results := strings.Split(e.ChildText("._6v-m"), " ")
-				string_number_results := array_number_results[len(array_number_results)-1]
-				number_results, _ := strconv.Atoi(string_number_results)
-				total_pages := number_results / number_results_per_page
-
-				for i := 2; i <= total_pages; i++ {
-					time.Sleep(SecondsSleep * time.Second)
-					c.Visit(fmt.Sprintf(start_url, i))
+					results = append(results, Result{
+						runtime.Name,
+						result_title,
+						result_url,
+						elem_json,
+					})
 				}
 			})
 
-			c.OnRequest(func(r *colly.Request) {
-				fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-			})
+			array_number_results := strings.Split(e.ChildText("._6v-m"), " ")
+			string_number_results := array_number_results[len(array_number_results)-1]
+			number_results, _ := strconv.Atoi(string_number_results)
+			total_pages := number_results / number_results_per_page
 
-			c.OnScraped(func(r *colly.Response) {
-				results_marshal, err := json.Marshal(results)
-				if err != nil {
-					panic(err.Error())
-				}
-				response = Response{[]byte(results_marshal)}
-			})
-
-			c.OnError(func(r *colly.Response, err error) {
-				fmt.Println(
-					Red("Request URL:"), Red(r.Request.URL),
-					Red("failed with response:"), Red(r),
-					Red("\nError:"), Red(err))
-			})
-
-			c.Visit(fmt.Sprintf(start_url, 1))
-		} else {
-			file, _ := os.Open("response.html")
-			pageResponse, _ := ioutil.ReadAll(file)
-			var jsonJobs []Job
-			err := json.Unmarshal(pageResponse, &jsonJobs)
-			if err != nil {
-				panic(err.Error())
+			for i := 2; i <= total_pages; i++ {
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, i))
 			}
+		})
 
-			for _, elem := range jsonJobs {
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
 
-				result_title := elem.Title
-				result_url := elem.Url
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
 
-				elem_json, err := json.Marshal(elem)
-				if err != nil {
-					panic(err.Error())
-				}
-
-				results = append(results, Result{
-					runtime.Name,
-					result_title,
-					result_url,
-					elem_json,
-				})
-			}
-		}
+		c.Visit(fmt.Sprintf(start_url, 1))
 	}
 	return
 }
 
-func (runtime Runtime) Paintgun(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Paintgun(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -7645,16 +5917,14 @@ func (runtime Runtime) Paintgun(
 			UsingFallbackData bool          `json:"usingFallbackData"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Items {
+			for _, elem := range jsonJobs.Items {
 
 				result_title := elem.Title
 				result_url := fmt.Sprintf(job_base_url, elem.IDParam)
@@ -7671,20 +5941,10 @@ func (runtime Runtime) Paintgun(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Items = append(jsonJobs.Items, tempJson.Items...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -7694,47 +5954,28 @@ func (runtime Runtime) Paintgun(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Nen(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Nen(version int) (results []Result) {
 	switch version {
 	case 1:
 
-		results = append(results, Result{
-			runtime.Name,
-			"Salesforce Lead",
-			"https://www.linkedin.com/jobs/view/1947567619",
-			[]byte("{}"),
-		})
-
-		results_marshal, err := json.Marshal(results)
-		if err != nil {
-			panic(err.Error())
-		}
-		response = Response{[]byte(results_marshal)}
+		/*
+			results = append(results, Result{
+				runtime.Name,
+				"Salesforce Lead",
+				"https://www.linkedin.com/jobs/view/1947567619",
+				[]byte("{}"),
+			})
+		*/
 	}
 	return
 }
 
-func (runtime Runtime) Amboss(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Amboss(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -7783,10 +6024,6 @@ func (runtime Runtime) Amboss(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -7798,25 +6035,12 @@ func (runtime Runtime) Amboss(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Chatterbug(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Chatterbug(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -7868,16 +6092,14 @@ func (runtime Runtime) Chatterbug(
 			} `json:"offers"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Offers {
+			for _, elem := range jsonJobs.Offers {
 
 				result_title := elem.Title
 				result_url := elem.CareersURL
@@ -7894,20 +6116,10 @@ func (runtime Runtime) Chatterbug(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Offers = append(jsonJobs.Offers, tempJson.Offers...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -7917,25 +6129,12 @@ func (runtime Runtime) Chatterbug(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(p_start_url)
-		}
+		c.Visit(p_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Infarm(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Infarm(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -7972,16 +6171,14 @@ func (runtime Runtime) Infarm(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -7998,20 +6195,10 @@ func (runtime Runtime) Infarm(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -8021,25 +6208,12 @@ func (runtime Runtime) Infarm(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Pitch(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Pitch(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8076,16 +6250,14 @@ func (runtime Runtime) Pitch(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -8102,20 +6274,10 @@ func (runtime Runtime) Pitch(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -8125,25 +6287,12 @@ func (runtime Runtime) Pitch(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Beat81(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Beat81(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8173,16 +6322,14 @@ func (runtime Runtime) Beat81(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -8199,20 +6346,10 @@ func (runtime Runtime) Beat81(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -8222,25 +6359,12 @@ func (runtime Runtime) Beat81(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Careerfoundry(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Careerfoundry(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8292,16 +6416,14 @@ func (runtime Runtime) Careerfoundry(
 			} `json:"offers"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Offers {
+			for _, elem := range jsonJobs.Offers {
 
 				result_title := elem.Title
 				result_url := elem.CareersURL
@@ -8318,20 +6440,10 @@ func (runtime Runtime) Careerfoundry(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Offers = append(jsonJobs.Offers, tempJson.Offers...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -8341,25 +6453,12 @@ func (runtime Runtime) Careerfoundry(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(p_start_url)
-		}
+		c.Visit(p_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Casparhealth(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Casparhealth(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8412,10 +6511,6 @@ func (runtime Runtime) Casparhealth(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -8427,25 +6522,12 @@ func (runtime Runtime) Casparhealth(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Ecosia(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Ecosia(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8475,16 +6557,14 @@ func (runtime Runtime) Ecosia(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -8501,20 +6581,10 @@ func (runtime Runtime) Ecosia(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -8524,25 +6594,12 @@ func (runtime Runtime) Ecosia(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Forto(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Forto(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8572,16 +6629,14 @@ func (runtime Runtime) Forto(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -8598,20 +6653,10 @@ func (runtime Runtime) Forto(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -8621,25 +6666,12 @@ func (runtime Runtime) Forto(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Idagio(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Idagio(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8692,10 +6724,6 @@ func (runtime Runtime) Idagio(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -8707,25 +6735,12 @@ func (runtime Runtime) Idagio(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Joblift(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Joblift(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8781,10 +6796,6 @@ func (runtime Runtime) Joblift(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -8796,25 +6807,12 @@ func (runtime Runtime) Joblift(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Kontist(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Kontist(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8845,16 +6843,14 @@ func (runtime Runtime) Kontist(
 			HasMore bool `json:"has_more"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Data {
+			for _, elem := range jsonJobs.Data {
 
 				result_title := elem.Title
 				result_url := elem.JobURL
@@ -8871,20 +6867,10 @@ func (runtime Runtime) Kontist(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Data = append(jsonJobs.Data, tempJson.Data...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -8894,25 +6880,12 @@ func (runtime Runtime) Kontist(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Medloop(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Medloop(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -8949,16 +6922,14 @@ func (runtime Runtime) Medloop(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -8975,20 +6946,10 @@ func (runtime Runtime) Medloop(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -8998,25 +6959,12 @@ func (runtime Runtime) Medloop(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Medwing(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Medwing(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9062,16 +7010,14 @@ func (runtime Runtime) Medwing(
 			Location      []int         `json:"location"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Title.Rendered
 				result_url := elem.Link
@@ -9088,20 +7034,10 @@ func (runtime Runtime) Medwing(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -9111,25 +7047,12 @@ func (runtime Runtime) Medwing(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Merantix(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Merantix(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9184,10 +7107,6 @@ func (runtime Runtime) Merantix(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -9199,25 +7118,12 @@ func (runtime Runtime) Merantix(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Ninox(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Ninox(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9263,10 +7169,6 @@ func (runtime Runtime) Ninox(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -9278,25 +7180,12 @@ func (runtime Runtime) Ninox(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Zenjob(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Zenjob(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9345,10 +7234,6 @@ func (runtime Runtime) Zenjob(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -9360,25 +7245,12 @@ func (runtime Runtime) Zenjob(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Plantix(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Plantix(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9430,16 +7302,14 @@ func (runtime Runtime) Plantix(
 			} `json:"offers"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Offers {
+			for _, elem := range jsonJobs.Offers {
 
 				result_title := elem.Title
 				result_url := elem.CareersURL
@@ -9456,20 +7326,10 @@ func (runtime Runtime) Plantix(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Offers = append(jsonJobs.Offers, tempJson.Offers...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -9479,25 +7339,12 @@ func (runtime Runtime) Plantix(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(p_start_url)
-		}
+		c.Visit(p_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Coachhub(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Coachhub(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9545,10 +7392,6 @@ func (runtime Runtime) Coachhub(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -9560,25 +7403,12 @@ func (runtime Runtime) Coachhub(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Raisin(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Raisin(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9621,10 +7451,6 @@ func (runtime Runtime) Raisin(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -9636,25 +7462,12 @@ func (runtime Runtime) Raisin(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Acatus(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Acatus(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9706,10 +7519,6 @@ func (runtime Runtime) Acatus(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -9721,25 +7530,12 @@ func (runtime Runtime) Acatus(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Adjust(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Adjust(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9776,16 +7572,14 @@ func (runtime Runtime) Adjust(
 			} `json:"meta"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Title
 				result_url := elem.AbsoluteURL
@@ -9802,20 +7596,10 @@ func (runtime Runtime) Adjust(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJson.Jobs...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -9825,25 +7609,12 @@ func (runtime Runtime) Adjust(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Automationhero(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Automationhero(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9873,16 +7644,14 @@ func (runtime Runtime) Automationhero(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -9899,20 +7668,10 @@ func (runtime Runtime) Automationhero(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -9922,25 +7681,12 @@ func (runtime Runtime) Automationhero(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Bonify(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Bonify(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -9987,21 +7733,19 @@ func (runtime Runtime) Bonify(
 			License string `json:"license"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
 			body := string(r.Body)
 			json_body := strings.Split(
 				strings.Split(
 					body, `resultsAllJobsListingsTrimmed":`)[1], `,"resultsCompanyBenefits`)[0]
 
-			var tempJson JsonJobs
-			err := json.Unmarshal([]byte(json_body), &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal([]byte(json_body), &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Results {
+			for _, elem := range jsonJobs.Results {
 
 				result_title := elem.Data.Title[0].Text
 				result_url := fmt.Sprintf(job_base_url, elem.UID)
@@ -10018,20 +7762,10 @@ func (runtime Runtime) Bonify(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Results = append(jsonJobs.Results, tempJson.Results...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -10041,25 +7775,12 @@ func (runtime Runtime) Bonify(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Bryter(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Bryter(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10102,10 +7823,6 @@ func (runtime Runtime) Bryter(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -10117,25 +7834,12 @@ func (runtime Runtime) Bryter(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Bunch(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Bunch(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10152,19 +7856,11 @@ func (runtime Runtime) Bunch(
 			"https://angel.co/company/bunch-hq/jobs/907192-product-launch-intern-internship",
 			[]byte("{}"),
 		})
-
-		results_marshal, err := json.Marshal(results)
-		if err != nil {
-			panic(err.Error())
-		}
-		response = Response{[]byte(results_marshal)}
 	}
 	return
 }
 
-func (runtime Runtime) Candis(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Candis(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10217,16 +7913,14 @@ func (runtime Runtime) Candis(
 			Terms []interface{} `json:"terms"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Offers {
+			for _, elem := range jsonJobs.Offers {
 
 				result_title := elem.Title
 				result_url := elem.CareersURL
@@ -10243,20 +7937,10 @@ func (runtime Runtime) Candis(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Offers = append(jsonJobs.Offers, tempJson.Offers...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -10266,25 +7950,12 @@ func (runtime Runtime) Candis(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(p_start_url)
-		}
+		c.Visit(p_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Cargoone(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Cargoone(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10314,16 +7985,14 @@ func (runtime Runtime) Cargoone(
 			ApplyURL  string `json:"applyUrl"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson {
+			for _, elem := range jsonJobs {
 
 				result_title := elem.Text
 				result_url := elem.HostedURL
@@ -10340,20 +8009,10 @@ func (runtime Runtime) Cargoone(
 					elem_json,
 				})
 			}
-
-			jsonJobs = append(jsonJobs, tempJson...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -10363,25 +8022,12 @@ func (runtime Runtime) Cargoone(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(c_start_url)
-		}
+		c.Visit(c_start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Construyo(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Construyo(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10434,10 +8080,6 @@ func (runtime Runtime) Construyo(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -10449,25 +8091,12 @@ func (runtime Runtime) Construyo(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Crosslend(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Crosslend(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10508,10 +8137,6 @@ func (runtime Runtime) Crosslend(
 			})
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -10523,24 +8148,12 @@ func (runtime Runtime) Crosslend(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(url)
-		}
+		c.Visit(url)
 	}
 	return
 }
 
-func (runtime Runtime) Bytedance(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Bytedance(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10639,13 +8252,13 @@ func (runtime Runtime) Bytedance(
 			panic(err.Error())
 		}
 
-		var tempJson Jobs
-		err = json.Unmarshal(bodyText, &tempJson)
+		var jsonJobs Jobs
+		err = json.Unmarshal(bodyText, &jsonJobs)
 		if err != nil {
 			panic(err.Error())
 		}
 
-		for _, elem := range tempJson.Data.JobPostList {
+		for _, elem := range jsonJobs.Data.JobPostList {
 			result_title := elem.Title
 			result_url := fmt.Sprintf(base_url, elem.ID)
 
@@ -10661,14 +8274,11 @@ func (runtime Runtime) Bytedance(
 				elem_json,
 			})
 		}
-		response = Response{bodyText}
 	}
 	return
 }
 
-func (runtime Runtime) Bmw(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Bmw(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10708,16 +8318,14 @@ func (runtime Runtime) Bmw(
 			} `json:"data"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Data {
+			for _, elem := range jsonJobs.Data {
 
 				result_title := elem.ReqTitle
 				result_url := fmt.Sprintf(base_job_url, elem.JobDescriptionLink)
@@ -10734,20 +8342,10 @@ func (runtime Runtime) Bmw(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Data = append(jsonJobs.Data, tempJson.Data...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -10757,24 +8355,12 @@ func (runtime Runtime) Bmw(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Infineon(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Infineon(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10830,13 +8416,13 @@ func (runtime Runtime) Infineon(
 			panic(err.Error())
 		}
 
-		var tempJson Jobs
-		err = json.Unmarshal(bodyText, &tempJson)
+		var jsonJobs Jobs
+		err = json.Unmarshal(bodyText, &jsonJobs)
 		if err != nil {
 			panic(err.Error())
 		}
 
-		for _, elem := range tempJson.Pages.Items {
+		for _, elem := range jsonJobs.Pages.Items {
 			result_title := elem.Title
 			result_url := fmt.Sprintf(base_url, elem.DetailPageURL)
 
@@ -10852,14 +8438,11 @@ func (runtime Runtime) Infineon(
 				elem_json,
 			})
 		}
-		response = Response{bodyText}
 	}
 	return
 }
 
-func (runtime Runtime) Porsche(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Porsche(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -10938,16 +8521,14 @@ func (runtime Runtime) Porsche(
 			} `json:"SearchResult"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.SearchResult.SearchResultItems {
+			for _, elem := range jsonJobs.SearchResult.SearchResultItems {
 
 				result_title := elem.MatchedObjectDescriptor.PositionTitle
 				result_url := elem.MatchedObjectDescriptor.PositionURI
@@ -10964,22 +8545,10 @@ func (runtime Runtime) Porsche(
 					elem_json,
 				})
 			}
-
-			jsonJobs.SearchResult.SearchResultItems = append(
-				jsonJobs.SearchResult.SearchResultItems,
-				tempJson.SearchResult.SearchResultItems...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -10989,24 +8558,12 @@ func (runtime Runtime) Porsche(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Bosch(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Bosch(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -11033,16 +8590,14 @@ func (runtime Runtime) Bosch(
 			} `json:"content"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson Jobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Content {
+			for _, elem := range jsonJobs.Content {
 
 				result_title := elem.Name
 				result_url := fmt.Sprintf(base_job_url, elem.ID)
@@ -11060,30 +8615,16 @@ func (runtime Runtime) Bosch(
 				})
 			}
 
-			jsonJobs.Content = append(jsonJobs.Content, tempJson.Content...)
-
-			if isLocal {
-				return
-			} else {
-				total_matches := tempJson.TotalFound
-				total_pages := total_matches / number_results_per_page
-				for i := 1; i <= total_pages; i++ {
-					time.Sleep(SecondsSleep * time.Second)
-					c.Visit(fmt.Sprintf(start_url, number_results_per_page*i))
-				}
+			total_matches := jsonJobs.TotalFound
+			total_pages := total_matches / number_results_per_page
+			for i := 1; i <= total_pages; i++ {
+				time.Sleep(SecondsSleep * time.Second)
+				c.Visit(fmt.Sprintf(start_url, number_results_per_page*i))
 			}
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -11093,24 +8634,12 @@ func (runtime Runtime) Bosch(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(fmt.Sprintf(start_url, 0))
-		}
+		c.Visit(fmt.Sprintf(start_url, 0))
 	}
 	return
 }
 
-func (runtime Runtime) Mckinsey(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Mckinsey(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -11149,16 +8678,14 @@ func (runtime Runtime) Mckinsey(
 			} `json:"response"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJsonJobs JsonJobs
-			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJsonJobs.Response.Docs {
+			for _, elem := range jsonJobs.Response.Docs {
 
 				result_title := elem.Title
 				result_url := fmt.Sprintf(base_url, elem.FriendlyURL)
@@ -11176,11 +8703,7 @@ func (runtime Runtime) Mckinsey(
 				})
 			}
 
-			jsonJobs.Response.Docs = append(
-				jsonJobs.Response.Docs,
-				tempJsonJobs.Response.Docs...)
-
-			total_pages := tempJsonJobs.Response.NumFound / number_results_per_page
+			total_pages := jsonJobs.Response.NumFound / number_results_per_page
 
 			if counter >= total_pages {
 				return
@@ -11195,14 +8718,6 @@ func (runtime Runtime) Mckinsey(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
-		})
-
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
 				Red("Request URL:"), Red(r.Request.URL),
@@ -11210,25 +8725,12 @@ func (runtime Runtime) Mckinsey(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(fmt.Sprintf(start_url, 0))
-		}
+		c.Visit(fmt.Sprintf(start_url, 0))
 	}
 	return
 }
 
-func (runtime Runtime) Sap(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Sap(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -11290,10 +8792,6 @@ func (runtime Runtime) Sap(
 			}
 		})
 
-		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
-		})
-
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
@@ -11305,25 +8803,12 @@ func (runtime Runtime) Sap(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(fmt.Sprintf(start_url, 0))
-		}
+		c.Visit(fmt.Sprintf(start_url, 0))
 	}
 	return
 }
 
-func (runtime Runtime) Puma(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Puma(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -11345,16 +8830,14 @@ func (runtime Runtime) Puma(
 			} `json:"teaser"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Teaser {
+			for _, elem := range jsonJobs.Teaser {
 
 				result_title := elem.Title
 				result_url := fmt.Sprintf(base_url, elem.URL)
@@ -11371,20 +8854,10 @@ func (runtime Runtime) Puma(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Teaser = append(jsonJobs.Teaser, tempJson.Teaser...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -11394,25 +8867,12 @@ func (runtime Runtime) Puma(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Daimler(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Daimler(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -11446,16 +8906,14 @@ func (runtime Runtime) Daimler(
 			} `json:"SearchResult"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.SearchResult.SearchResultItems {
+			for _, elem := range jsonJobs.SearchResult.SearchResultItems {
 
 				result_title := elem.MatchedObjectDescriptor.PositionTitle
 				result_url := elem.MatchedObjectDescriptor.PositionURI
@@ -11472,22 +8930,10 @@ func (runtime Runtime) Daimler(
 					elem_json,
 				})
 			}
-
-			jsonJobs.SearchResult.SearchResultItems = append(
-				jsonJobs.SearchResult.SearchResultItems,
-				tempJson.SearchResult.SearchResultItems...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -11497,24 +8943,12 @@ func (runtime Runtime) Daimler(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Siemens(
-	version int, isLocal bool) (response Response, results []Result) {
+func (runtime Runtime) Siemens(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -11568,16 +9002,14 @@ func (runtime Runtime) Siemens(
 			Count      int `json:"count"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJsonJobs JsonJobs
-			err := json.Unmarshal(r.Body, &tempJsonJobs)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJsonJobs.Jobs {
+			for _, elem := range jsonJobs.Jobs {
 
 				result_title := elem.Data.Title
 				result_url := elem.Data.MetaData.CanonicalURL
@@ -11595,9 +9027,7 @@ func (runtime Runtime) Siemens(
 				})
 			}
 
-			jsonJobs.Jobs = append(jsonJobs.Jobs, tempJsonJobs.Jobs...)
-
-			total_pages := tempJsonJobs.TotalCount / number_results_per_page
+			total_pages := jsonJobs.TotalCount / number_results_per_page
 
 			if counter > total_pages {
 				return
@@ -11612,14 +9042,6 @@ func (runtime Runtime) Siemens(
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 		})
 
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
-		})
-
 		c.OnError(func(r *colly.Response, err error) {
 			fmt.Println(
 				Red("Request URL:"), Red(r.Request.URL),
@@ -11627,25 +9049,12 @@ func (runtime Runtime) Siemens(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(fmt.Sprintf(start_url, 1))
-		}
+		c.Visit(fmt.Sprintf(start_url, 1))
 	}
 	return
 }
 
-func (runtime Runtime) Continental(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Continental(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -11684,16 +9093,14 @@ func (runtime Runtime) Continental(
 			} `json:"SearchResult"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			var tempJson JsonJobs
-			err := json.Unmarshal(r.Body, &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.SearchResult.SearchResultItems {
+			for _, elem := range jsonJobs.SearchResult.SearchResultItems {
 
 				result_title := elem.MatchedObjectDescriptor.PositionTitle
 				result_url := elem.MatchedObjectDescriptor.PositionURI
@@ -11710,22 +9117,10 @@ func (runtime Runtime) Continental(
 					elem_json,
 				})
 			}
-
-			jsonJobs.SearchResult.SearchResultItems = append(
-				jsonJobs.SearchResult.SearchResultItems,
-				tempJson.SearchResult.SearchResultItems...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -11735,25 +9130,12 @@ func (runtime Runtime) Continental(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Deliveryhero(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Deliveryhero(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -11815,22 +9197,20 @@ func (runtime Runtime) Deliveryhero(
 			} `json:"eagerLoadRefineSearch"`
 		}
 
-		var jsonJobs JsonJobs
-
 		c.OnResponse(func(r *colly.Response) {
-			response = Response{r.Body}
+			response := Response{r.Body}
 			response_body := string(response.Html)
 			response_json := strings.Split(
 				strings.Split(
 					response_body, "phApp.ddo = ")[1], "; phApp.experimentData")[0]
 
-			var tempJson JsonJobs
-			err := json.Unmarshal([]byte(response_json), &tempJson)
+			var jsonJobs JsonJobs
+			err := json.Unmarshal([]byte(response_json), &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.EagerLoadRefineSearch.Data.Jobs {
+			for _, elem := range jsonJobs.EagerLoadRefineSearch.Data.Jobs {
 
 				result_title := elem.Title
 				result_url := fmt.Sprintf(base_job_url, elem.JobID)
@@ -11848,11 +9228,7 @@ func (runtime Runtime) Deliveryhero(
 				})
 			}
 
-			jsonJobs.EagerLoadRefineSearch.Data.Jobs = append(
-				jsonJobs.EagerLoadRefineSearch.Data.Jobs,
-				tempJson.EagerLoadRefineSearch.Data.Jobs...)
-
-			total_pages := tempJson.EagerLoadRefineSearch.TotalHits / number_results_per_page
+			total_pages := jsonJobs.EagerLoadRefineSearch.TotalHits / number_results_per_page
 
 			if counter > total_pages {
 				return
@@ -11874,25 +9250,12 @@ func (runtime Runtime) Deliveryhero(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(fmt.Sprintf(start_url, 0))
-		}
+		c.Visit(fmt.Sprintf(start_url, 0))
 	}
 	return
 }
 
-func (runtime Runtime) Volkswagen(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Volkswagen(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -11975,23 +9338,21 @@ func (runtime Runtime) Volkswagen(
 			} `json:"feed"`
 		}
 
-		var jsonJobs Jobs
-
 		c.OnResponse(func(r *colly.Response) {
 
 			body_xml := strings.NewReader(string(r.Body))
 			body_json, err := xj.Convert(body_xml)
 			if err != nil {
-				panic("That's embarrassing...")
+				panic(err.Error())
 			}
 
-			var tempJson Jobs
-			err = json.Unmarshal(body_json.Bytes(), &tempJson)
+			var jsonJobs Jobs
+			err = json.Unmarshal(body_json.Bytes(), &jsonJobs)
 			if err != nil {
 				panic(err.Error())
 			}
 
-			for _, elem := range tempJson.Feed.Entry {
+			for _, elem := range jsonJobs.Feed.Entry {
 
 				result_title := elem.Properties.Title
 				result_url := fmt.Sprintf(job_base_url, elem.Properties.JobDetailsURL)
@@ -12008,20 +9369,10 @@ func (runtime Runtime) Volkswagen(
 					elem_json,
 				})
 			}
-
-			jsonJobs.Feed.Entry = append(jsonJobs.Feed.Entry, tempJson.Feed.Entry...)
 		})
 
 		c.OnRequest(func(r *colly.Request) {
 			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-		})
-
-		c.OnScraped(func(r *colly.Response) {
-			jsonJobs_marshal, err := json.Marshal(jsonJobs)
-			if err != nil {
-				panic(err.Error())
-			}
-			response = Response{[]byte(jsonJobs_marshal)}
 		})
 
 		c.OnError(func(r *colly.Response, err error) {
@@ -12031,25 +9382,12 @@ func (runtime Runtime) Volkswagen(
 				Red("\nError:"), Red(err))
 		})
 
-		if isLocal {
-			t := &http.Transport{}
-			t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-			c.WithTransport(t)
-			dir, err := os.Getwd()
-			if err != nil {
-				panic(err.Error())
-			}
-			c.Visit("file:" + dir + "/response.html")
-		} else {
-			c.Visit(start_url)
-		}
+		c.Visit(start_url)
 	}
 	return
 }
 
-func (runtime Runtime) Tesla(
-	version int, isLocal bool) (
-	response Response, results []Result) {
+func (runtime Runtime) Tesla(version int) (results []Result) {
 	switch version {
 	case 1:
 
@@ -12110,9 +9448,6 @@ func (runtime Runtime) Tesla(
 					})
 				}
 			})
-		})
-
-		c.OnResponse(func(r *colly.Response) {
 		})
 
 		c.OnRequest(func(r *colly.Request) {
