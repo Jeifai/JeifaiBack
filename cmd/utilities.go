@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	. "github.com/logrusorgru/aurora"
 	"path/filepath"
 	"strconv"
 )
