@@ -103,8 +103,7 @@ create table userstargetskeywords2 (
   id              serial primary key,
   usertargetid    integer references userstargets(id),
   userkeywordid   integer references userskeywords(id),
-  createdat       timestamp not null,
-  deletedat       timestamp
+  createdat       timestamp not null
 );
 
 create table matchings (

@@ -661,7 +661,7 @@ func (runtime Runtime) Microsoft(version int) (results []Result) {
 
 		c := colly.NewCollector()
 
-		m_start_url := "https://careers.microsoft.com/us/en/search-results?s=1&from=1"
+		m_start_url := "https://careers.microsoft.com/us/en/search-results?s=1&from=0"
 		m_base_url := "https://careers.microsoft.com/us/en/search-results?s=1&from="
 		m_base_result_url := "https://careers.microsoft.com/us/en/job/"
 		first_part_json := `"eagerLoadRefineSearch":`
@@ -9473,6 +9473,78 @@ func (runtime Runtime) Tesla(version int) (results []Result) {
 		}
 		c.WithTransport(t)
 		c.Visit("file:" + dir + "/tesla.html")
+	}
+	return
+}
+
+func (runtime Runtime) Klarna(version int) (results []Result) {
+	switch version {
+	case 1:
+
+		c := colly.NewCollector()
+
+		c_start_url := "https://api.lever.co/v0/postings/klarna?mode=json"
+
+		type Jobs []struct {
+			AdditionalPlain string `json:"additionalPlain"`
+			Additional      string `json:"additional"`
+			Categories      struct {
+				Commitment string `json:"commitment"`
+				Department string `json:"department"`
+				Location   string `json:"location"`
+				Team       string `json:"team"`
+			} `json:"categories"`
+			CreatedAt        int64  `json:"createdAt"`
+			DescriptionPlain string `json:"descriptionPlain"`
+			Description      string `json:"description"`
+			ID               string `json:"id"`
+			Lists            []struct {
+				Text    string `json:"text"`
+				Content string `json:"content"`
+			} `json:"lists"`
+			Text      string `json:"text"`
+			HostedURL string `json:"hostedUrl"`
+			ApplyURL  string `json:"applyUrl"`
+		}
+
+		c.OnResponse(func(r *colly.Response) {
+			var jsonJobs Jobs
+			err := json.Unmarshal(r.Body, &jsonJobs)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			for _, elem := range jsonJobs {
+
+				result_title := elem.Text
+				result_url := elem.HostedURL
+
+				elem_json, err := json.Marshal(elem)
+				if err != nil {
+					panic(err.Error())
+				}
+
+				results = append(results, Result{
+					runtime.Name,
+					result_title,
+					result_url,
+					elem_json,
+				})
+			}
+		})
+
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(
+				Red("Request URL:"), Red(r.Request.URL),
+				Red("failed with response:"), Red(r),
+				Red("\nError:"), Red(err))
+		})
+
+		c.Visit(c_start_url)
 	}
 	return
 }
