@@ -181,29 +181,32 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	for i, elem := range results {
 		if !Contains(all_urls, elem.ResultUrl) {
 			all_urls = append(all_urls, elem.ResultUrl)
-			str1 := "$" + strconv.Itoa(1+i*7) + ","
-			str2 := "$" + strconv.Itoa(2+i*7) + ","
-			str3 := "$" + strconv.Itoa(3+i*7) + ","
-			str4 := "$" + strconv.Itoa(4+i*7) + ","
-			str5 := "$" + strconv.Itoa(5+i*7) + ","
-			str6 := "$" + strconv.Itoa(6+i*7) + ","
-			str7 := "$" + strconv.Itoa(7+i*7)
-			str_n := "(" + str1 + str2 + str3 + str4 + str5 + str6 + str7 + ")"
+			str1 := "$" + strconv.Itoa(1+i*8) + ","
+			str2 := "$" + strconv.Itoa(2+i*8) + ","
+			str3 := "$" + strconv.Itoa(3+i*8) + ","
+			str4 := "$" + strconv.Itoa(4+i*8) + ","
+			str5 := "$" + strconv.Itoa(5+i*8) + ","
+			str6 := "$" + strconv.Itoa(6+i*8) + ","
+			str7 := "$" + strconv.Itoa(7+i*8) + ","
+			str8 := "$" + strconv.Itoa(8+i*8)
+			str_n := "(" + str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + ")"
 			valueStrings = append(valueStrings, str_n)
 			valueArgs = append(valueArgs, scraper.Id)
 			valueArgs = append(valueArgs, scraping.Id)
 			valueArgs = append(valueArgs, elem.Title)
 			valueArgs = append(valueArgs, elem.ResultUrl)
+			valueArgs = append(valueArgs, elem.Location)
 			valueArgs = append(valueArgs, elem.Data)
 			valueArgs = append(valueArgs, timeNow)
 			valueArgs = append(valueArgs, timeNow)
 		}
 	}
 	smt := `INSERT INTO results (
-                scraperid, scrapingid, title, url, data, createdat, updatedat)
+                scraperid, scrapingid, title, url, location, data, createdat, updatedat)
             VALUES %s ON CONFLICT (url) DO UPDATE
             SET scrapingid = EXCLUDED.scrapingid,
                 title = EXCLUDED.title,
+                location = EXCLUDED.location,
                 updatedat = EXCLUDED.updatedat,
                 data = EXCLUDED.data`
 	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))

@@ -68,6 +68,7 @@ create table results (
   scrapingid    integer references scraping(id),
   title         varchar(1000) not null,
   url           varchar(1000) not null unique,
+  location      varchar(1000),
   createdat     timestamp,
   updatedat     timestamp,
   data          json
