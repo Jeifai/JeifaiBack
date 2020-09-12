@@ -13,8 +13,6 @@ import (
 	"strings"
 	"time"
 
-	// "github.com/PuerkitoBio/goquery"
-	// xj "github.com/basgys/goxml2json"
 	"github.com/chromedp/chromedp"
 	"github.com/gocolly/colly/v2"
 	. "github.com/logrusorgru/aurora"
@@ -40,7 +38,7 @@ type Results []Result
 
 const SecondsSleep = 2 // Seconds between pagination
 
-func Extract(scraper_name string, scraper_version int) (results Results) {
+func Extract(scraper_name string) (results Results) {
 	fmt.Println(Gray(8-1, "Starting Scrape..."))
 	runtime := Runtime{scraper_name}
 	strucReflected := reflect.ValueOf(runtime)
@@ -58,7 +56,6 @@ func (results *Results) Add(
 	job_url string,
 	job_location string,
 	job_data interface{}) {
-
 	job_data_json, err := json.Marshal(job_data)
 	if err != nil {
 		panic(err.Error())

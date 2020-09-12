@@ -21,9 +21,8 @@ type Scraping struct {
 }
 
 type Scraper struct {
-	Id      int
-	Name    string
-	Version int
+	Id   int
+	Name string
 }
 
 type Matching struct {
@@ -113,14 +112,11 @@ func GetScraper(company string) (scraper Scraper) {
 	fmt.Println(Gray(8-1, "Starting GetScraper..."))
 	err := Db.QueryRow(`SELECT
                             s.name, 
-                            MAX(s.version) AS version, 
-                            MAX(s.id) AS id 
+                            s.id AS id 
                         FROM scrapers s
-                        WHERE s.name=$1
-                        GROUP BY 1;`,
+                        WHERE s.name=$1;`,
 		company).Scan(
 		&scraper.Name,
-		&scraper.Version,
 		&scraper.Id)
 	if err != nil {
 		panic(err.Error())
@@ -132,10 +128,8 @@ func GetScrapers() (scrapers []Scraper) {
 	fmt.Println(Gray(8-1, "Starting GetScrapers..."))
 	rows, err := Db.Query(`SELECT
                                 s.name, 
-                                MAX(s.version) AS version, 
-                                MAX(s.id) AS id 
-                           FROM scrapers s
-                           GROUP BY 1;`)
+                                s.id AS id 
+                           FROM scrapers s;`)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -143,7 +137,6 @@ func GetScrapers() (scrapers []Scraper) {
 		scraper := Scraper{}
 		if err = rows.Scan(
 			&scraper.Name,
-			&scraper.Version,
 			&scraper.Id); err != nil {
 			return
 		}
@@ -217,15 +210,12 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	}
 }
 
-func LastScrapingByNameVersion(
-	scraper_name string, scraper_version int) (scraping int) {
-	fmt.Println(Gray(8-1, "Starting LastScrapingByNameVersion..."))
+func LastScrapingByName(scraper_name string) (scraping int) {
+	fmt.Println(Gray(8-1, "Starting LastScrapingByName..."))
 	err := Db.QueryRow(`SELECT MAX(s.id)
                        FROM scrapings s 
                        LEFT JOIN scrapers ss ON(s.scraperid = ss.id)
-                       LEFT JOIN targets t ON(ss.targetid = t.id)
-                       WHERE t.name = $1 AND ss.version = $2;`,
-		scraper_name, scraper_version).Scan(&scraping)
+                       WHERE s.name = $1;`, scraper_name).Scan(&scraping)
 	if err != nil {
 		panic(err.Error())
 	}

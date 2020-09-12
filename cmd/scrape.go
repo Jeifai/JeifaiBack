@@ -52,7 +52,7 @@ func Scrape(company string, runSavers string, excludedCompanies []string) {
 
 func RunScraper(scraper Scraper, runSavers string) {
 	fmt.Println(BrightBlue("Scraping -->"), Bold(BrightBlue(scraper.Name)))
-	results := Extract(scraper.Name, scraper.Version)
+	results := Extract(scraper.Name)
 	if runSavers == "true" {
 		count_results := len(results)
 		if count_results > 0 {

@@ -3,8 +3,8 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/jedib0t/go-pretty/table"
+	"github.com/spf13/cobra"
 )
 
 var checkCmd = &cobra.Command{

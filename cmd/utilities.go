@@ -7,12 +7,12 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strconv"
 	"time"
 
 	"cloud.google.com/go/storage"
 	. "github.com/logrusorgru/aurora"
-	"path/filepath"
-	"strconv"
 )
 
 func Contains(s []string, e string) bool {

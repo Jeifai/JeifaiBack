@@ -50,7 +50,6 @@ create table userstargets (
 create table scrapers (
   id            serial primary key,
   name          varchar(64) not null,
-  version       integer not null,
   targetid      integer references targets(id),
   createdat     timestamp not null  
 );
