@@ -50,7 +50,6 @@ create table userstargets (
 create table scrapers (
   id            serial primary key,
   name          varchar(64) not null,
-  version       integer not null,
   targetid      integer references targets(id),
   createdat     timestamp not null  
 );
@@ -68,6 +67,7 @@ create table results (
   scrapingid    integer references scraping(id),
   title         varchar(1000) not null,
   url           varchar(1000) not null unique,
+  location      varchar(1000),
   createdat     timestamp,
   updatedat     timestamp,
   data          json

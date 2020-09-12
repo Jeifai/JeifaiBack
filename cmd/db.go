@@ -21,9 +21,8 @@ type Scraping struct {
 }
 
 type Scraper struct {
-	Id      int
-	Name    string
-	Version int
+	Id   int
+	Name string
 }
 
 type Matching struct {
@@ -113,14 +112,11 @@ func GetScraper(company string) (scraper Scraper) {
 	fmt.Println(Gray(8-1, "Starting GetScraper..."))
 	err := Db.QueryRow(`SELECT
                             s.name, 
-                            MAX(s.version) AS version, 
-                            MAX(s.id) AS id 
+                            s.id AS id 
                         FROM scrapers s
-                        WHERE s.name=$1
-                        GROUP BY 1;`,
+                        WHERE s.name=$1;`,
 		company).Scan(
 		&scraper.Name,
-		&scraper.Version,
 		&scraper.Id)
 	if err != nil {
 		panic(err.Error())
@@ -132,10 +128,8 @@ func GetScrapers() (scrapers []Scraper) {
 	fmt.Println(Gray(8-1, "Starting GetScrapers..."))
 	rows, err := Db.Query(`SELECT
                                 s.name, 
-                                MAX(s.version) AS version, 
-                                MAX(s.id) AS id 
-                           FROM scrapers s
-                           GROUP BY 1;`)
+                                s.id AS id 
+                           FROM scrapers s;`)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -143,7 +137,6 @@ func GetScrapers() (scrapers []Scraper) {
 		scraper := Scraper{}
 		if err = rows.Scan(
 			&scraper.Name,
-			&scraper.Version,
 			&scraper.Id); err != nil {
 			return
 		}
@@ -181,29 +174,32 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	for i, elem := range results {
 		if !Contains(all_urls, elem.ResultUrl) {
 			all_urls = append(all_urls, elem.ResultUrl)
-			str1 := "$" + strconv.Itoa(1+i*7) + ","
-			str2 := "$" + strconv.Itoa(2+i*7) + ","
-			str3 := "$" + strconv.Itoa(3+i*7) + ","
-			str4 := "$" + strconv.Itoa(4+i*7) + ","
-			str5 := "$" + strconv.Itoa(5+i*7) + ","
-			str6 := "$" + strconv.Itoa(6+i*7) + ","
-			str7 := "$" + strconv.Itoa(7+i*7)
-			str_n := "(" + str1 + str2 + str3 + str4 + str5 + str6 + str7 + ")"
+			str1 := "$" + strconv.Itoa(1+i*8) + ","
+			str2 := "$" + strconv.Itoa(2+i*8) + ","
+			str3 := "$" + strconv.Itoa(3+i*8) + ","
+			str4 := "$" + strconv.Itoa(4+i*8) + ","
+			str5 := "$" + strconv.Itoa(5+i*8) + ","
+			str6 := "$" + strconv.Itoa(6+i*8) + ","
+			str7 := "$" + strconv.Itoa(7+i*8) + ","
+			str8 := "$" + strconv.Itoa(8+i*8)
+			str_n := "(" + str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + ")"
 			valueStrings = append(valueStrings, str_n)
 			valueArgs = append(valueArgs, scraper.Id)
 			valueArgs = append(valueArgs, scraping.Id)
 			valueArgs = append(valueArgs, elem.Title)
 			valueArgs = append(valueArgs, elem.ResultUrl)
+			valueArgs = append(valueArgs, elem.Location)
 			valueArgs = append(valueArgs, elem.Data)
 			valueArgs = append(valueArgs, timeNow)
 			valueArgs = append(valueArgs, timeNow)
 		}
 	}
 	smt := `INSERT INTO results (
-                scraperid, scrapingid, title, url, data, createdat, updatedat)
+                scraperid, scrapingid, title, url, location, data, createdat, updatedat)
             VALUES %s ON CONFLICT (url) DO UPDATE
             SET scrapingid = EXCLUDED.scrapingid,
                 title = EXCLUDED.title,
+                location = EXCLUDED.location,
                 updatedat = EXCLUDED.updatedat,
                 data = EXCLUDED.data`
 	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
@@ -214,15 +210,12 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	}
 }
 
-func LastScrapingByNameVersion(
-	scraper_name string, scraper_version int) (scraping int) {
-	fmt.Println(Gray(8-1, "Starting LastScrapingByNameVersion..."))
+func LastScrapingByName(scraper_name string) (scraping int) {
+	fmt.Println(Gray(8-1, "Starting LastScrapingByName..."))
 	err := Db.QueryRow(`SELECT MAX(s.id)
                        FROM scrapings s 
                        LEFT JOIN scrapers ss ON(s.scraperid = ss.id)
-                       LEFT JOIN targets t ON(ss.targetid = t.id)
-                       WHERE t.name = $1 AND ss.version = $2;`,
-		scraper_name, scraper_version).Scan(&scraping)
+                       WHERE s.name = $1;`, scraper_name).Scan(&scraping)
 	if err != nil {
 		panic(err.Error())
 	}
