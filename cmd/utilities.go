@@ -45,6 +45,18 @@ func Unique(results []Result) []Result {
 	return unique
 }
 
+func RemoveDuplicatedFromSliceOfString(slice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, entry := range slice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
+}
+
 func GenerateFilePath(
 	scraper_name string, scraper_version int) (file_path string) {
 	file_path = filepath.Join(
