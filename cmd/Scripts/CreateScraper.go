@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	scraper_name := "Klarna"
+	scraper_name := "Researchgate"
 	scraper_version := 1
-	jobs_url := "https://jobs.lever.co/klarna"
-	host_url := "https://www.klarna.com"
+	jobs_url := "https://www.researchgate.net/jobs"
+	host_url := "https://www.researchgate.net"
 	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
 	scraper.CreateScraper()
 }
@@ -78,12 +78,12 @@ func (scraper Scraper) CreateScraper() {
 		panic(err.Error())
 	}
 
-	statement_2 := `INSERT INTO scrapers (name, version, targetid, createdat)
-                    VALUES ($1, $2, $3, $4) RETURNING id`
+	statement_2 := `INSERT INTO scrapers (name, targetid, createdat)
+                    VALUES ($1, $2, $3) RETURNING id`
 	stmt_2, err := Db.Prepare(statement_2)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer stmt_2.Close()
-	stmt_2.QueryRow(scraper.Name, scraper.Version, target_id, time.Now())
+	stmt_2.QueryRow(scraper.Name, target_id, time.Now())
 }
