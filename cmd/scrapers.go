@@ -7187,3 +7187,55 @@ func (runtime Runtime) Skoove() (results Results) {
 	c.Visit(start_url)
 	return
 }
+
+func (runtime Runtime) Rocketinternet() (results Results) {
+	c := colly.NewCollector()
+	l := c.Clone()
+	start_url := "https://www.rocket-internet.com/careers/rocket"
+	base_job_url := "https://www.rocket-internet.com%s"
+	type Job struct {
+		Url      string
+		Title    string
+		Location string
+		Type     string
+	}
+	c.OnHTML(".department", func(e *colly.HTMLElement) {
+		department_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
+		l.Visit(department_url)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	l.OnHTML("#careers-listing", func(e *colly.HTMLElement) {
+		e.ForEach("div[role=listitem]", func(_ int, el *colly.HTMLElement) {
+			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
+			result_info := el.ChildTexts(".text-sans-serif")
+			result_title := result_info[0]
+			result_type := result_info[1]
+			result_location := result_info[2]
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_url,
+					result_title,
+					result_location,
+					result_type,
+				},
+			)
+		})
+	})
+	l.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	l.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
