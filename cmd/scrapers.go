@@ -7278,3 +7278,59 @@ func (runtime Runtime) Morressier() (results Results) {
 	c.Visit(start_url)
 	return
 }
+
+func (runtime Runtime) Here() (results Results) {
+	c := colly.NewCollector()
+	start_url := "https://careers-here.icims.com/jobs/search?pr=%d"
+	// base_job_url := "https://www.researchgate.net/%s"
+	// counter := 1
+	type Job struct {
+		Title       string
+		Url         string
+		Location    string
+		Description string
+		Category    string
+	}
+	c.OnHTML("html", func(e *colly.HTMLElement) {
+		/**
+		e.ForEach(".jobs-list-item-nova", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText(".nova-v-job-item__title")
+			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
+			result_infos := el.ChildTexts(".nova-v-job-item__info-section-list-item")
+			result_institute := result_infos[0]
+			result_location := result_infos[1]
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+					result_institute,
+				},
+			)
+		})
+		page_links := e.ChildAttrs(".pager-link", "data-target-page")
+		temp_total_pages := page_links[len(page_links)-2]
+		total_pages, _ := strconv.Atoi(temp_total_pages)
+		if counter <= total_pages {
+			counter++
+			time.Sleep(SecondsSleep * time.Second)
+			c.Visit(fmt.Sprintf(start_url, counter))
+		}
+		*/
+	})
+	c.OnResponse(func(r *colly.Response) {
+		SaveResponseToFileWithFileName(string(r.Body), "here.html")
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(fmt.Sprintf(start_url, 0))
+	return
+}
