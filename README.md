@@ -5,7 +5,7 @@ Here everything happening behind the scenes of Jaifai.
 There are currently 4 programs available:
 
 * *scrape*: extract data from the web
-* *match*: create a relations between job offers and keywords
+* *match*: create relations between job offers and keywords
 * *notify*: whenever a match happens, notify all the interested users 
 * *check*: identitfy whenever a scrape returns bad results
 
