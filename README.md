@@ -95,7 +95,7 @@ func (runtime Runtime) Morressier() (results Results) {
 ### **How to run a scraper?**
 ```bash
 go build
-./Jeifaiback scrape -s=[scraper_name] -r=[true/false]
+./JeifaiBack scrape -s=[scraper_name] -r=[true/false]
 ```
 * -s select any scraper name
 * -r true if results need to be saved, false otherwise (might be useful for testing purposes)
