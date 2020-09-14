@@ -13,10 +13,9 @@ import (
 
 func main() {
 	scraper_name := "Here"
-	scraper_version := 1
 	jobs_url := "https://www.here.com/careers"
 	host_url := "https://www.here.com"
-	scraper := Scraper{scraper_name, jobs_url, host_url, scraper_version}
+	scraper := Scraper{scraper_name, jobs_url, host_url}
 	scraper.CreateScraper()
 }
 
