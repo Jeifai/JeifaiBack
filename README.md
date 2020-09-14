@@ -99,3 +99,12 @@ go build
 ```
 * -s select any scraper name
 * -r true if results need to be saved, false otherwise (might be useful for testing purposes)
+
+
+## TODO
+* How to add IP to Google Cloud Platform
+* Cobra
+* Dependencies
+* Write architecture_decision_record
+* Describe Scripts folder
+* How to scrape LinkedIn 
