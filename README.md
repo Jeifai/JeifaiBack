@@ -39,63 +39,63 @@ The creation of a new scraper is divided in two different part:
 * Add in the database the new target and the new scraper (*Scripts/CreateScraper.go*)
     * Name, career's url and host url are necessary
 ```golang
-    func main() {
-        scraper_name := "Google"
-        jobs_url := "https://www.google.com/careers"
-        host_url := "https://www.google.com"
-        scraper := Scraper{scraper_name, jobs_url, host_url}
-        scraper.CreateScraper()
-    }
+func main() {
+    scraper_name := "Google"
+    jobs_url := "https://www.google.com/careers"
+    host_url := "https://www.google.com"
+    scraper := Scraper{scraper_name, jobs_url, host_url}
+    scraper.CreateScraper()
+}
 ```
 
 * Create the algorithm to scrape in *scrapers.go*
     * Often it is good practice to build and test the scraper in a separate folder.
     * Here an example fo scraper which extract the information directly from the HTML.
 ```golang
-    func (runtime Runtime) Morressier() (results Results) {
-        c := colly.NewCollector()
-        start_url := "https://morressier-jobs.personio.de/"
-        type Job struct {
-            Url      string
-            Title    string
-            Location string
-            Type     string
-        }
-        c.OnHTML("a", func(e *colly.HTMLElement) {
-            if strings.Contains(e.Attr("class"), "job-box-link") {
-                result_title := e.ChildText(".jb-title")
-                result_url := e.Attr("href")
-                result_description := e.ChildTexts("span")[0]
-                result_location := e.ChildTexts("span")[2]
-                results.Add(
-                    runtime.Name,
-                    result_title,
-                    result_url,
-                    result_location,
-                    Job{
-                        result_url,
-                        result_title,
-                        result_location,
-                        result_description,
-                    },
-                )
-            }
-        })
-        c.OnRequest(func(r *colly.Request) {
-            fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-        })
-        c.OnError(func(r *colly.Response, err error) {
-            fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-        })
-        c.Visit(start_url)
-        return
+func (runtime Runtime) Morressier() (results Results) {
+    c := colly.NewCollector()
+    start_url := "https://morressier-jobs.personio.de/"
+    type Job struct {
+        Url      string
+        Title    string
+        Location string
+        Type     string
     }
+    c.OnHTML("a", func(e *colly.HTMLElement) {
+        if strings.Contains(e.Attr("class"), "job-box-link") {
+            result_title := e.ChildText(".jb-title")
+            result_url := e.Attr("href")
+            result_description := e.ChildTexts("span")[0]
+            result_location := e.ChildTexts("span")[2]
+            results.Add(
+                runtime.Name,
+                result_title,
+                result_url,
+                result_location,
+                Job{
+                    result_url,
+                    result_title,
+                    result_location,
+                    result_description,
+                },
+            )
+        }
+    })
+    c.OnRequest(func(r *colly.Request) {
+        fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+    })
+    c.OnError(func(r *colly.Response, err error) {
+        fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+    })
+    c.Visit(start_url)
+    return
+}
 ```
 
 ### **How to run a scraper?**
 ```bash
-    sudo go build
-    ./Jeifaiback scrape -s=[scraper_name] -r=[true/false]
+sudo go build
+./Jeifaiback scrape -s=[scraper_name] -r=[true/false]
 ```
 * -s select any scraper name
 * -r true if results need to be saved, false otherwise (might be useful for testing purposes)
