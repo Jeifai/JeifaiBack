@@ -9,6 +9,7 @@ import (
 	netUrl "net/url"
 	"os"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -7280,25 +7281,21 @@ func (runtime Runtime) Morressier() (results Results) {
 }
 
 func (runtime Runtime) Here() (results Results) {
-	c := colly.NewCollector()
-	start_url := "https://careers-here.icims.com/jobs/search?pr=%d"
-	// base_job_url := "https://www.researchgate.net/%s"
-	// counter := 1
+	start_url := "https://careers-here.icims.com/jobs/search?in_iframe=1&pr=%d"
+	counter := 0
 	type Job struct {
-		Title       string
 		Url         string
+		Title       string
 		Location    string
 		Description string
-		Category    string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("html", func(e *colly.HTMLElement) {
-		/**
-		e.ForEach(".jobs-list-item-nova", func(_ int, el *colly.HTMLElement) {
-			result_title := el.ChildText(".nova-v-job-item__title")
-			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
-			result_infos := el.ChildTexts(".nova-v-job-item__info-section-list-item")
-			result_institute := result_infos[0]
-			result_location := result_infos[1]
+		e.ForEach(".row", func(_ int, el *colly.HTMLElement) {
+			result_title := strings.TrimSpace(strings.ReplaceAll(el.ChildText(".title"), "Requisition Title", ""))
+			result_url := el.ChildAttr("a", "href")
+			result_location := strings.TrimSpace(strings.ReplaceAll(el.ChildText(".left"), "Job Locations", ""))
+			result_description := el.ChildText(".description")
 			results.Add(
 				runtime.Name,
 				result_title,
@@ -7308,22 +7305,20 @@ func (runtime Runtime) Here() (results Results) {
 					result_title,
 					result_url,
 					result_location,
-					result_institute,
+					result_description,
 				},
 			)
 		})
-		page_links := e.ChildAttrs(".pager-link", "data-target-page")
-		temp_total_pages := page_links[len(page_links)-2]
+		result_pages := e.ChildTexts(".iCIMS_PagingBatch .sr-only")
+		re := regexp.MustCompile("[0-9]+")
+		temp_total_pages := re.FindAllString(result_pages[len(result_pages)-1], -1)[0]
 		total_pages, _ := strconv.Atoi(temp_total_pages)
-		if counter <= total_pages {
+		if counter < (total_pages - 1) {
 			counter++
 			time.Sleep(SecondsSleep * time.Second)
-			c.Visit(fmt.Sprintf(start_url, counter))
+			temp_url := fmt.Sprintf(start_url, counter)
+			c.Visit(temp_url)
 		}
-		*/
-	})
-	c.OnResponse(func(r *colly.Response) {
-		SaveResponseToFileWithFileName(string(r.Body), "here.html")
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
