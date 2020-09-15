@@ -71,7 +71,6 @@ func (results *Results) Add(
 }
 
 func (runtime Runtime) Dreamingjobs() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://robimalco.github.io/dreamingjobs.github.io/"
 	type Job struct {
 		Title      string
@@ -80,6 +79,7 @@ func (runtime Runtime) Dreamingjobs() (results Results) {
 		Type       string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("ul", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "position") {
 			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
@@ -115,13 +115,13 @@ func (runtime Runtime) Dreamingjobs() (results Results) {
 }
 
 func (runtime Runtime) Kununu() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://www.kununu.com/at/kununu/jobs"
 	type Job struct {
 		Title    string
 		Url      string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("div", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "company-profile-job-item") {
 			result_title := e.ChildText("a")
@@ -151,7 +151,6 @@ func (runtime Runtime) Kununu() (results Results) {
 }
 
 func (runtime Runtime) Mitte() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/mitte?&mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -174,6 +173,7 @@ func (runtime Runtime) Mitte() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -204,7 +204,6 @@ func (runtime Runtime) Mitte() (results Results) {
 }
 
 func (runtime Runtime) IMusician() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://imusician-digital-jobs.personio.de/"
 	type Job struct {
 		Title       string
@@ -212,6 +211,7 @@ func (runtime Runtime) IMusician() (results Results) {
 		Description string
 		Location    string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "job-box-link") {
 			result_title := e.ChildText(".jb-title")
@@ -243,13 +243,13 @@ func (runtime Runtime) IMusician() (results Results) {
 }
 
 func (runtime Runtime) Babelforce() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://www.babelforce.com/jobs/"
 	type Job struct {
 		Title    string
 		Url      string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("div", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "qodef-portfolio") {
 			result_title := e.ChildText("h5")
@@ -279,7 +279,6 @@ func (runtime Runtime) Babelforce() (results Results) {
 }
 
 func (runtime Runtime) Zalando() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://jobs.zalando.com/api/jobs/?limit=100&offset=0"
 	base_url := "https://jobs.zalando.com"
 	base_job_url := "https://jobs.zalando.com/de/jobs/%s"
@@ -304,6 +303,7 @@ func (runtime Runtime) Zalando() (results Results) {
 		Last  string `json:"last"`
 		Next  string `json:"next"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -338,7 +338,6 @@ func (runtime Runtime) Zalando() (results Results) {
 }
 
 func (runtime Runtime) Google() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page=1"
 	base_url := "https://careers.google.com/api/v2/jobs/search/?page_size=100&page="
 	base_result_url := "https://careers.google.com/jobs/results/%s"
@@ -359,6 +358,7 @@ func (runtime Runtime) Google() (results Results) {
 		} `json:"jobs"`
 		PageSize int `json:"page_size"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -397,7 +397,6 @@ func (runtime Runtime) Google() (results Results) {
 }
 
 func (runtime Runtime) Soundcloud() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://boards.greenhouse.io/embed/job_board?for=soundcloud71"
 	type Job struct {
 		Title      string
@@ -405,6 +404,7 @@ func (runtime Runtime) Soundcloud() (results Results) {
 		Department string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "level-0") {
 			result_department := e.ChildText("h3")
@@ -438,7 +438,6 @@ func (runtime Runtime) Soundcloud() (results Results) {
 }
 
 func (runtime Runtime) Microsoft() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://careers.microsoft.com/us/en/search-results?s=1&from=0"
 	base_url := "https://careers.microsoft.com/us/en/search-results?s=1&from=%d"
 	base_result_url := "https://careers.microsoft.com/us/en/job/%s"
@@ -483,6 +482,7 @@ func (runtime Runtime) Microsoft() (results Results) {
 		} `json:"data"`
 		Eid string `json:"eid"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		temp_resultsJson := strings.Split(string(r.Body), `"eagerLoadRefineSearch":`)[1]
 		s_resultsJson := strings.Split(temp_resultsJson, `}; phApp.sessionParams`)[0]
@@ -525,7 +525,6 @@ func (runtime Runtime) Microsoft() (results Results) {
 }
 
 func (runtime Runtime) Twitter() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://careers.twitter.com/content/careers-twitter/en/jobs.careers.search.json?limit=100&offset=0"
 	base_url := "https://careers.twitter.com/content/careers-twitter/en/jobs.careers.search.json?limit=100&offset=%d"
 	counter := 0
@@ -549,6 +548,7 @@ func (runtime Runtime) Twitter() (results Results) {
 		PageCount  int `json:"pageCount"`
 		TotalCount int `json:"totalCount"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -592,7 +592,6 @@ func (runtime Runtime) Twitter() (results Results) {
 }
 
 func (runtime Runtime) Shopify() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/shopify?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -615,6 +614,7 @@ func (runtime Runtime) Shopify() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -645,7 +645,6 @@ func (runtime Runtime) Shopify() (results Results) {
 }
 
 func (runtime Runtime) Urbansport() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://boards.greenhouse.io/urbansportsclub"
 	type Job struct {
 		Title      string
@@ -653,6 +652,7 @@ func (runtime Runtime) Urbansport() (results Results) {
 		Department string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "level-0") {
 			result_department := e.ChildText("h3")
@@ -686,8 +686,6 @@ func (runtime Runtime) Urbansport() (results Results) {
 }
 
 func (runtime Runtime) N26() (results Results) {
-	c := colly.NewCollector()
-	l := c.Clone()
 	start_url := "https://n26.com/en/careers"
 	base_url := "https://www.n26.com%s"
 	type Job struct {
@@ -696,6 +694,8 @@ func (runtime Runtime) N26() (results Results) {
 		Location string
 		Contract string
 	}
+	c := colly.NewCollector()
+	l := c.Clone()
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("href"), "locations") {
 			temp_location_url := e.Attr("href")
@@ -754,7 +754,6 @@ func (runtime Runtime) N26() (results Results) {
 }
 
 func (runtime Runtime) Blinkist() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/blinkist?&mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -777,6 +776,7 @@ func (runtime Runtime) Blinkist() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -810,7 +810,6 @@ func (runtime Runtime) Blinkist() (results Results) {
 }
 
 func (runtime Runtime) Deutschebahn() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://karriere.deutschebahn.com/service/search/karriere-de/2653760?sort=pubExternalDate_td&pageNum=%s"
 	base_result_url := "https://karriere.deutschebahn.com/%s"
 	type Job struct {
@@ -821,6 +820,7 @@ func (runtime Runtime) Deutschebahn() (results Results) {
 		Publication string
 		Description string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("ul", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "result-items") {
 			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
@@ -873,7 +873,6 @@ func (runtime Runtime) Deutschebahn() (results Results) {
 }
 
 func (runtime Runtime) Celo() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/celo?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -896,6 +895,7 @@ func (runtime Runtime) Celo() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -929,7 +929,6 @@ func (runtime Runtime) Celo() (results Results) {
 }
 
 func (runtime Runtime) Penta() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://boards.greenhouse.io/embed/job_board?for=penta"
 	type Job struct {
 		Title      string
@@ -937,6 +936,7 @@ func (runtime Runtime) Penta() (results Results) {
 		Department string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "level-0") {
 			result_department := e.ChildText("h3")
@@ -970,7 +970,6 @@ func (runtime Runtime) Penta() (results Results) {
 }
 
 func (runtime Runtime) Contentful() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://boards.greenhouse.io/embed/job_board?for=contentful"
 	type Job struct {
 		Title      string
@@ -978,6 +977,7 @@ func (runtime Runtime) Contentful() (results Results) {
 		Department string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "level-0") {
 			result_department := e.ChildText("h3")
@@ -1011,7 +1011,6 @@ func (runtime Runtime) Contentful() (results Results) {
 }
 
 func (runtime Runtime) Gympass() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://boards.greenhouse.io/embed/job_board?for=gympass"
 	type Job struct {
 		Title      string
@@ -1019,6 +1018,7 @@ func (runtime Runtime) Gympass() (results Results) {
 		Department string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "level-0") {
 			result_department := e.ChildText("h3")
@@ -1052,7 +1052,6 @@ func (runtime Runtime) Gympass() (results Results) {
 }
 
 func (runtime Runtime) Hometogo() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.heavenhr.com/api/v1/positions/public/vacancies/?companyId=_VBAnjTs72rz0J-zBe1sYtA_"
 	base_job_url := "https://hometogo.heavenhr.com/jobs/%s%s"
 	type Jobs struct {
@@ -1083,6 +1082,7 @@ func (runtime Runtime) Hometogo() (results Results) {
 			Count    int `json:"count"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -1113,7 +1113,6 @@ func (runtime Runtime) Hometogo() (results Results) {
 }
 
 func (runtime Runtime) Amazon() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://www.amazon.jobs/en/search.json?loc_query=Germany&country=DEU&result_limit=1000&offset=%d"
 	base_job_url := "https://www.amazon.jobs%s"
 	number_results_per_page := 1000
@@ -1172,6 +1171,7 @@ func (runtime Runtime) Amazon() (results Results) {
 			} `json:"team"`
 		} `json:"jobs"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -1209,7 +1209,6 @@ func (runtime Runtime) Amazon() (results Results) {
 }
 
 func (runtime Runtime) Lanalabs() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://lana-labs.breezy.hr/%s"
 	type Job struct {
 		Title      string
@@ -1218,6 +1217,7 @@ func (runtime Runtime) Lanalabs() (results Results) {
 		Type       string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("ul", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "position") {
 			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
@@ -1253,7 +1253,6 @@ func (runtime Runtime) Lanalabs() (results Results) {
 }
 
 func (runtime Runtime) Slack() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://slack.com/intl/de-de/careers?eu_nc=1#opening"
 	type Job struct {
 		Title    string
@@ -1261,6 +1260,7 @@ func (runtime Runtime) Slack() (results Results) {
 		Location string
 		Division string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".shadow-table", func(e *colly.HTMLElement) {
 		e.ForEach("table", func(_ int, el *colly.HTMLElement) {
 			result_division := el.ChildText("th")
@@ -1297,7 +1297,6 @@ func (runtime Runtime) Slack() (results Results) {
 }
 
 func (runtime Runtime) Revolut() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/revolut?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -1320,6 +1319,7 @@ func (runtime Runtime) Revolut() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -1350,7 +1350,6 @@ func (runtime Runtime) Revolut() (results Results) {
 }
 
 func (runtime Runtime) Mollie() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/mollie?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -1373,6 +1372,7 @@ func (runtime Runtime) Mollie() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -1403,7 +1403,6 @@ func (runtime Runtime) Mollie() (results Results) {
 }
 
 func (runtime Runtime) Circleci() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://boards.greenhouse.io/embed/job_board?for=circleci"
 	base_job_url := "https://boards.greenhouse.io/circleci/jobs/%s"
 	type Job struct {
@@ -1412,6 +1411,7 @@ func (runtime Runtime) Circleci() (results Results) {
 		Department string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "level-0") {
 			result_department := e.ChildText("h3")
@@ -1445,7 +1445,6 @@ func (runtime Runtime) Circleci() (results Results) {
 }
 
 func (runtime Runtime) Blacklane() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://boards.greenhouse.io/blacklane"
 	base_job_url := "https://boards.greenhouse.io"
 	type Job struct {
@@ -1454,6 +1453,7 @@ func (runtime Runtime) Blacklane() (results Results) {
 		Department string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "level-0") {
 			result_department := e.ChildText("h3")
@@ -1487,7 +1487,6 @@ func (runtime Runtime) Blacklane() (results Results) {
 }
 
 func (runtime Runtime) Auto1() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://www.auto1-group.com/smart-recruiters/jobs/search/?page=%d"
 	base_job_url := "https://www.auto1-group.com/de/jobs/%s"
 	counter := 1
@@ -1540,6 +1539,7 @@ func (runtime Runtime) Auto1() (results Results) {
 			} `json:"hits"`
 		} `json:"jobs"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Auto1Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -1578,7 +1578,6 @@ func (runtime Runtime) Auto1() (results Results) {
 }
 
 func (runtime Runtime) Flixbus() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://flix.careers/api/jobs"
 	type FlixbusJobs struct {
 		Jobs []struct {
@@ -1620,6 +1619,7 @@ func (runtime Runtime) Flixbus() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs FlixbusJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -1650,7 +1650,6 @@ func (runtime Runtime) Flixbus() (results Results) {
 }
 
 func (runtime Runtime) Quora() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://boards.greenhouse.io/quora"
 	base_job_url := "https://boards.greenhouse.io/%s"
 	type Job struct {
@@ -1659,6 +1658,7 @@ func (runtime Runtime) Quora() (results Results) {
 		Department string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "level-0") {
 			result_department := e.ChildText("h3")
@@ -1692,7 +1692,6 @@ func (runtime Runtime) Quora() (results Results) {
 }
 
 func (runtime Runtime) Greenhouse() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://boards.greenhouse.io/embed/job_board?for=greenhouse"
 	type Job struct {
 		Title      string
@@ -1700,6 +1699,7 @@ func (runtime Runtime) Greenhouse() (results Results) {
 		Department string
 		Location   string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "level-0") {
 			result_department := e.ChildText("h2")
@@ -1734,13 +1734,13 @@ func (runtime Runtime) Greenhouse() (results Results) {
 }
 
 func (runtime Runtime) Docker() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://newton.newtonsoftware.com/career/CareerHome.action?clientId=8a7883c6708df1d40170a6df29950b39"
 	type Job struct {
 		Title    string
 		Url      string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".gnewtonCareerGroupRowClass", func(e *colly.HTMLElement) {
 		result_title := e.ChildText("a")
 		result_url := e.ChildAttr("a", "href")
@@ -1768,7 +1768,6 @@ func (runtime Runtime) Docker() (results Results) {
 }
 
 func (runtime Runtime) Zapier() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://zapier.com/jobs"
 	base_job_url := "https://zapier.com%s"
 	type Job struct {
@@ -1777,6 +1776,7 @@ func (runtime Runtime) Zapier() (results Results) {
 		Location   string
 		Department string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("section", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("id"), "job-openings") {
 			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
@@ -1815,7 +1815,6 @@ func (runtime Runtime) Zapier() (results Results) {
 }
 
 func (runtime Runtime) Datadog() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/datadog/jobs/"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -1845,6 +1844,7 @@ func (runtime Runtime) Datadog() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -1875,7 +1875,6 @@ func (runtime Runtime) Datadog() (results Results) {
 }
 
 func (runtime Runtime) Stripe() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/stripe/jobs/"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -1905,6 +1904,7 @@ func (runtime Runtime) Stripe() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -1935,7 +1935,6 @@ func (runtime Runtime) Stripe() (results Results) {
 }
 
 func (runtime Runtime) Github() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/github/jobs/"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -1965,6 +1964,7 @@ func (runtime Runtime) Github() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -1995,7 +1995,6 @@ func (runtime Runtime) Github() (results Results) {
 }
 
 func (runtime Runtime) Getyourguide() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/getyourguide/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -2025,6 +2024,7 @@ func (runtime Runtime) Getyourguide() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2055,7 +2055,6 @@ func (runtime Runtime) Getyourguide() (results Results) {
 }
 
 func (runtime Runtime) Wefox() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/wefoxgroup/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -2085,6 +2084,7 @@ func (runtime Runtime) Wefox() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2115,7 +2115,6 @@ func (runtime Runtime) Wefox() (results Results) {
 }
 
 func (runtime Runtime) Celonis() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/celonis/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -2145,6 +2144,7 @@ func (runtime Runtime) Celonis() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2175,7 +2175,6 @@ func (runtime Runtime) Celonis() (results Results) {
 }
 
 func (runtime Runtime) Omio() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.smartrecruiters.com/v1/companies/Omio1/postings"
 	base_job_url := "https://www.omio.com/jobs/#%s"
 	type JsonJobs struct {
@@ -2236,6 +2235,7 @@ func (runtime Runtime) Omio() (results Results) {
 			} `json:"language"`
 		} `json:"content"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2269,7 +2269,6 @@ func (runtime Runtime) Omio() (results Results) {
 }
 
 func (runtime Runtime) Aboutyou() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://corporate.aboutyou.de/app/api/openpositions.php?posts_per_page=500"
 	type JsonJobs struct {
 		Posts []struct {
@@ -2285,6 +2284,7 @@ func (runtime Runtime) Aboutyou() (results Results) {
 		} `json:"posts"`
 		TotalCount int `json:"totalCount"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2315,7 +2315,6 @@ func (runtime Runtime) Aboutyou() (results Results) {
 }
 
 func (runtime Runtime) Depositsolutions() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://careers-page.workable.com/api/v3/accounts/deposit-solutions/jobs"
 	base_job_url := "https://apply.workable.com/deposit-solutions/j/"
 	type JsonJobs struct {
@@ -2345,6 +2344,7 @@ func (runtime Runtime) Depositsolutions() (results Results) {
 			ApprovalStatus string      `json:"approvalStatus"`
 		} `json:"results"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2384,7 +2384,6 @@ func (runtime Runtime) Depositsolutions() (results Results) {
 }
 
 func (runtime Runtime) Taxfix() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/taxfix/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -2414,6 +2413,7 @@ func (runtime Runtime) Taxfix() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2444,7 +2444,6 @@ func (runtime Runtime) Taxfix() (results Results) {
 }
 
 func (runtime Runtime) Moonfare() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/moonfare/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -2474,6 +2473,7 @@ func (runtime Runtime) Moonfare() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2504,7 +2504,6 @@ func (runtime Runtime) Moonfare() (results Results) {
 }
 
 func (runtime Runtime) Fincompare() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/fincompare?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -2527,6 +2526,7 @@ func (runtime Runtime) Fincompare() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2557,7 +2557,6 @@ func (runtime Runtime) Fincompare() (results Results) {
 }
 
 func (runtime Runtime) Billie() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/billie/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -2587,6 +2586,7 @@ func (runtime Runtime) Billie() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2617,7 +2617,6 @@ func (runtime Runtime) Billie() (results Results) {
 }
 
 func (runtime Runtime) Pairfinance() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/pairfinance/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -2647,6 +2646,7 @@ func (runtime Runtime) Pairfinance() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2677,7 +2677,6 @@ func (runtime Runtime) Pairfinance() (results Results) {
 }
 
 func (runtime Runtime) Getsafe() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://getsafe-jobs.personio.de"
 	type Job struct {
 		Title       string
@@ -2685,6 +2684,7 @@ func (runtime Runtime) Getsafe() (results Results) {
 		Description string
 		Location    string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "job-box-link") {
 			result_title := e.ChildText(".jb-title")
@@ -2716,7 +2716,6 @@ func (runtime Runtime) Getsafe() (results Results) {
 }
 
 func (runtime Runtime) Liqid() (results Results) {
-	c := colly.NewCollector()
 	url := "https://liqid-jobs.personio.de"
 	type Job struct {
 		Title    string
@@ -2724,6 +2723,7 @@ func (runtime Runtime) Liqid() (results Results) {
 		Type     string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("div", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "job-list-desc") {
 			result_title := e.ChildText("a")
@@ -2756,7 +2756,6 @@ func (runtime Runtime) Liqid() (results Results) {
 }
 
 func (runtime Runtime) Elementinsurance() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://elementinsuranceag.recruitee.com/api/offers"
 	type Jobs struct {
 		Offers []struct {
@@ -2793,6 +2792,7 @@ func (runtime Runtime) Elementinsurance() (results Results) {
 			Tags               []interface{} `json:"tags"`
 		} `json:"offers"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2826,7 +2826,6 @@ func (runtime Runtime) Elementinsurance() (results Results) {
 }
 
 func (runtime Runtime) Freeda() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/freedamedia/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -2856,6 +2855,7 @@ func (runtime Runtime) Freeda() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -2886,7 +2886,6 @@ func (runtime Runtime) Freeda() (results Results) {
 }
 
 func (runtime Runtime) Talentgarden() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://talentgarden.bamboohr.com/jobs/embed2.php?departmentId=0"
 	type Job struct {
 		Title      string
@@ -2894,6 +2893,7 @@ func (runtime Runtime) Talentgarden() (results Results) {
 		Location   string
 		Department string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("div", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "BambooHR-ATS-board") {
 			e.ForEach("li[class=BambooHR-ATS-Department-Item]", func(_ int, el *colly.HTMLElement) {
@@ -2989,7 +2989,6 @@ func (runtime Runtime) Facileit() (results Results) {
 }
 
 func (runtime Runtime) Vodafone() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://careers.vodafone.com/search/?startrow=%d"
 	base_job_url := "https://careers.vodafone.com"
 	number_results_per_page := 25
@@ -3000,6 +2999,7 @@ func (runtime Runtime) Vodafone() (results Results) {
 		Location string
 		Date     string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".html5", func(e *colly.HTMLElement) {
 		e.ForEach(".data-row", func(_ int, el *colly.HTMLElement) {
 			result_title := strings.Join(strings.Fields(strings.TrimSpace(el.ChildTexts("a")[0])), " ")
@@ -3046,7 +3046,6 @@ func (runtime Runtime) Vodafone() (results Results) {
 }
 
 func (runtime Runtime) Glovo() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/glovo/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -3076,6 +3075,7 @@ func (runtime Runtime) Glovo() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -3106,8 +3106,6 @@ func (runtime Runtime) Glovo() (results Results) {
 }
 
 func (runtime Runtime) Glickon() (results Results) {
-	c := colly.NewCollector()
-	l := c.Clone()
 	section_url := "https://core.glickon.com/api/candidate/latest/companies/glickon"
 	department_url := "https://core.glickon.com/api/candidate/latest/sections/%s?from_www=true"
 	job_api_url := "https://core.glickon.com/api/candidate/latest/company_challenges/%s"
@@ -3134,6 +3132,8 @@ func (runtime Runtime) Glickon() (results Results) {
 	type Job struct {
 		Location string `json:"location"`
 	}
+	c := colly.NewCollector()
+	l := c.Clone()
 	c.OnResponse(func(r *colly.Response) {
 		var departments Departments
 		err := json.Unmarshal(r.Body, &departments)
@@ -3191,7 +3191,6 @@ func (runtime Runtime) Glickon() (results Results) {
 }
 
 func (runtime Runtime) Satispay() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://satispay.breezy.hr%s"
 	type Job struct {
 		Title      string
@@ -3200,6 +3199,7 @@ func (runtime Runtime) Satispay() (results Results) {
 		Department string
 		Type       string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("ul", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "position") {
 			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
@@ -3235,9 +3235,6 @@ func (runtime Runtime) Satispay() (results Results) {
 }
 
 func (runtime Runtime) Medtronic() (results Results) {
-	c := colly.NewCollector()
-	l := c.Clone()
-	x := l.Clone()
 	start_url := "https://jobs.medtronic.com"
 	id_url := "https://jobs.medtronic.com/ajax/jobs/search/create?uid=661"
 	temp_jobs_url := "https://jobs.medtronic.com/jobs/search/%d/page/%d"
@@ -3259,6 +3256,9 @@ func (runtime Runtime) Medtronic() (results Results) {
 		Category    string
 		Description string
 	}
+	c := colly.NewCollector()
+	l := c.Clone()
+	x := l.Clone()
 	c.OnHTML("body", func(e *colly.HTMLElement) {
 		tsstoken = e.ChildAttr("input[name=tsstoken]", "value")
 		l.Visit(id_url)
@@ -3366,7 +3366,6 @@ func (runtime Runtime) Medtronic() (results Results) {
 }
 
 func (runtime Runtime) Bendingspoons() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://website.rolemodel.bendingspoons.com/roles.json"
 	base_job_url := "https://bendingspoons.com/careers.html?x=%s"
 	type Jobs []struct {
@@ -3403,6 +3402,7 @@ func (runtime Runtime) Bendingspoons() (results Results) {
 		} `json:"we_look_for"`
 		LongDescription string `json:"long_description"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -3636,7 +3636,6 @@ func (runtime Runtime) Deloitte() (results Results) {
 }
 
 func (runtime Runtime) Bayer() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://career.bayer.com/en/jobs-search?page=%d"
 	base_job_url := "https://career.bayer.com%s"
 	counter := 0
@@ -3647,6 +3646,7 @@ func (runtime Runtime) Bayer() (results Results) {
 		Date     string
 		Country  string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".content", func(e *colly.HTMLElement) {
 		e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
 			result_title := el.ChildText("a")
@@ -3689,7 +3689,6 @@ func (runtime Runtime) Bayer() (results Results) {
 }
 
 func (runtime Runtime) Roche() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://www.roche.com/toolbox/jobSearch.json?type=json&api=jobs&pageLength=%d&offset=%d"
 	base_url := "https://www.roche.com%s"
 	number_results_per_page := 300
@@ -3719,6 +3718,7 @@ func (runtime Runtime) Roche() (results Results) {
 			} `json:"items"`
 		} `json:"jobs"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -3858,7 +3858,6 @@ func (runtime Runtime) Msd() (results Results) {
 }
 
 func (runtime Runtime) Subitoit() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://info.subito.it/lavora-con-noi.htm"
 	type Job struct {
 		Url        string
@@ -3866,6 +3865,7 @@ func (runtime Runtime) Subitoit() (results Results) {
 		Location   string
 		Department string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".work-openings", func(e *colly.HTMLElement) {
 		e.ForEach(".list-box-item", func(_ int, el *colly.HTMLElement) {
 			result_title := el.ChildText("a")
@@ -3896,7 +3896,6 @@ func (runtime Runtime) Subitoit() (results Results) {
 }
 
 func (runtime Runtime) Square() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.smartrecruiters.com/v1/companies/square/postings?offset=%d"
 	base_job_url := "https://www.smartrecruiters.com/Square/%s"
 	number_results_per_page := 100
@@ -3956,6 +3955,7 @@ func (runtime Runtime) Square() (results Results) {
 			} `json:"language"`
 		} `json:"content"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -3995,7 +3995,6 @@ func (runtime Runtime) Square() (results Results) {
 }
 
 func (runtime Runtime) Facebook() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://www.facebook.com/careers/jobs?results_per_page=100&page=%d"
 	base_job_url := "https://www.facebook.com%s"
 	number_results_per_page := 100
@@ -4005,6 +4004,7 @@ func (runtime Runtime) Facebook() (results Results) {
 		Location string
 		Info     string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("#search_result", func(e *colly.HTMLElement) {
 		e.ForEach("a", func(_ int, el *colly.HTMLElement) {
 			result_url := fmt.Sprintf(base_job_url, el.Attr("href"))
@@ -4050,7 +4050,6 @@ func (runtime Runtime) Facebook() (results Results) {
 }
 
 func (runtime Runtime) Paintgun() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://join.com/api/public/companies/9628/jobs?page=1&pageSize=100"
 	job_base_url := "https://paintgun.join.com/jobs/%s"
 	type JsonJobs struct {
@@ -4119,6 +4118,7 @@ func (runtime Runtime) Paintgun() (results Results) {
 		Aggregations      []interface{} `json:"aggregations"`
 		UsingFallbackData bool          `json:"usingFallbackData"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4165,7 +4165,6 @@ func (runtime Runtime) Nen() (results Results) {
 }
 
 func (runtime Runtime) Amboss() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://www.amboss.com/us/career-opportunities"
 	base_job_url := "https://www.amboss.com%s"
 	type Job struct {
@@ -4173,6 +4172,7 @@ func (runtime Runtime) Amboss() (results Results) {
 		Title    string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".jobs-list", func(e *colly.HTMLElement) {
 		e.ForEach("._pwggpq", func(_ int, el *colly.HTMLElement) {
 			result_url := fmt.Sprintf(base_job_url, el.Attr("href"))
@@ -4202,7 +4202,6 @@ func (runtime Runtime) Amboss() (results Results) {
 }
 
 func (runtime Runtime) Chatterbug() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://chatterbug.recruitee.com/api/offers"
 	type Jobs struct {
 		Offers []struct {
@@ -4247,6 +4246,7 @@ func (runtime Runtime) Chatterbug() (results Results) {
 			OpenQuestions []interface{} `json:"open_questions"`
 		} `json:"offers"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4277,7 +4277,6 @@ func (runtime Runtime) Chatterbug() (results Results) {
 }
 
 func (runtime Runtime) Infarm() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/infarm/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -4307,6 +4306,7 @@ func (runtime Runtime) Infarm() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4337,7 +4337,6 @@ func (runtime Runtime) Infarm() (results Results) {
 }
 
 func (runtime Runtime) Pitch() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/pitch/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -4367,6 +4366,7 @@ func (runtime Runtime) Pitch() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4397,7 +4397,6 @@ func (runtime Runtime) Pitch() (results Results) {
 }
 
 func (runtime Runtime) Beat81() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/beat81?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -4420,6 +4419,7 @@ func (runtime Runtime) Beat81() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4450,7 +4450,6 @@ func (runtime Runtime) Beat81() (results Results) {
 }
 
 func (runtime Runtime) Careerfoundry() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://careerfoundry.recruitee.com/api/offers"
 	type Jobs struct {
 		Offers []struct {
@@ -4495,6 +4494,7 @@ func (runtime Runtime) Careerfoundry() (results Results) {
 			OpenQuestions []interface{} `json:"open_questions"`
 		} `json:"offers"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4528,7 +4528,6 @@ func (runtime Runtime) Careerfoundry() (results Results) {
 }
 
 func (runtime Runtime) Casparhealth() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://goreha-jobs.personio.de"
 	type Job struct {
 		Title       string
@@ -4536,6 +4535,7 @@ func (runtime Runtime) Casparhealth() (results Results) {
 		Location    string
 		Description string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "job-box-link") {
 			result_title := e.ChildText(".jb-title")
@@ -4570,7 +4570,6 @@ func (runtime Runtime) Casparhealth() (results Results) {
 }
 
 func (runtime Runtime) Ecosia() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/ecosia?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -4593,6 +4592,7 @@ func (runtime Runtime) Ecosia() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4623,7 +4623,6 @@ func (runtime Runtime) Ecosia() (results Results) {
 }
 
 func (runtime Runtime) Forto() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/forto?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -4646,6 +4645,7 @@ func (runtime Runtime) Forto() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4676,7 +4676,6 @@ func (runtime Runtime) Forto() (results Results) {
 }
 
 func (runtime Runtime) Idagio() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://idagio-jobs.personio.de"
 	type Job struct {
 		Url         string
@@ -4684,6 +4683,7 @@ func (runtime Runtime) Idagio() (results Results) {
 		Location    string
 		Description string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "job-box-link") {
 			result_title := e.ChildText(".jb-title")
@@ -4715,7 +4715,6 @@ func (runtime Runtime) Idagio() (results Results) {
 }
 
 func (runtime Runtime) Joblift() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://joblift-talent.freshteam.com/jobs"
 	base_job_url := "https://joblift-talent.freshteam.com%s"
 	type Job struct {
@@ -4724,6 +4723,7 @@ func (runtime Runtime) Joblift() (results Results) {
 		Location   string
 		Department string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".job-role-list", func(e *colly.HTMLElement) {
 		e.ForEach("li:not([class])", func(_ int, el *colly.HTMLElement) {
 			result_department := strings.Split(el.ChildText(".role-title"), "-")[0]
@@ -4757,7 +4757,6 @@ func (runtime Runtime) Joblift() (results Results) {
 }
 
 func (runtime Runtime) Kontist() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://kontist.com/careers/jobs.json"
 	type Jobs struct {
 		Data []struct {
@@ -4781,6 +4780,7 @@ func (runtime Runtime) Kontist() (results Results) {
 		} `json:"data"`
 		HasMore bool `json:"has_more"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4811,7 +4811,6 @@ func (runtime Runtime) Kontist() (results Results) {
 }
 
 func (runtime Runtime) Medloop() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/medloop/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -4841,6 +4840,7 @@ func (runtime Runtime) Medloop() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4871,7 +4871,6 @@ func (runtime Runtime) Medloop() (results Results) {
 }
 
 func (runtime Runtime) Medwing() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://team.medwing.com/wp-json/wp/v2/jobs"
 	type Jobs []struct {
 		ID      int    `json:"id"`
@@ -4920,6 +4919,7 @@ func (runtime Runtime) Medwing() (results Results) {
 	type Location []struct {
 		Name string `json:"name"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -4965,7 +4965,6 @@ func (runtime Runtime) Medwing() (results Results) {
 }
 
 func (runtime Runtime) Merantix() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://merantix.bamboohr.com/jobs/embed2.php?departmentId=0"
 	type Job struct {
 		Url      string
@@ -4973,6 +4972,7 @@ func (runtime Runtime) Merantix() (results Results) {
 		Location string
 		Division string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".BambooHR-ATS-Department-List", func(e *colly.HTMLElement) {
 		e.ForEach(".BambooHR-ATS-Department-Item", func(_ int, el *colly.HTMLElement) {
 			result_division := strings.TrimSpace(el.ChildText(".BambooHR-ATS-Department-Header"))
@@ -5006,7 +5006,6 @@ func (runtime Runtime) Merantix() (results Results) {
 }
 
 func (runtime Runtime) Ninox() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://ninox.com/en/jobs"
 	base_job_url := "https://ninox.com/%s"
 	type Job struct {
@@ -5014,6 +5013,7 @@ func (runtime Runtime) Ninox() (results Results) {
 		Title    string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".job-new", func(e *colly.HTMLElement) {
 		result_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
 		result_title := e.ChildText("h4")
@@ -5041,7 +5041,6 @@ func (runtime Runtime) Ninox() (results Results) {
 }
 
 func (runtime Runtime) Zenjob() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://zenjob.teamtailor.com"
 	base_job_url := "https://zenjob.teamtailor.com%s"
 	type Job struct {
@@ -5049,6 +5048,7 @@ func (runtime Runtime) Zenjob() (results Results) {
 		Title    string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".jobs", func(e *colly.HTMLElement) {
 		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
 			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
@@ -5078,7 +5078,6 @@ func (runtime Runtime) Zenjob() (results Results) {
 }
 
 func (runtime Runtime) Plantix() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://plantix.recruitee.com/api/offers"
 	type Jobs struct {
 		Offers []struct {
@@ -5123,6 +5122,7 @@ func (runtime Runtime) Plantix() (results Results) {
 			OpenQuestions []interface{} `json:"open_questions"`
 		} `json:"offers"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -5156,13 +5156,13 @@ func (runtime Runtime) Plantix() (results Results) {
 }
 
 func (runtime Runtime) Coachhub() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://coachhub-jobs.personio.de/"
 	type Job struct {
 		Url      string
 		Title    string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".panel-container", func(e *colly.HTMLElement) {
 		e.ForEach(".recent-job-list", func(_ int, el *colly.HTMLElement) {
 			result_url := el.ChildAttr("a", "href")
@@ -5192,7 +5192,6 @@ func (runtime Runtime) Coachhub() (results Results) {
 }
 
 func (runtime Runtime) Raisin() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://raisin-jobs.personio.de"
 	type Job struct {
 		Title       string
@@ -5200,6 +5199,7 @@ func (runtime Runtime) Raisin() (results Results) {
 		Description string
 		Location    string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "job-box-link") {
 			result_title := e.ChildText(".jb-title")
@@ -5231,7 +5231,6 @@ func (runtime Runtime) Raisin() (results Results) {
 }
 
 func (runtime Runtime) Acatus() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://acatus-jobs.personio.de/?language=en#all"
 	type Job struct {
 		Url      string
@@ -5239,6 +5238,7 @@ func (runtime Runtime) Acatus() (results Results) {
 		Location string
 		Type     string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("body", func(e *colly.HTMLElement) {
 		e.ForEach(".job-list-desc", func(_ int, el *colly.HTMLElement) {
 			result_url := el.ChildAttr("a", "href")
@@ -5271,7 +5271,6 @@ func (runtime Runtime) Acatus() (results Results) {
 }
 
 func (runtime Runtime) Adjust() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/adjust/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -5301,6 +5300,7 @@ func (runtime Runtime) Adjust() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -5331,7 +5331,6 @@ func (runtime Runtime) Adjust() (results Results) {
 }
 
 func (runtime Runtime) Automationhero() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/automationhero?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -5354,6 +5353,7 @@ func (runtime Runtime) Automationhero() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -5384,7 +5384,6 @@ func (runtime Runtime) Automationhero() (results Results) {
 }
 
 func (runtime Runtime) Bonify() (results Results) {
-	c := colly.NewCollector()
 	start_url := "http://www.bonify.de/jobs"
 	base_job_url := "https://www.bonify.de/jobs/%s"
 	type JsonJobs struct {
@@ -5424,6 +5423,7 @@ func (runtime Runtime) Bonify() (results Results) {
 		Version string `json:"version"`
 		License string `json:"license"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		body := string(r.Body)
 		json_body := strings.Split(
@@ -5458,13 +5458,13 @@ func (runtime Runtime) Bonify() (results Results) {
 }
 
 func (runtime Runtime) Bryter() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://bryter.io/careers"
 	type Job struct {
 		Title    string
 		Url      string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("#careers-listing", func(e *colly.HTMLElement) {
 		e.ForEach("a", func(_ int, el *colly.HTMLElement) {
 			result_url := el.Attr("href")
@@ -5513,7 +5513,6 @@ func (runtime Runtime) Bunch() (results Results) {
 }
 
 func (runtime Runtime) Candis() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://career.recruitee.com/api/c/50731/widget/?widget=true"
 	type Jobs struct {
 		Offers []struct {
@@ -5559,6 +5558,7 @@ func (runtime Runtime) Candis() (results Results) {
 		} `json:"offers"`
 		Terms []interface{} `json:"terms"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -5589,7 +5589,6 @@ func (runtime Runtime) Candis() (results Results) {
 }
 
 func (runtime Runtime) Cargoone() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/cargo-2?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -5612,6 +5611,7 @@ func (runtime Runtime) Cargoone() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -5642,7 +5642,6 @@ func (runtime Runtime) Cargoone() (results Results) {
 }
 
 func (runtime Runtime) Construyo() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://partum-gmbh-jobs.personio.de"
 	type Job struct {
 		Title       string
@@ -5650,6 +5649,7 @@ func (runtime Runtime) Construyo() (results Results) {
 		Description string
 		Location    string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "job-box-link") {
 			result_title := e.ChildText(".jb-title")
@@ -5681,7 +5681,6 @@ func (runtime Runtime) Construyo() (results Results) {
 }
 
 func (runtime Runtime) Crosslend() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://crosslend-jobs.personio.de/"
 	type Job struct {
 		Url      string
@@ -5689,6 +5688,7 @@ func (runtime Runtime) Crosslend() (results Results) {
 		Location string
 		Type     string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("body", func(e *colly.HTMLElement) {
 		e.ForEach(".job-list-desc", func(_ int, el *colly.HTMLElement) {
 			result_url := el.ChildAttr("a", "href")
@@ -5831,7 +5831,6 @@ func (runtime Runtime) Bytedance() (results Results) {
 }
 
 func (runtime Runtime) Bmw() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://www.bmwgroup.jobs/content/grpw/websites/jobfinder.joblist.en.de.json"
 	base_job_url := "https://www.bmwgroup.jobs/en/jobfinder/job-description.%s"
 	type JsonJobs struct {
@@ -5864,6 +5863,7 @@ func (runtime Runtime) Bmw() (results Results) {
 			Fulltext           string `json:"fulltext"`
 		} `json:"data"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -5964,7 +5964,6 @@ func (runtime Runtime) Infineon() (results Results) {
 }
 
 func (runtime Runtime) Porsche() (results Results) {
-	c := colly.NewCollector()
 	start_url := `https://api-jobs.porsche.com/search/?data={"SearchParameters":{"FirstItem":1,"CountItem":1000}}`
 	type JsonJobs struct {
 		LanguageCode string `json:"LanguageCode"`
@@ -6036,6 +6035,7 @@ func (runtime Runtime) Porsche() (results Results) {
 			} `json:"UserArea"`
 		} `json:"SearchResult"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -6066,7 +6066,6 @@ func (runtime Runtime) Porsche() (results Results) {
 }
 
 func (runtime Runtime) Bosch() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings?offset=%d"
 	base_job_url := "https://www.smartrecruiters.com/BoschGroup/%s"
 	number_results_per_page := 100
@@ -6125,6 +6124,7 @@ func (runtime Runtime) Bosch() (results Results) {
 		Offset     int64 `json:"offset"`
 		TotalFound int64 `json:"totalFound"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -6161,7 +6161,6 @@ func (runtime Runtime) Bosch() (results Results) {
 }
 
 func (runtime Runtime) Mckinsey() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://mobileservices.mckinsey.com/services/ContentAPI/SearchAPI.svc/jobs/search?&pageSize=100&start=%d"
 	base_job_url := "https://www.mckinsey.com/careers/search-jobs/jobs/%s"
 	number_results_per_page := 100
@@ -6193,6 +6192,7 @@ func (runtime Runtime) Mckinsey() (results Results) {
 			} `json:"docs"`
 		} `json:"response"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -6233,7 +6233,6 @@ func (runtime Runtime) Mckinsey() (results Results) {
 }
 
 func (runtime Runtime) Sap() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://jobs.sap.com/search/?q=&sortColumn=referencedate&sortDirection=desc&startrow=%d"
 	base_job_url := "https://jobs.sap.com/%s"
 	number_results_per_page := 25
@@ -6243,6 +6242,7 @@ func (runtime Runtime) Sap() (results Results) {
 		Url      string
 		Location string
 	}
+	c := colly.NewCollector()
 	c.OnHTML(".html5", func(e *colly.HTMLElement) {
 		e.ForEach(".data-row", func(_ int, el *colly.HTMLElement) {
 			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
@@ -6285,7 +6285,6 @@ func (runtime Runtime) Sap() (results Results) {
 }
 
 func (runtime Runtime) Puma() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://about.puma.com/api/PUMA/Feature/JobFinder?loadMore=500"
 	base_job_url := "https://about.puma.com%s"
 	type JsonJobs struct {
@@ -6300,6 +6299,7 @@ func (runtime Runtime) Puma() (results Results) {
 			LocationID interface{} `json:"locationId"`
 		} `json:"teaser"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -6330,7 +6330,6 @@ func (runtime Runtime) Puma() (results Results) {
 }
 
 func (runtime Runtime) Daimler() (results Results) {
-	c := colly.NewCollector()
 	start_url := `https://global-jobboard-api.daimler.com/v3/search/{"SearchParameters":{"MatchedObjectDescriptor":["PositionID","PositionTitle","PositionURI","OrganizationName","PositionLocation.CityName","JobCategory.Name","CareerLevel.Name","Facet:PositionLocation.CityName","Facet:PositionLocation.CountryName","PublicationStartDate"],"FirstItem":0,"CountItem":1000000},"SearchCriteria":[{"CriterionName":"PublicationLanguage.Code","CriterionValue":["EN"]}]}`
 	type JsonJobs struct {
 		SearchResult struct {
@@ -6357,6 +6356,7 @@ func (runtime Runtime) Daimler() (results Results) {
 			} `json:"SearchResultItems"`
 		} `json:"SearchResult"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -6387,7 +6387,6 @@ func (runtime Runtime) Daimler() (results Results) {
 }
 
 func (runtime Runtime) Siemens() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://jobs.siemens.com/api/jobs?page=%d&limit=100"
 	number_results_per_page := 100
 	counter := 1
@@ -6434,6 +6433,7 @@ func (runtime Runtime) Siemens() (results Results) {
 		TotalCount int `json:"totalCount"`
 		Count      int `json:"count"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -6474,7 +6474,6 @@ func (runtime Runtime) Siemens() (results Results) {
 }
 
 func (runtime Runtime) Continental() (results Results) {
-	c := colly.NewCollector()
 	start_url := `https://api.continental-jobs.com/search/?data={"LanguageCode":"EN","SearchParameters":{"FirstItem":1,"CountItem":2000,"Sort":[{"Criterion":"PublicationStartDate","Direction":"DESC"}],"MatchedObjectDescriptor":["ID","PositionID","PositionTitle","PositionURI","PositionLocation.CountryName","PositionLocation.CityName","PositionLocation.Longitude","PositionLocation.Latitude","PositionIndustry.Name","JobCategory.Name","PublicationStartDate","VacancyDivision"]},"SearchCriteria":[{"CriterionName":"PublicationLanguage.Code","CriterionValue":["EN"]},{"CriterionName":"PublicationChannel.Code","CriterionValue":["12"]}]}`
 	type JsonJobs struct {
 		SearchResult struct {
@@ -6506,6 +6505,7 @@ func (runtime Runtime) Continental() (results Results) {
 			} `json:"SearchResultItems"`
 		} `json:"SearchResult"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -6541,7 +6541,6 @@ func (runtime Runtime) Continental() (results Results) {
 }
 
 func (runtime Runtime) Deliveryhero() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://careers.deliveryhero.com/global/en/search-results?s=1&from=%d"
 	base_job_url := "https://careers.deliveryhero.com/global/en/job/%s"
 	number_results_per_page := 50
@@ -6596,6 +6595,7 @@ func (runtime Runtime) Deliveryhero() (results Results) {
 			} `json:"data"`
 		} `json:"eagerLoadRefineSearch"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		response := Response{r.Body}
 		response_body := string(response.Html)
@@ -6769,7 +6769,6 @@ func (runtime Runtime) Tesla() (results Results) {
 }
 
 func (runtime Runtime) Klarna() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.lever.co/v0/postings/klarna?mode=json"
 	type Jobs []struct {
 		AdditionalPlain string `json:"additionalPlain"`
@@ -6792,6 +6791,7 @@ func (runtime Runtime) Klarna() (results Results) {
 		HostedURL string `json:"hostedUrl"`
 		ApplyURL  string `json:"applyUrl"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs Jobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -6822,7 +6822,6 @@ func (runtime Runtime) Klarna() (results Results) {
 }
 
 func (runtime Runtime) Researchgate() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://www.researchgate.net/jobs?page=%d"
 	base_job_url := "https://www.researchgate.net/%s"
 	counter := 1
@@ -6832,6 +6831,7 @@ func (runtime Runtime) Researchgate() (results Results) {
 		Location  string
 		Institute string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("html", func(e *colly.HTMLElement) {
 		e.ForEach(".jobs-list-item-nova", func(_ int, el *colly.HTMLElement) {
 			result_title := el.ChildText(".nova-v-job-item__title")
@@ -6872,7 +6872,6 @@ func (runtime Runtime) Researchgate() (results Results) {
 }
 
 func (runtime Runtime) Clue() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/clue/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -6902,6 +6901,7 @@ func (runtime Runtime) Clue() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -6932,7 +6932,6 @@ func (runtime Runtime) Clue() (results Results) {
 }
 
 func (runtime Runtime) Juniqe() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://juniqe-jobs.personio.de/"
 	type Job struct {
 		Url      string
@@ -6940,6 +6939,7 @@ func (runtime Runtime) Juniqe() (results Results) {
 		Location string
 		Type     string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("body", func(e *colly.HTMLElement) {
 		e.ForEach(".job-list-desc", func(_ int, el *colly.HTMLElement) {
 			result_url := el.ChildAttr("a", "href")
@@ -6972,7 +6972,6 @@ func (runtime Runtime) Juniqe() (results Results) {
 }
 
 func (runtime Runtime) Adahealth() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/adahealth/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -7002,6 +7001,7 @@ func (runtime Runtime) Adahealth() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -7032,7 +7032,6 @@ func (runtime Runtime) Adahealth() (results Results) {
 }
 
 func (runtime Runtime) Babbel() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://api.greenhouse.io/v1/boards/babbel/jobs"
 	type JsonJobs struct {
 		Jobs []struct {
@@ -7062,6 +7061,7 @@ func (runtime Runtime) Babbel() (results Results) {
 			Total int `json:"total"`
 		} `json:"meta"`
 	}
+	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal(r.Body, &jsonJobs)
@@ -7150,7 +7150,6 @@ func (runtime Runtime) Eyeem() (results Results) {
 }
 
 func (runtime Runtime) Skoove() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://skoove-jobs.personio.de/"
 	type Job struct {
 		Url      string
@@ -7158,6 +7157,7 @@ func (runtime Runtime) Skoove() (results Results) {
 		Location string
 		Type     string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("body", func(e *colly.HTMLElement) {
 		e.ForEach(".job-list-desc", func(_ int, el *colly.HTMLElement) {
 			result_url := el.ChildAttr("a", "href")
@@ -7190,8 +7190,6 @@ func (runtime Runtime) Skoove() (results Results) {
 }
 
 func (runtime Runtime) Rocketinternet() (results Results) {
-	c := colly.NewCollector()
-	l := c.Clone()
 	start_url := "https://www.rocket-internet.com/careers/rocket"
 	base_job_url := "https://www.rocket-internet.com%s"
 	type Job struct {
@@ -7200,6 +7198,8 @@ func (runtime Runtime) Rocketinternet() (results Results) {
 		Location string
 		Type     string
 	}
+	c := colly.NewCollector()
+	l := c.Clone()
 	c.OnHTML(".department", func(e *colly.HTMLElement) {
 		department_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
 		l.Visit(department_url)
@@ -7242,7 +7242,6 @@ func (runtime Runtime) Rocketinternet() (results Results) {
 }
 
 func (runtime Runtime) Morressier() (results Results) {
-	c := colly.NewCollector()
 	start_url := "https://morressier-jobs.personio.de/"
 	type Job struct {
 		Url      string
@@ -7250,6 +7249,7 @@ func (runtime Runtime) Morressier() (results Results) {
 		Location string
 		Type     string
 	}
+	c := colly.NewCollector()
 	c.OnHTML("a", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Attr("class"), "job-box-link") {
 			result_title := e.ChildText(".jb-title")

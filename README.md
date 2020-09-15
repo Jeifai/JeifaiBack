@@ -53,7 +53,6 @@ func main() {
     * Here an example fo scraper which extract the information directly from the HTML.
 ```golang
 func (runtime Runtime) Morressier() (results Results) {
-    c := colly.NewCollector()
     start_url := "https://morressier-jobs.personio.de/"
     type Job struct {
         Url      string
@@ -61,6 +60,7 @@ func (runtime Runtime) Morressier() (results Results) {
         Location string
         Type     string
     }
+    c := colly.NewCollector()
     c.OnHTML("a", func(e *colly.HTMLElement) {
         if strings.Contains(e.Attr("class"), "job-box-link") {
             result_title := e.ChildText(".jb-title")
