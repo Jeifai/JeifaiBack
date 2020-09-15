@@ -278,12 +278,13 @@ func GenerateMatches(matching Matching, scraper_id int) (matches []Match) {
                         WITH 
                             active_keywords AS(
                                 SELECT DISTINCT
-                                    utk.keywordid,
+                                    uk.keywordid,
                                     k.text,
                                     REPLACE(LOWER(k.text), ' ', '') AS lowertext
                                 FROM userstargetskeywords utk
-                                LEFT JOIN keywords k ON(utk.keywordid = k.id)
-                                WHERE utk.deletedat IS NULL),
+                                LEFT JOIN userskeywords uk ON(utk.userkeywordid = uk.id)
+                                LEFT JOIN keywords k ON(uk.keywordid = k.id)
+                                WHERE uk.deletedat IS NULL),
                             today_results AS(
                                 SELECT
                                     r.id AS resultid,
@@ -410,24 +411,26 @@ func GetUserNotifications(scrapers []Scraper, user string) (notifications []Noti
 		rows, err := Db.Query(`
                             SELECT
                                 m.id AS matchid,
-                                utk.userid,
+                                uk.userid,
                                 u.username,
                                 u.email,
                                 s.name,
                                 r.title,
                                 r.url
                             FROM userstargetskeywords utk
-                            INNER JOIN matches m ON(utk.keywordid = m.keywordid)
+                            LEFT JOIN userskeywords uk ON(utk.userkeywordid = uk.id)
+                            LEFT JOIN userstargets ut ON(utk.usertargetid = ut.id)
+                            INNER JOIN matches m ON(uk.keywordid = m.keywordid)
                             INNER JOIN results r ON(m.resultid = r.id)
                             INNER JOIN scrapers s ON(r.scraperid = s.id)
-                            INNER JOIN users u ON(utk.userid = u.id)
+                            INNER JOIN users u ON(uk.userid = u.id)
                             LEFT JOIN notifications n ON(m.id = n.matchid)
                             WHERE m.createdat > current_date - interval '0' day
-                            AND s.targetid = utk.targetid
+                            AND s.targetid = ut.targetid
                             AND s.id = $1
-                            AND utk.userid = $2
+                            AND uk.userid = $2
                             AND n.id IS NULL
-                            AND utk.deletedat IS NULL;`, scraper_id, user)
+                            AND uk.deletedat IS NULL;`, scraper_id, user)
 		counter := 0
 		for rows.Next() {
 			notification := Notification{}

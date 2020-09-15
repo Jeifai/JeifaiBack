@@ -89,17 +89,6 @@ create table userskeywords (
 );
 
 create table userstargetskeywords (
-  id            serial primary key,
-  userid        integer references users(id),
-  targetid      integer references targets(id),
-  keywordid     integer references keywords(id),
-  createdat     timestamp not null,
-  updatedat     timestamp not null,
-  deletedat     timestamp,
-  UNIQUE (userid, targetid, keywordid)
-);
-
-create table userstargetskeywords2 (
   id              serial primary key,
   usertargetid    integer references userstargets(id),
   userkeywordid   integer references userskeywords(id),
