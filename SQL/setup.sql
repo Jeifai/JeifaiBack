@@ -167,7 +167,7 @@ create table favouriteresults (
   id              serial primary key,
   userid          integer references users(id),      
   resultid        integer references results(id),
-  createdat       timestamp not null,        
+  createdat       timestamp not null,
   deletedat       timestamp,
   filelocation    varchar(100)
 );
