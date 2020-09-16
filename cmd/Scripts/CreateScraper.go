@@ -12,9 +12,9 @@ import (
 )
 
 func main() {
-	scraper_name := "Here"
-	jobs_url := "https://www.here.com/careers"
-	host_url := "https://www.here.com"
+	scraper_name := "Improbable"
+	jobs_url := "https://improbable.io/careers"
+	host_url := "https://improbable.io"
 	scraper := Scraper{scraper_name, jobs_url, host_url}
 	scraper.CreateScraper()
 }
@@ -23,7 +23,6 @@ type Scraper struct {
 	Name    string
 	JobsUrl string
 	HostUrl string
-	Version int
 }
 
 func DbConnect() (Db *sql.DB) {
