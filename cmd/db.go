@@ -170,25 +170,29 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	valueArgs := []interface{}{}
 	timeNow := time.Now() // updatedAt and createdAt will be identical
 
+	var all_urls []string
 	for i, elem := range results {
-		str1 := "$" + strconv.Itoa(1+i*8) + ","
-		str2 := "$" + strconv.Itoa(2+i*8) + ","
-		str3 := "$" + strconv.Itoa(3+i*8) + ","
-		str4 := "$" + strconv.Itoa(4+i*8) + ","
-		str5 := "$" + strconv.Itoa(5+i*8) + ","
-		str6 := "$" + strconv.Itoa(6+i*8) + ","
-		str7 := "$" + strconv.Itoa(7+i*8) + ","
-		str8 := "$" + strconv.Itoa(8+i*8)
-		str_n := "(" + str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + ")"
-		valueStrings = append(valueStrings, str_n)
-		valueArgs = append(valueArgs, scraper.Id)
-		valueArgs = append(valueArgs, scraping.Id)
-		valueArgs = append(valueArgs, elem.Title)
-		valueArgs = append(valueArgs, elem.ResultUrl)
-		valueArgs = append(valueArgs, elem.Location)
-		valueArgs = append(valueArgs, elem.Data)
-		valueArgs = append(valueArgs, timeNow)
-		valueArgs = append(valueArgs, timeNow)
+		if !Contains(all_urls, elem.ResultUrl) {
+			all_urls = append(all_urls, elem.ResultUrl)
+			str1 := "$" + strconv.Itoa(1+i*8) + ","
+			str2 := "$" + strconv.Itoa(2+i*8) + ","
+			str3 := "$" + strconv.Itoa(3+i*8) + ","
+			str4 := "$" + strconv.Itoa(4+i*8) + ","
+			str5 := "$" + strconv.Itoa(5+i*8) + ","
+			str6 := "$" + strconv.Itoa(6+i*8) + ","
+			str7 := "$" + strconv.Itoa(7+i*8) + ","
+			str8 := "$" + strconv.Itoa(8+i*8)
+			str_n := "(" + str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + ")"
+			valueStrings = append(valueStrings, str_n)
+			valueArgs = append(valueArgs, scraper.Id)
+			valueArgs = append(valueArgs, scraping.Id)
+			valueArgs = append(valueArgs, elem.Title)
+			valueArgs = append(valueArgs, elem.ResultUrl)
+			valueArgs = append(valueArgs, elem.Location)
+			valueArgs = append(valueArgs, elem.Data)
+			valueArgs = append(valueArgs, timeNow)
+			valueArgs = append(valueArgs, timeNow)
+		}
 	}
 	smt := `INSERT INTO results (
                 scraperid, scrapingid, title, url, location, data, createdat, updatedat)
