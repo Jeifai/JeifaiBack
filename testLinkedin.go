@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func main() {
+func mainLinkedin() {
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
 
@@ -35,10 +35,10 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(res2)
-	SaveResponseToFileWithFileName(initialResponse, "linkedin.html")
+	SaveResponseToFileWithFileNameLink(initialResponse, "linkedin.html")
 }
 
-func SaveResponseToFileWithFileName(response string, filename string) {
+func SaveResponseToFileWithFileNameLink(response string, filename string) {
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(err.Error())

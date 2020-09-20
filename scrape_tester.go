@@ -15,7 +15,7 @@ import (
 	// "github.com/chromedp/chromedp"
 )
 
-func mainTTTT() {
+func mainTestt() {
 
 	t := &http.Transport{}
 	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
@@ -33,6 +33,7 @@ func mainTTTT() {
 
 	base_job_url := "https://improbable.io%s"
 	c.OnHTML("html", func(e *colly.HTMLElement) {
+		fmt.Println(e)
 		e.ForEach(".vacancy-card-module--root--b8XxX", func(_ int, el *colly.HTMLElement) {
 			result_title := el.ChildText("h2 > a")
 			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("h2 > a", "href"))
@@ -48,7 +49,7 @@ func mainTTTT() {
 		})
 	})
 	c.WithTransport(t)
-	c.Visit("file:" + dir + "/sonomotors.html")
+	c.Visit("file:" + dir + "/linkedin.html")
 	// c.Visit(fmt.Sprintf(start_url, 0))
 	///////////////////////////////////////////////////////////////////////////////// CHROMEDP BLOCK
 
