@@ -7733,3 +7733,994 @@ func (runtime Runtime) Improbable() (results Results) {
 	c.Visit(start_url)
 	return
 }
+
+func (runtime Runtime) Lilium() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/lilium/jobs"
+	type JsonJobs struct {
+		Jobs []struct {
+			AbsoluteURL    string `json:"absolute_url"`
+			DataCompliance []struct {
+				Type            string      `json:"type"`
+				RequiresConsent bool        `json:"requires_consent"`
+				RetentionPeriod interface{} `json:"retention_period"`
+			} `json:"data_compliance"`
+			Education     string `json:"education,omitempty"`
+			InternalJobID int    `json:"internal_job_id"`
+			Location      struct {
+				Name string `json:"name"`
+			} `json:"location"`
+			Metadata []struct {
+				ID        int         `json:"id"`
+				Name      string      `json:"name"`
+				Value     interface{} `json:"value"`
+				ValueType string      `json:"value_type"`
+			} `json:"metadata"`
+			ID            int    `json:"id"`
+			UpdatedAt     string `json:"updated_at"`
+			RequisitionID string `json:"requisition_id"`
+			Title         string `json:"title"`
+		} `json:"jobs"`
+		Meta struct {
+			Total int `json:"total"`
+		} `json:"meta"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Jobs {
+			result_title := elem.Title
+			result_url := elem.AbsoluteURL
+			result_location := elem.Location.Name
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Volocopter() (results Results) {
+	start_url := "https://api.smartrecruiters.com/v1/companies/VolocopterGmbH/postings"
+	type JsonJobs struct {
+		Offset     int `json:"offset"`
+		Limit      int `json:"limit"`
+		TotalFound int `json:"totalFound"`
+		Content    []struct {
+			ID        string `json:"id"`
+			Name      string `json:"name"`
+			UUID      string `json:"uuid"`
+			RefNumber string `json:"refNumber"`
+			Company   struct {
+				Identifier string `json:"identifier"`
+				Name       string `json:"name"`
+			} `json:"company"`
+			ReleasedDate time.Time `json:"releasedDate"`
+			Location     struct {
+				City       string `json:"city"`
+				Region     string `json:"region"`
+				Country    string `json:"country"`
+				Address    string `json:"address"`
+				PostalCode string `json:"postalCode"`
+				Remote     bool   `json:"remote"`
+			} `json:"location,omitempty"`
+			Industry struct {
+				ID    string `json:"id"`
+				Label string `json:"label"`
+			} `json:"industry"`
+			Department struct {
+				ID    string `json:"id"`
+				Label string `json:"label"`
+			} `json:"department,omitempty"`
+			Function struct {
+				ID    string `json:"id"`
+				Label string `json:"label"`
+			} `json:"function"`
+			TypeOfEmployment struct {
+				Label string `json:"label"`
+			} `json:"typeOfEmployment"`
+			ExperienceLevel struct {
+				ID    string `json:"id"`
+				Label string `json:"label"`
+			} `json:"experienceLevel"`
+			CustomField []struct {
+				FieldID    string `json:"fieldId"`
+				FieldLabel string `json:"fieldLabel"`
+				ValueID    string `json:"valueId"`
+				ValueLabel string `json:"valueLabel"`
+			} `json:"customField"`
+			Ref     string `json:"ref"`
+			Creator struct {
+				Name string `json:"name"`
+			} `json:"creator"`
+			Language struct {
+				Code        string `json:"code"`
+				Label       string `json:"label"`
+				LabelNative string `json:"labelNative"`
+			} `json:"language"`
+		} `json:"content"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Content {
+			result_title := elem.Name
+			result_url := elem.Ref
+			result_location := elem.Location.City + "," + elem.Location.Country
+			if elem.Location.Remote {
+				result_location = result_location + "," + "Remote"
+			}
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Idnow() (results Results) {
+	start_url := "https://idnow.jobbase.io"
+	base_url := "https://idnow.jobbase.io%s"
+	file_name := "idnow.html"
+	type Job struct {
+		Url      string
+		Title    string
+		Location string
+		Date     string
+	}
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+	var initialResponse string
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(start_url),
+		chromedp.Sleep(SecondsSleep*time.Second),
+		chromedp.OuterHTML("html", &initialResponse),
+	); err != nil {
+		panic(err)
+	}
+	SaveResponseToFileWithFileName(initialResponse, file_name)
+	c := colly.NewCollector()
+	c.OnHTML(".row-table-condensed-md", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("a")
+		result_url := fmt.Sprintf(base_url, e.ChildAttr("a", "href"))
+		result_location := e.ChildTexts(".cell-table")[1]
+		result_date := e.ChildTexts(".cell-table")[2]
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+				result_date,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnScraped(func(r *colly.Response) {
+		RemoveFileWithFileName(file_name)
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	c.WithTransport(t)
+	c.Visit("file:" + dir + "/" + file_name)
+	return
+}
+
+func (runtime Runtime) Demodesk() (results Results) {
+	start_url := "https://wordpress.demodesk.com/wp-json/wp/v2/jobs"
+	type Jobs []struct {
+		ID      int    `json:"id"`
+		Date    string `json:"date"`
+		DateGmt string `json:"date_gmt"`
+		GUID    struct {
+			Rendered string `json:"rendered"`
+		} `json:"guid"`
+		Modified    string `json:"modified"`
+		ModifiedGmt string `json:"modified_gmt"`
+		Slug        string `json:"slug"`
+		Status      string `json:"status"`
+		Type        string `json:"type"`
+		Link        string `json:"link"`
+		Title       struct {
+			Rendered string `json:"rendered"`
+		} `json:"title"`
+		Content struct {
+			Rendered  string `json:"rendered"`
+			Protected bool   `json:"protected"`
+		} `json:"content"`
+		FeaturedMedia       int         `json:"featured_media"`
+		Template            string      `json:"template"`
+		BetterFeaturedImage interface{} `json:"better_featured_image"`
+		Acf                 struct {
+			Department  string `json:"department"`
+			JobType     string `json:"job_type"`
+			WorkingTime string `json:"working_time"`
+			Location    string `json:"location"`
+			Profile     string `json:"profile"`
+			Blurb       string `json:"blurb"`
+			Order       string `json:"order"`
+		} `json:"acf"`
+		Links struct {
+			Self []struct {
+				Href string `json:"href"`
+			} `json:"self"`
+			Collection []struct {
+				Href string `json:"href"`
+			} `json:"collection"`
+			About []struct {
+				Href string `json:"href"`
+			} `json:"about"`
+			WpAttachment []struct {
+				Href string `json:"href"`
+			} `json:"wp:attachment"`
+			Curies []struct {
+				Name      string `json:"name"`
+				Href      string `json:"href"`
+				Templated bool   `json:"templated"`
+			} `json:"curies"`
+		} `json:"_links"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jobs Jobs
+		err := json.Unmarshal(r.Body, &jobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jobs {
+			result_title := elem.Title.Rendered
+			result_url := elem.Link
+			result_location := elem.Acf.Location
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Personio() (results Results) {
+	start_url := "https://personio-jobs.personio.de/"
+	type Job struct {
+		Url      string
+		Title    string
+		Location string
+		Type     string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("a", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Attr("class"), "job-box-link") {
+			result_title := e.ChildText(".jb-title")
+			result_url := e.Attr("href")
+			result_description := e.ChildTexts("span")[0]
+			result_location := e.ChildTexts("span")[2]
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_description,
+					result_location,
+				},
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Tado() (results Results) {
+	start_url := "https://apply.workable.com/api/v3/accounts/tado/jobs"
+	base_job_url := "https://apply.workable.com/tado/j/%s"
+	type JsonJobs struct {
+		Total   int `json:"total"`
+		Results []struct {
+			ID           int    `json:"id"`
+			Shortcode    string `json:"shortcode"`
+			Title        string `json:"title"`
+			Description  string `json:"description"`
+			Requirements string `json:"requirements"`
+			Benefits     string `json:"benefits"`
+			Remote       bool   `json:"remote"`
+			Location     struct {
+				Country     string `json:"country"`
+				CountryCode string `json:"countryCode"`
+				City        string `json:"city"`
+				Region      string `json:"region"`
+			} `json:"location"`
+			State          string      `json:"state"`
+			IsInternal     bool        `json:"isInternal"`
+			Code           interface{} `json:"code"`
+			Published      time.Time   `json:"published"`
+			Type           string      `json:"type"`
+			Language       string      `json:"language"`
+			Department     []string    `json:"department"`
+			AccountUID     string      `json:"accountUid"`
+			ApprovalStatus string      `json:"approvalStatus"`
+		} `json:"results"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Results {
+			result_title := elem.Title
+			result_url := fmt.Sprintf(base_job_url, elem.Shortcode)
+			result_location := elem.Location.City + "," + elem.Location.Country
+			if elem.Remote {
+				result_location = result_location + "," + "Remote"
+			}
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Request(
+		"POST",
+		start_url,
+		strings.NewReader(""),
+		nil,
+		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
+	)
+	return
+}
+
+func (runtime Runtime) Holidu() (results Results) {
+	start_url := "https://api.holidu.com/api/careers"
+	type JsonJobs struct {
+		Positions []struct {
+			ID                 string `json:"id"`
+			Subcompany         string `json:"subcompany,omitempty"`
+			Office             string `json:"office"`
+			Department         string `json:"department"`
+			RecruitingCategory string `json:"recruitingCategory"`
+			Name               string `json:"name"`
+			JobDescriptions    struct {
+				JobDescription []struct {
+					Name  string `json:"name"`
+					Value string `json:"value"`
+				} `json:"jobDescription"`
+			} `json:"jobDescriptions"`
+			EmploymentType     string    `json:"employmentType"`
+			Seniority          string    `json:"seniority"`
+			Schedule           string    `json:"schedule"`
+			YearsOfExperience  string    `json:"yearsOfExperience"`
+			Occupation         string    `json:"occupation"`
+			OccupationCategory string    `json:"occupationCategory"`
+			CreatedAt          time.Time `json:"createdAt"`
+		} `json:"positions"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Positions {
+			result_title := elem.Name
+			fmt.Println(result_title)
+			result_url := "https://www.holidu.com/careers?" + elem.ID
+			result_location := elem.Office
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Navvis() (results Results) {
+	start_url := "https://navvis-jobs.personio.de/"
+	type Job struct {
+		Url      string
+		Title    string
+		Location string
+		Type     string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("div", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Attr("class"), "job-list-desc") {
+			result_title := e.ChildText("a")
+			result_url := e.ChildAttr("a", "href")
+			result_info := strings.Split(e.ChildText("p"), "·")
+			result_type := strings.Join(strings.Fields(strings.TrimSpace(result_info[0])), " ")
+			result_location := strings.Join(strings.Fields(strings.TrimSpace(result_info[1])), " ")
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_type,
+					result_location,
+				},
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Egym() (results Results) {
+	start_url := "https://egym-jobs.personio.de/"
+	type Job struct {
+		Url      string
+		Title    string
+		Location string
+		Type     string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("a", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Attr("class"), "job-box-link") {
+			result_title := e.ChildText(".jb-title")
+			result_url := e.Attr("href")
+			result_description := e.ChildTexts("span")[0]
+			result_location := e.ChildTexts("span")[2]
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_description,
+					result_location,
+				},
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Westwing() (results Results) {
+	start_url := "https://www.westwing.com/de/career/"
+	base_job_url := "https://www.westwing.com%s"
+	type Job struct {
+		Url      string
+		Title    string
+		Location string
+		Type     string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".js-job", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".block__jobs-title")
+		result_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
+		result_location := e.ChildTexts(".block__jobs-detail")[0]
+		result_type := e.ChildTexts(".block__jobs-detail")[1]
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+				result_type,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Combyne() (results Results) {
+	start_url := "https://combyne.recruitee.com/api/offers"
+	type Jobs struct {
+		Offers []struct {
+			ID                 int           `json:"id"`
+			Slug               string        `json:"slug"`
+			Position           int           `json:"position"`
+			Status             string        `json:"status"`
+			OptionsPhone       string        `json:"options_phone"`
+			OptionsPhoto       string        `json:"options_photo"`
+			OptionsCoverLetter string        `json:"options_cover_letter"`
+			OptionsCv          string        `json:"options_cv"`
+			Remote             interface{}   `json:"remote"`
+			CountryCode        string        `json:"country_code"`
+			StateCode          string        `json:"state_code"`
+			PostalCode         string        `json:"postal_code"`
+			MinHours           int           `json:"min_hours"`
+			MaxHours           int           `json:"max_hours"`
+			Title              string        `json:"title"`
+			Description        string        `json:"description"`
+			Requirements       string        `json:"requirements"`
+			Location           string        `json:"location"`
+			City               string        `json:"city"`
+			Country            string        `json:"country"`
+			CareersURL         string        `json:"careers_url"`
+			CareersApplyURL    string        `json:"careers_apply_url"`
+			MailboxEmail       string        `json:"mailbox_email"`
+			CompanyName        string        `json:"company_name"`
+			Department         string        `json:"department"`
+			CreatedAt          string        `json:"created_at"`
+			EmploymentTypeCode string        `json:"employment_type_code"`
+			CategoryCode       string        `json:"category_code"`
+			ExperienceCode     string        `json:"experience_code"`
+			EducationCode      string        `json:"education_code"`
+			Tags               []interface{} `json:"tags"`
+		} `json:"offers"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs Jobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Offers {
+			result_title := elem.Title
+			result_url := elem.CareersURL
+			result_location := elem.City + "," + elem.Country
+			if fmt.Sprint(elem.Remote) == "true" {
+				result_location = result_location + "," + "Remote"
+			}
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Globalsavingsgroup() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/lilium/jobs"
+	type JsonJobs struct {
+		Jobs []struct {
+			AbsoluteURL    string `json:"absolute_url"`
+			DataCompliance []struct {
+				Type            string      `json:"type"`
+				RequiresConsent bool        `json:"requires_consent"`
+				RetentionPeriod interface{} `json:"retention_period"`
+			} `json:"data_compliance"`
+			Education     string `json:"education,omitempty"`
+			InternalJobID int    `json:"internal_job_id"`
+			Location      struct {
+				Name string `json:"name"`
+			} `json:"location"`
+			Metadata []struct {
+				ID        int         `json:"id"`
+				Name      string      `json:"name"`
+				Value     interface{} `json:"value"`
+				ValueType string      `json:"value_type"`
+			} `json:"metadata"`
+			ID            int    `json:"id"`
+			UpdatedAt     string `json:"updated_at"`
+			RequisitionID string `json:"requisition_id"`
+			Title         string `json:"title"`
+		} `json:"jobs"`
+		Meta struct {
+			Total int `json:"total"`
+		} `json:"meta"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Jobs {
+			result_title := elem.Title
+			result_url := elem.AbsoluteURL
+			result_location := elem.Location.Name
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Buildingradar() (results Results) {
+	start_url := "https://building-radar-jobs.personio.de/"
+	type Job struct {
+		Url      string
+		Title    string
+		Location string
+		Type     string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("a", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Attr("class"), "job-box-link") {
+			result_title := e.ChildText(".jb-title")
+			result_url := e.Attr("href")
+			result_description := e.ChildTexts("span")[0]
+			result_location := e.ChildTexts("span")[2]
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_description,
+					result_location,
+				},
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Riskmethods() (results Results) {
+	start_url := "https://apply.workable.com/api/v3/accounts/riskmethods/jobs"
+	base_job_url := "https://apply.workable.com/riskmethods/j/%s"
+	type JsonJobs struct {
+		Total   int `json:"total"`
+		Results []struct {
+			ID           int    `json:"id"`
+			Shortcode    string `json:"shortcode"`
+			Title        string `json:"title"`
+			Description  string `json:"description"`
+			Requirements string `json:"requirements"`
+			Benefits     string `json:"benefits"`
+			Remote       bool   `json:"remote"`
+			Location     struct {
+				Country     string `json:"country"`
+				CountryCode string `json:"countryCode"`
+				City        string `json:"city"`
+				Region      string `json:"region"`
+			} `json:"location"`
+			State          string      `json:"state"`
+			IsInternal     bool        `json:"isInternal"`
+			Code           interface{} `json:"code"`
+			Published      time.Time   `json:"published"`
+			Type           string      `json:"type"`
+			Language       string      `json:"language"`
+			Department     []string    `json:"department"`
+			AccountUID     string      `json:"accountUid"`
+			ApprovalStatus string      `json:"approvalStatus"`
+		} `json:"results"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Results {
+			result_title := elem.Title
+			result_url := fmt.Sprintf(base_job_url, elem.Shortcode)
+			result_location := elem.Location.City + "," + elem.Location.Country
+			if elem.Remote {
+				result_location = result_location + "," + "Remote"
+			}
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Request(
+		"POST",
+		start_url,
+		strings.NewReader(""),
+		nil,
+		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
+	)
+	return
+}
+
+func (runtime Runtime) Magazino() (results Results) {
+	url := "https://magazino-jobs.personio.de/"
+	type Job struct {
+		Title    string
+		Url      string
+		Type     string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("div", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Attr("class"), "job-list-desc") {
+			result_title := e.ChildText("a")
+			result_url := e.ChildAttr("a", "href")
+			result_info := strings.Split(e.ChildText("p"), "·")
+			result_type := strings.Join(strings.Fields(strings.TrimSpace(result_info[0])), " ")
+			result_location := strings.Join(strings.Fields(strings.TrimSpace(result_info[1])), " ")
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_type,
+					result_location,
+				},
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(url)
+	return
+}
+
+func (runtime Runtime) Mylivn() (results Results) {
+	start_url := "https://mylivn.com/jobs"
+	base_job_url := "https://mylivn.com%s"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+		Type     string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".positions-module--position--23wcR", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".positions-module--positionTitle--i2U3O")
+		result_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
+		result_type := e.ChildText(".positions-module--positionTime--38eR8")
+		result_location := e.ChildText(".positions-module--positionLocation--mtUS9")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+				result_type,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Klarx() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/klarx?&mode=json"
+	type Jobs []struct {
+		AdditionalPlain string `json:"additionalPlain"`
+		Additional      string `json:"additional"`
+		Categories      struct {
+			Commitment string `json:"commitment"`
+			Department string `json:"department"`
+			Location   string `json:"location"`
+			Team       string `json:"team"`
+		} `json:"categories"`
+		CreatedAt        int64  `json:"createdAt"`
+		DescriptionPlain string `json:"descriptionPlain"`
+		Description      string `json:"description"`
+		ID               string `json:"id"`
+		Lists            []struct {
+			Text    string `json:"text"`
+			Content string `json:"content"`
+		} `json:"lists"`
+		Text      string `json:"text"`
+		HostedURL string `json:"hostedUrl"`
+		ApplyURL  string `json:"applyUrl"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs Jobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs {
+			result_title := elem.Text
+			result_url := elem.HostedURL
+			result_location := elem.Categories.Location
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Teleclinic() (results Results) {
+	start_url := "https://teleclinic-gmbh.breezy.hr%s"
+	type Job struct {
+		Title      string
+		Url        string
+		Location   string
+		Department string
+		Type       string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("ul", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Attr("class"), "position") {
+			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+				result_title := el.ChildText("h2")
+				result_url := fmt.Sprintf(start_url, el.ChildAttr("a", "href"))
+				result_department := el.ChildText("li[class=department]")
+				result_type := el.ChildText("li[class=type]")
+				result_location := el.ChildText("li[class=location]")
+				results.Add(
+					runtime.Name,
+					result_title,
+					result_url,
+					result_location,
+					Job{
+						result_title,
+						result_url,
+						result_location,
+						result_department,
+						result_type,
+					},
+				)
+			})
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(fmt.Sprintf(start_url, ""))
+	return
+}
