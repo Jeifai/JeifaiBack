@@ -9518,7 +9518,7 @@ func (runtime Runtime) Allianz() (results Results) {
 	c.Visit(start_url)
 	return
 }
-
+ 
 func (runtime Runtime) Tier() (results Results) {
 	start_url := "https://tier-mobility-jobs.personio.de/"
 	type Job struct {
@@ -9545,6 +9545,71 @@ func (runtime Runtime) Tier() (results Results) {
 			)
 		})
 	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Uniper() (results Results) {
+	start_url := "https://jobs.uniper.energy/search"
+	new_page_url := "https://jobs.uniper.energy/tile-search-results/?startrow=%d"
+	base_job_url := "https://jobs.uniper.energy"
+	number_results_per_page := 10
+	total_pages := 0
+	counter := 0
+	type Job struct {
+		Title    	string
+		Url      	string
+		Location 	string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("html", func(e *colly.HTMLElement) {
+		e.ForEach(".sub-section", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText("a")
+			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
+			result_location := strings.TrimSpace(strings.ReplaceAll(el.ChildText(".location"), "Location", ""))
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		})
+
+		if counter == 0 {
+			temp_total_results := strings.Split(e.ChildText("#tile-search-results-label"), " ")
+			string_total_results := temp_total_results[len(temp_total_results)-2]
+			total_results, err := strconv.Atoi(string_total_results)
+			if err != nil {
+				panic(err.Error())
+			}
+			total_pages = total_results/number_results_per_page
+		}
+		if counter >= total_pages {
+			return
+		} else {
+			time.Sleep(SecondsSleep * time.Second)
+			temp_v_url := fmt.Sprintf(new_page_url, 10+counter*number_results_per_page)
+			counter++
+			c.Visit(temp_v_url)
+		}
+
+	})
+
+	c.OnResponse(func(r *colly.Response) {
+		SaveResponseToFileWithFileName(string(r.Body), "Uniper.html")
+	})
+
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 	})
