@@ -6,9 +6,10 @@ import (
 	// "log"
 	// "net/http"
 	"context"
-	"github.com/chromedp/chromedp"
 	"os"
 	"time"
+
+	"github.com/chromedp/chromedp"
 )
 
 func mainLinkedin() {

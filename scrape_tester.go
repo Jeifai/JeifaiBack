@@ -16,7 +16,6 @@ import (
 )
 
 func mainTestt() {
-
 	t := &http.Transport{}
 	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
 	dir, err := os.Getwd()
