@@ -72,6 +72,210 @@ func (results *Results) Add(
 }
 
 /**
+ ██████  ██████  ███████ ███████ ███    ██ ██   ██  ██████  ██    ██ ███████ ███████
+██       ██   ██ ██      ██      ████   ██ ██   ██ ██    ██ ██    ██ ██      ██
+██   ███ ██████  █████   █████   ██ ██  ██ ███████ ██    ██ ██    ██ ███████ █████
+██    ██ ██   ██ ██      ██      ██  ██ ██ ██   ██ ██    ██ ██    ██      ██ ██
+ ██████  ██   ██ ███████ ███████ ██   ████ ██   ██  ██████   ██████  ███████ ███████
+*/
+func Greenhouse(start_url string, runtime_name string, results *Results) {
+	type JsonJobs struct {
+		Jobs []struct {
+			AbsoluteURL    string `json:"absolute_url"`
+			DataCompliance []struct {
+				Type            string      `json:"type"`
+				RequiresConsent bool        `json:"requires_consent"`
+				RetentionPeriod interface{} `json:"retention_period"`
+			} `json:"data_compliance"`
+			InternalJobID int `json:"internal_job_id"`
+			Location      struct {
+				Name string `json:"name"`
+			} `json:"location"`
+			Metadata []struct {
+				ID        int    `json:"id"`
+				Name      string `json:"name"`
+				Value     string `json:"value"`
+				ValueType string `json:"value_type"`
+			} `json:"metadata"`
+			ID            int    `json:"id"`
+			UpdatedAt     string `json:"updated_at"`
+			RequisitionID string `json:"requisition_id"`
+			Title         string `json:"title"`
+			Education     string `json:"education,omitempty"`
+		} `json:"jobs"`
+		Meta struct {
+			Total int `json:"total"`
+		} `json:"meta"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Jobs {
+			result_title := elem.Title
+			result_url := elem.AbsoluteURL
+			result_location := elem.Location.Name
+			results.Add(
+				runtime_name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Pairfinance() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/pairfinance/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Flixbus() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/flix/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Datadog() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/datadog/jobs/"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Stripe() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/stripe/jobs/"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Github() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/github/jobs/"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Getyourguide() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/getyourguide/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Wefox() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/wefoxgroup/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Celonis() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/celonis/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Taxfix() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/taxfix/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Moonfare() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/moonfare/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Billie() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/billie/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Freeda() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/freedamedia/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Glovo() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/glovo/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Infarm() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/infarm/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Pitch() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/pitch/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Medloop() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/medloop/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Adjust() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/adjust/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Clue() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/clue/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Adahealth() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/adahealth/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Babbel() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/babbel/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Lilium() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/lilium/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Globalsavingsgroup() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/globalsavingsgroup/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Alyne() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/Alyne/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+/**
 ██      ███████ ██    ██ ███████ ██████
 ██      ██      ██    ██ ██      ██   ██
 ██      █████   ██    ██ █████   ██████
@@ -1614,78 +1818,6 @@ func (runtime Runtime) Auto1() (results Results) {
 	return
 }
 
-func (runtime Runtime) Flixbus() (results Results) {
-	start_url := "https://flix.careers/api/jobs"
-	type FlixbusJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			InternalJobID int64 `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int64  `json:"id"`
-				Name      string `json:"name"`
-				Value     string `json:"value"`
-				ValueType string `json:"value_type"`
-			} `json:"metadata"`
-			ID            int64  `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-			Departments   []struct {
-				ID       int64         `json:"id"`
-				Name     string        `json:"name"`
-				ChildIds []interface{} `json:"child_ids"`
-				ParentID interface{}   `json:"parent_id"`
-			} `json:"departments"`
-			Offices []struct {
-				ID       int64         `json:"id"`
-				Name     string        `json:"name"`
-				Location interface{}   `json:"location"`
-				ChildIds []interface{} `json:"child_ids"`
-				ParentID int64         `json:"parent_id"`
-			} `json:"offices"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs FlixbusJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Quora() (results Results) {
 	start_url := "https://boards.greenhouse.io/quora"
 	base_job_url := "https://boards.greenhouse.io/%s"
@@ -1839,366 +1971,6 @@ func (runtime Runtime) Zapier() (results Results) {
 					)
 				}
 			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Datadog() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/datadog/jobs/"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			InternalJobID int `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int    `json:"id"`
-				Name      string `json:"name"`
-				Value     string `json:"value"`
-				ValueType string `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-			Education     string `json:"education,omitempty"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Stripe() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/stripe/jobs/"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			InternalJobID int `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int    `json:"id"`
-				Name      string `json:"name"`
-				Value     string `json:"value"`
-				ValueType string `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-			Education     string `json:"education,omitempty"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Github() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/github/jobs/"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			InternalJobID int `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int    `json:"id"`
-				Name      string `json:"name"`
-				Value     string `json:"value"`
-				ValueType string `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-			Education     string `json:"education,omitempty"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Getyourguide() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/getyourguide/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Wefox() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/wefoxgroup/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Celonis() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/celonis/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
@@ -2420,246 +2192,6 @@ func (runtime Runtime) Depositsolutions() (results Results) {
 	return
 }
 
-func (runtime Runtime) Taxfix() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/taxfix/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Moonfare() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/moonfare/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Billie() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/billie/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Pairfinance() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/pairfinance/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Elementinsurance() (results Results) {
 	start_url := "https://elementinsuranceag.recruitee.com/api/offers"
 	type Jobs struct {
@@ -2711,66 +2243,6 @@ func (runtime Runtime) Elementinsurance() (results Results) {
 			if fmt.Sprint(elem.Remote) == "true" {
 				result_location = result_location + "," + "Remote"
 			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Freeda() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/freedamedia/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
 			results.Add(
 				runtime.Name,
 				result_title,
@@ -2947,66 +2419,6 @@ func (runtime Runtime) Vodafone() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(fmt.Sprintf(start_url, 0))
-	return
-}
-
-func (runtime Runtime) Glovo() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/glovo/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
 	return
 }
 
@@ -4181,126 +3593,6 @@ func (runtime Runtime) Chatterbug() (results Results) {
 	return
 }
 
-func (runtime Runtime) Infarm() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/infarm/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Pitch() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/pitch/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Careerfoundry() (results Results) {
 	start_url := "https://careerfoundry.recruitee.com/api/offers"
 	type Jobs struct {
@@ -4456,66 +3748,6 @@ func (runtime Runtime) Kontist() (results Results) {
 			result_title := elem.Title
 			result_url := elem.JobURL
 			result_location := elem.TmpLocation
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Medloop() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/medloop/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
 			results.Add(
 				runtime.Name,
 				result_title,
@@ -4845,66 +4077,6 @@ func (runtime Runtime) Coachhub() (results Results) {
 				},
 			)
 		})
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Adjust() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/adjust/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
@@ -6219,186 +5391,6 @@ func (runtime Runtime) Researchgate() (results Results) {
 	return
 }
 
-func (runtime Runtime) Clue() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/clue/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Adahealth() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/adahealth/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Babbel() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/babbel/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Eyeem() (results Results) {
 	start_url := "https://www.eyeem.com/jobs"
 	file_name := "eyeem.html"
@@ -6728,66 +5720,6 @@ func (runtime Runtime) Twaice() (results Results) {
 				result_type,
 			},
 		)
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Lilium() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/lilium/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
@@ -7269,66 +6201,6 @@ func (runtime Runtime) Combyne() (results Results) {
 	return
 }
 
-func (runtime Runtime) Globalsavingsgroup() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/globalsavingsgroup/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Riskmethods() (results Results) {
 	start_url := "https://apply.workable.com/api/v3/accounts/riskmethods/jobs"
 	base_job_url := "https://apply.workable.com/riskmethods/j/%s"
@@ -7552,66 +6424,6 @@ func (runtime Runtime) Inmindcloud() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(url)
-	return
-}
-
-func (runtime Runtime) Alyne() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/Alyne/jobs"
-	type JsonJobs struct {
-		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			Education     string `json:"education,omitempty"`
-			InternalJobID int    `json:"internal_job_id"`
-			Location      struct {
-				Name string `json:"name"`
-			} `json:"location"`
-			Metadata []struct {
-				ID        int         `json:"id"`
-				Name      string      `json:"name"`
-				Value     interface{} `json:"value"`
-				ValueType string      `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Jobs {
-			result_title := elem.Title
-			result_url := elem.AbsoluteURL
-			result_location := elem.Location.Name
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
 	return
 }
 
