@@ -763,49 +763,49 @@ func Recruitee(start_url string, runtime_name string, results *Results) {
 
 func (runtime Runtime) Elementinsurance() (results Results) {
 	start_url := "https://elementinsuranceag.recruitee.com/api/offers"
-	Recruitee(Recruitee, runtime.Name, &results)
+	Recruitee(start_url, runtime.Name, &results)
 	return
 }
 
 func (runtime Runtime) Chatterbug() (results Results) {
 	start_url := "https://chatterbug.recruitee.com/api/offers"
-	Recruitee(Recruitee, runtime.Name, &results)
+	Recruitee(start_url, runtime.Name, &results)
 	return
 }
 
 func (runtime Runtime) Careerfoundry() (results Results) {
 	start_url := "https://careerfoundry.recruitee.com/api/offers"
-	Recruitee(Recruitee, runtime.Name, &results)
+	Recruitee(start_url, runtime.Name, &results)
 	return
 }
 
 func (runtime Runtime) Plantix() (results Results) {
 	start_url := "https://plantix.recruitee.com/api/offers"
-	Recruitee(Recruitee, runtime.Name, &results)
+	Recruitee(start_url, runtime.Name, &results)
 	return
 }
 
 func (runtime Runtime) Candis() (results Results) {
 	start_url := "https://career.recruitee.com/api/c/50731/widget/?widget=true"
-	Recruitee(Recruitee, runtime.Name, &results)
+	Recruitee(start_url, runtime.Name, &results)
 	return
 }
 
 func (runtime Runtime) Fineway() (results Results) {
 	start_url := "https://fineway.recruitee.com/api/offers"
-	Recruitee(Recruitee, runtime.Name, &results)
+	Recruitee(start_url, runtime.Name, &results)
 	return
 }
 
 func (runtime Runtime) Combyne() (results Results) {
 	start_url := "https://combyne.recruitee.com/api/offers"
-	Recruitee(Recruitee, runtime.Name, &results)
+	Recruitee(start_url, runtime.Name, &results)
 	return
 }
 
 func (runtime Runtime) Spendit() (results Results) {
 	start_url := "https://spendit.recruitee.com/api/offers"
-	Recruitee(Recruitee, runtime.Name, &results)
+	Recruitee(start_url, runtime.Name, &results)
 	return
 }
 
@@ -927,7 +927,7 @@ func Workable(start_url string, base_job_url string, runtime_name string, result
 				result_location = result_location + "," + "Remote"
 			}
 			results.Add(
-				runtime.Name,
+				runtime_name,
 				result_title,
 				result_url,
 				result_location,
@@ -987,16 +987,70 @@ func (runtime Runtime) Speexx() (results Results) {
 	return
 }
 
+/**
+██████   █████  ███    ███ ██████   ██████   ██████  ██   ██ ██████
+██   ██ ██   ██ ████  ████ ██   ██ ██    ██ ██    ██ ██   ██ ██   ██
+██████  ███████ ██ ████ ██ ██████  ██    ██ ██    ██ ███████ ██████
+██   ██ ██   ██ ██  ██  ██ ██   ██ ██    ██ ██    ██ ██   ██ ██   ██
+██████  ██   ██ ██      ██ ██████   ██████   ██████  ██   ██ ██   ██
+*/
+func Bamboohr(start_url string, runtime_name string, results *Results) {
+	type Job struct {
+		Url      string
+		Title    string
+		Location string
+		Division string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".BambooHR-ATS-Department-List", func(e *colly.HTMLElement) {
+		e.ForEach(".BambooHR-ATS-Department-Item", func(_ int, el *colly.HTMLElement) {
+			result_division := strings.TrimSpace(el.ChildText(".BambooHR-ATS-Department-Header"))
+			el.ForEach(".BambooHR-ATS-Jobs-Item", func(_ int, ell *colly.HTMLElement) {
+				result_title := ell.ChildText("a")
+				result_url := "https:" + ell.ChildAttr("a", "href")
+				result_location := ell.ChildText("span")
+				results.Add(
+					runtime_name,
+					result_title,
+					result_url,
+					result_location,
+					Job{
+						result_url,
+						result_title,
+						result_location,
+						result_division,
+					},
+				)
+			})
+		})
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
 
+func (runtime Runtime) Codasip() (results Results) {
+	start_url := "https://codasip.bamboohr.com/jobs/embed2.php?departmentId=0"
+	Bamboohr(start_url, runtime.Name, &results)
+	return
+}
 
+func (runtime Runtime) Merantix() (results Results) {
+	start_url := "https://merantix.bamboohr.com/jobs/embed2.php?departmentId=0"
+	Bamboohr(start_url, runtime.Name, &results)
+	return
+}
 
-
-
-
-
-
-
-
+func (runtime Runtime) Talentgarden() (results Results) {
+	start_url := "https://talentgarden.bamboohr.com/jobs/embed2.php?departmentId=0"
+	Bamboohr(start_url, runtime.Name, &results)
+	return
+}
 
 
 
@@ -2414,50 +2468,6 @@ func (runtime Runtime) Aboutyou() (results Results) {
 }
 
 
-
-func (runtime Runtime) Talentgarden() (results Results) {
-	start_url := "https://talentgarden.bamboohr.com/jobs/embed2.php?departmentId=0"
-	type Job struct {
-		Title      string
-		Url        string
-		Location   string
-		Department string
-	}
-	c := colly.NewCollector()
-	c.OnHTML("div", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("class"), "BambooHR-ATS-board") {
-			e.ForEach("li[class=BambooHR-ATS-Department-Item]", func(_ int, el *colly.HTMLElement) {
-				result_department := strings.TrimSpace(el.ChildText("div[class=BambooHR-ATS-Department-Header]"))
-				el.ForEach("ul[class=BambooHR-ATS-Jobs-List]", func(_ int, ell *colly.HTMLElement) {
-					result_title := ell.ChildText("a")
-					result_url := "https:" + ell.ChildAttr("a", "href")
-					result_location := ell.ChildText("span")
-					results.Add(
-						runtime.Name,
-						result_title,
-						result_url,
-						result_location,
-						Job{
-							result_title,
-							result_url,
-							result_location,
-							result_department,
-						},
-					)
-				})
-			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Facileit() (results Results) {
 	start_url := "https://inrecruiting.intervieweb.it/app.php?module=iframeAnnunci&k=1382636f10340a4ca6713ef6df70205a&LAC=Facileit&act1=23"
 	file_name := "facileit.html"
@@ -3819,46 +3829,6 @@ func (runtime Runtime) Medwing() (results Results) {
 	return
 }
 
-func (runtime Runtime) Merantix() (results Results) {
-	start_url := "https://merantix.bamboohr.com/jobs/embed2.php?departmentId=0"
-	type Job struct {
-		Url      string
-		Title    string
-		Location string
-		Division string
-	}
-	c := colly.NewCollector()
-	c.OnHTML(".BambooHR-ATS-Department-List", func(e *colly.HTMLElement) {
-		e.ForEach(".BambooHR-ATS-Department-Item", func(_ int, el *colly.HTMLElement) {
-			result_division := strings.TrimSpace(el.ChildText(".BambooHR-ATS-Department-Header"))
-			el.ForEach(".BambooHR-ATS-Jobs-Item", func(_ int, ell *colly.HTMLElement) {
-				result_title := ell.ChildText("a")
-				result_url := "https:" + ell.ChildAttr("a", "href")
-				result_location := ell.ChildText("span")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_url,
-						result_title,
-						result_location,
-						result_division,
-					},
-				)
-			})
-		})
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
 
 func (runtime Runtime) Ninox() (results Results) {
 	start_url := "https://ninox.com/en/jobs"
@@ -6025,48 +5995,6 @@ func (runtime Runtime) Ryte() (results Results) {
 	c.Visit(start_url)
 	return
 }
-
-func (runtime Runtime) Codasip() (results Results) {
-	start_url := "https://codasip.bamboohr.com/jobs/embed2.php?departmentId=0"
-	type Job struct {
-		Url      string
-		Title    string
-		Location string
-		Division string
-	}
-	c := colly.NewCollector()
-	c.OnHTML(".BambooHR-ATS-Department-List", func(e *colly.HTMLElement) {
-		e.ForEach(".BambooHR-ATS-Department-Item", func(_ int, el *colly.HTMLElement) {
-			result_division := strings.TrimSpace(el.ChildText(".BambooHR-ATS-Department-Header"))
-			el.ForEach(".BambooHR-ATS-Jobs-Item", func(_ int, ell *colly.HTMLElement) {
-				result_title := ell.ChildText("a")
-				result_url := "https:" + ell.ChildAttr("a", "href")
-				result_location := ell.ChildText("span")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_url,
-						result_title,
-						result_location,
-						result_division,
-					},
-				)
-			})
-		})
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 
 func (runtime Runtime) Allianz() (results Results) {
 	start_url := "https://jobs.allianz.com/sap/hcmx/hitlist_na"
