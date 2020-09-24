@@ -4528,8 +4528,7 @@ func (runtime Runtime) Careerfoundry() (results Results) {
 	return
 }
 
-func (runtime Runtime) Casparhealth() (results Results) {
-	start_url := "https://goreha-jobs.personio.de"
+func Personio1(start_url string, runtime_name string, results *Results) {
 	type Job struct {
 		Title       string
 		Url         string
@@ -4544,7 +4543,7 @@ func (runtime Runtime) Casparhealth() (results Results) {
 			result_description := e.ChildTexts("span")[0]
 			result_location := e.ChildTexts("span")[2]
 			results.Add(
-				runtime.Name,
+				runtime_name,
 				result_title,
 				result_url,
 				result_location,
@@ -4567,6 +4566,12 @@ func (runtime Runtime) Casparhealth() (results Results) {
 			Red("\nError:"), Red(err))
 	})
 	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Casparhealth() (results Results) {
+	start_url := "https://goreha-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
 	return
 }
 
