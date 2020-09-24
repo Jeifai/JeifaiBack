@@ -674,6 +674,74 @@ func (runtime Runtime) Ndgit() (results Results) {
 	return
 }
 
+/**
+██████  ██████  ███████ ███████ ███████ ██    ██
+██   ██ ██   ██ ██      ██         ███   ██  ██
+██████  ██████  █████   █████     ███     ████
+██   ██ ██   ██ ██      ██       ███       ██
+██████  ██   ██ ███████ ███████ ███████    ██
+*/
+func Breezy(start_url string, runtime_name string, results *Results) {
+	type Job struct {
+		Title      string
+		Url        string
+		Department string
+		Type       string
+		Location   string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("ul", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Attr("class"), "position") {
+			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+				result_title := el.ChildText("h2")
+				result_url := fmt.Sprintf(start_url, el.ChildAttr("a", "href"))
+				result_department := el.ChildText("li[class=department]")
+				result_type := el.ChildText("li[class=type]")
+				result_location := el.ChildText("li[class=location]")
+				results.Add(
+					runtime_name,
+					result_title,
+					result_url,
+					result_location,
+					Job{
+						result_title,
+						result_url,
+						result_department,
+						result_type,
+						result_location,
+					},
+				)
+			})
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(fmt.Sprintf(start_url, ""))
+	return
+}
+
+func (runtime Runtime) Lanalabs() (results Results) {
+	start_url := "https://lana-labs.breezy.hr/%s"
+	Breezy(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Satispay() (results Results) {
+	start_url := "https://satispay.breezy.hr%s"
+	Breezy(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Teleclinic() (results Results) {
+	start_url := "https://teleclinic-gmbh.breezy.hr%s"
+	Breezy(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Dreamingjobs() (results Results) {
 	start_url := "https://robimalco.github.io/dreamingjobs.github.io/"
 	type Job struct {
@@ -1552,50 +1620,6 @@ func (runtime Runtime) Amazon() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(fmt.Sprintf(start_url, 0))
-	return
-}
-
-func (runtime Runtime) Lanalabs() (results Results) {
-	start_url := "https://lana-labs.breezy.hr/%s"
-	type Job struct {
-		Title      string
-		Url        string
-		Department string
-		Type       string
-		Location   string
-	}
-	c := colly.NewCollector()
-	c.OnHTML("ul", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("class"), "position") {
-			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-				result_title := el.ChildText("h2")
-				result_url := fmt.Sprintf(start_url, el.ChildAttr("a", "href"))
-				result_department := el.ChildText("li[class=department]")
-				result_type := el.ChildText("li[class=type]")
-				result_location := el.ChildText("li[class=location]")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_title,
-						result_url,
-						result_department,
-						result_type,
-						result_location,
-					},
-				)
-			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(fmt.Sprintf(start_url, ""))
 	return
 }
 
@@ -2504,50 +2528,6 @@ func (runtime Runtime) Glickon() (results Results) {
 		}
 	})
 	c.Visit(section_url)
-	return
-}
-
-func (runtime Runtime) Satispay() (results Results) {
-	start_url := "https://satispay.breezy.hr%s"
-	type Job struct {
-		Title      string
-		Url        string
-		Location   string
-		Department string
-		Type       string
-	}
-	c := colly.NewCollector()
-	c.OnHTML("ul", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("class"), "position") {
-			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-				result_title := el.ChildText("h2")
-				result_url := fmt.Sprintf(start_url, el.ChildAttr("a", "href"))
-				result_department := el.ChildText("li[class=department]")
-				result_type := el.ChildText("li[class=type]")
-				result_location := el.ChildText("li[class=location]")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_title,
-						result_url,
-						result_location,
-						result_department,
-						result_type,
-					},
-				)
-			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(fmt.Sprintf(start_url, ""))
 	return
 }
 
@@ -6305,50 +6285,6 @@ func (runtime Runtime) Mylivn() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Teleclinic() (results Results) {
-	start_url := "https://teleclinic-gmbh.breezy.hr%s"
-	type Job struct {
-		Title      string
-		Url        string
-		Location   string
-		Department string
-		Type       string
-	}
-	c := colly.NewCollector()
-	c.OnHTML("ul", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("class"), "position") {
-			e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-				result_title := el.ChildText("h2")
-				result_url := fmt.Sprintf(start_url, el.ChildAttr("a", "href"))
-				result_department := el.ChildText("li[class=department]")
-				result_type := el.ChildText("li[class=type]")
-				result_location := el.ChildText("li[class=location]")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_title,
-						result_url,
-						result_location,
-						result_department,
-						result_type,
-					},
-				)
-			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(fmt.Sprintf(start_url, ""))
 	return
 }
 
