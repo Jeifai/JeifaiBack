@@ -568,6 +568,12 @@ func (runtime Runtime) Remberg() (results Results) {
 	return
 }
 
+func (runtime Runtime) Coachhub() (results Results) {
+	start_url := "https://coachhub-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██████  ███████ ██████  ███████  ██████  ███    ██ ██  ██████      ██████
 ██   ██ ██      ██   ██ ██      ██    ██ ████   ██ ██ ██    ██          ██
@@ -1051,6 +1057,197 @@ func (runtime Runtime) Talentgarden() (results Results) {
 	Bamboohr(start_url, runtime.Name, &results)
 	return
 }
+
+/**
+███████ ███    ███  █████  ██████  ████████ ██████  ███████  ██████ ██████  ██    ██ ██ ████████ ███████ ██████  ███████
+██      ████  ████ ██   ██ ██   ██    ██    ██   ██ ██      ██      ██   ██ ██    ██ ██    ██    ██      ██   ██ ██
+███████ ██ ████ ██ ███████ ██████     ██    ██████  █████   ██      ██████  ██    ██ ██    ██    █████   ██████  ███████
+     ██ ██  ██  ██ ██   ██ ██   ██    ██    ██   ██ ██      ██      ██   ██ ██    ██ ██    ██    ██      ██   ██      ██
+███████ ██      ██ ██   ██ ██   ██    ██    ██   ██ ███████  ██████ ██   ██  ██████  ██    ██    ███████ ██   ██ ███████
+*/
+func Smartrecruiters(start_url string, base_job_url string, runtime_name string, results *Results) {
+	number_results_per_page := 100
+	type Jobs struct {
+		Offset     int `json:"offset"`
+		Limit      int `json:"limit"`
+		TotalFound int `json:"totalFound"`
+		Content    []struct {
+			ID        string `json:"id"`
+			Name      string `json:"name"`
+			UUID      string `json:"uuid"`
+			RefNumber string `json:"refNumber"`
+			Company   struct {
+				Identifier string `json:"identifier"`
+				Name       string `json:"name"`
+			} `json:"company"`
+			ReleasedDate time.Time `json:"releasedDate"`
+			Location     struct {
+				City    string `json:"city"`
+				Region  string `json:"region"`
+				Country string `json:"country"`
+				Remote  bool   `json:"remote"`
+			} `json:"location"`
+			Industry struct {
+				ID    string `json:"id"`
+				Label string `json:"label"`
+			} `json:"industry"`
+			Department struct {
+				ID    string `json:"id"`
+				Label string `json:"label"`
+			} `json:"department"`
+			Function struct {
+				ID    string `json:"id"`
+				Label string `json:"label"`
+			} `json:"function"`
+			TypeOfEmployment struct {
+				Label string `json:"label"`
+			} `json:"typeOfEmployment"`
+			ExperienceLevel struct {
+				ID    string `json:"id"`
+				Label string `json:"label"`
+			} `json:"experienceLevel"`
+			CustomField []struct {
+				FieldID    string `json:"fieldId"`
+				FieldLabel string `json:"fieldLabel"`
+				ValueID    string `json:"valueId"`
+				ValueLabel string `json:"valueLabel"`
+			} `json:"customField"`
+			Ref     string `json:"ref"`
+			Creator struct {
+				Name string `json:"name"`
+			} `json:"creator"`
+			Language struct {
+				Code        string `json:"code"`
+				Label       string `json:"label"`
+				LabelNative string `json:"labelNative"`
+			} `json:"language"`
+		} `json:"content"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs Jobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Content {
+			result_title := elem.Name
+			result_url := fmt.Sprintf(base_job_url, elem.ID)
+			result_location := elem.Location.City + "," + elem.Location.Country
+			if elem.Location.Remote {
+				result_location = result_location + ", Remote"
+			}
+			results.Add(
+				runtime_name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+		total_matches := jsonJobs.TotalFound
+		total_pages := total_matches / number_results_per_page
+		for i := 1; i <= total_pages; i++ {
+			time.Sleep(SecondsSleep * time.Second)
+			c.Visit(fmt.Sprintf(start_url, number_results_per_page*i))
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(fmt.Sprintf(start_url, 0))
+	return
+}
+
+func (runtime Runtime) Square() (results Results) {
+	start_url := "https://api.smartrecruiters.com/v1/companies/square/postings?offset=%d"
+	base_job_url := "https://www.smartrecruiters.com/Square/%s"
+	Smartrecruiters(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Bosch() (results Results) {
+	start_url := "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings?offset=%d"
+	base_job_url := "https://www.smartrecruiters.com/BoschGroup/%s"
+	Smartrecruiters(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Omio() (results Results) {
+	start_url := "https://api.smartrecruiters.com/v1/companies/Omio1/postings?offset=%d"
+	base_job_url := "https://www.smartrecruiters.com/Omio1/%s"
+	Smartrecruiters(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Volocopter() (results Results) {
+	start_url := "https://api.smartrecruiters.com/v1/companies/VolocopterGmbH/postings?offset=%d"
+	base_job_url := "https://www.smartrecruiters.com/VolocopterGmbH/%s"
+	Smartrecruiters(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+/**
+████████ ███████  █████  ███    ███ ████████  █████  ██ ██       ██████  ██████
+   ██    ██      ██   ██ ████  ████    ██    ██   ██ ██ ██      ██    ██ ██   ██
+   ██    █████   ███████ ██ ████ ██    ██    ███████ ██ ██      ██    ██ ██████
+   ██    ██      ██   ██ ██  ██  ██    ██    ██   ██ ██ ██      ██    ██ ██   ██
+   ██    ███████ ██   ██ ██      ██    ██    ██   ██ ██ ███████  ██████  ██   ██
+*/
+func Teamtailor(start_url string, base_job_url string, runtime_name string, results *Results) {
+	type Job struct {
+		Url      string
+		Title    string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".jobs", func(e *colly.HTMLElement) {
+		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
+			result_title := el.ChildText(".title")
+			result_location := el.ChildText(".meta")
+			results.Add(
+				runtime_name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_url,
+					result_title,
+					result_location,
+				},
+			)
+		})
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Zenjob() (results Results) {
+	start_url := "https://zenjob.teamtailor.com"
+	base_job_url := "https://zenjob.teamtailor.com%s"
+	Teamtailor(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2327,100 +2524,6 @@ func (runtime Runtime) Zapier() (results Results) {
 	return
 }
 
-func (runtime Runtime) Omio() (results Results) {
-	start_url := "https://api.smartrecruiters.com/v1/companies/Omio1/postings"
-	base_job_url := "https://www.omio.com/jobs/#%s"
-	type JsonJobs struct {
-		Offset     int `json:"offset"`
-		Limit      int `json:"limit"`
-		TotalFound int `json:"totalFound"`
-		Content    []struct {
-			ID        string `json:"id"`
-			Name      string `json:"name"`
-			UUID      string `json:"uuid"`
-			RefNumber string `json:"refNumber"`
-			Company   struct {
-				Identifier string `json:"identifier"`
-				Name       string `json:"name"`
-			} `json:"company"`
-			ReleasedDate time.Time `json:"releasedDate"`
-			Location     struct {
-				City       string `json:"city"`
-				Region     string `json:"region"`
-				Country    string `json:"country"`
-				Address    string `json:"address"`
-				PostalCode string `json:"postalCode"`
-				Remote     bool   `json:"remote"`
-			} `json:"location,omitempty"`
-			Industry struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"industry"`
-			Department struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"department,omitempty"`
-			Function struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"function"`
-			TypeOfEmployment struct {
-				Label string `json:"label"`
-			} `json:"typeOfEmployment"`
-			ExperienceLevel struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"experienceLevel"`
-			CustomField []struct {
-				FieldID    string `json:"fieldId"`
-				FieldLabel string `json:"fieldLabel"`
-				ValueID    string `json:"valueId"`
-				ValueLabel string `json:"valueLabel"`
-			} `json:"customField"`
-			Ref     string `json:"ref"`
-			Creator struct {
-				Name string `json:"name"`
-			} `json:"creator"`
-			Language struct {
-				Code        string `json:"code"`
-				Label       string `json:"label"`
-				LabelNative string `json:"labelNative"`
-			} `json:"language"`
-		} `json:"content"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Content {
-			result_title := elem.Name
-			result_url := fmt.Sprintf(base_job_url, elem.ID)
-			result_location := elem.Location.City + "," + elem.Location.Country
-			if elem.Location.Remote {
-				result_location = result_location + "," + "Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Aboutyou() (results Results) {
 	start_url := "https://corporate.aboutyou.de/app/api/openpositions.php?posts_per_page=500"
 	type JsonJobs struct {
@@ -3331,104 +3434,6 @@ func (runtime Runtime) Subitoit() (results Results) {
 	return
 }
 
-func (runtime Runtime) Square() (results Results) {
-	start_url := "https://api.smartrecruiters.com/v1/companies/square/postings?offset=%d"
-	base_job_url := "https://www.smartrecruiters.com/Square/%s"
-	number_results_per_page := 100
-	type Jobs struct {
-		Offset     int `json:"offset"`
-		Limit      int `json:"limit"`
-		TotalFound int `json:"totalFound"`
-		Content    []struct {
-			ID        string `json:"id"`
-			Name      string `json:"name"`
-			UUID      string `json:"uuid"`
-			RefNumber string `json:"refNumber"`
-			Company   struct {
-				Identifier string `json:"identifier"`
-				Name       string `json:"name"`
-			} `json:"company"`
-			ReleasedDate time.Time `json:"releasedDate"`
-			Location     struct {
-				City    string `json:"city"`
-				Region  string `json:"region"`
-				Country string `json:"country"`
-				Remote  bool   `json:"remote"`
-			} `json:"location"`
-			Industry struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"industry"`
-			Department struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"department"`
-			Function struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"function"`
-			TypeOfEmployment struct {
-				Label string `json:"label"`
-			} `json:"typeOfEmployment"`
-			ExperienceLevel struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"experienceLevel"`
-			CustomField []struct {
-				FieldID    string `json:"fieldId"`
-				FieldLabel string `json:"fieldLabel"`
-				ValueID    string `json:"valueId"`
-				ValueLabel string `json:"valueLabel"`
-			} `json:"customField"`
-			Ref     string `json:"ref"`
-			Creator struct {
-				Name string `json:"name"`
-			} `json:"creator"`
-			Language struct {
-				Code        string `json:"code"`
-				Label       string `json:"label"`
-				LabelNative string `json:"labelNative"`
-			} `json:"language"`
-		} `json:"content"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs Jobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Content {
-			result_title := elem.Name
-			result_url := fmt.Sprintf(base_job_url, elem.ID)
-			result_location := elem.Location.City + "," + elem.Location.Country
-			if elem.Location.Remote {
-				result_location = result_location + ", Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-		total_matches := jsonJobs.TotalFound
-		total_pages := total_matches / number_results_per_page
-		for i := 1; i <= total_pages; i++ {
-			time.Sleep(SecondsSleep * time.Second)
-			c.Visit(fmt.Sprintf(start_url, number_results_per_page*i))
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(fmt.Sprintf(start_url, 0))
-	return
-}
 
 func (runtime Runtime) Facebook() (results Results) {
 	start_url := "https://www.facebook.com/careers/jobs?results_per_page=100&page=%d"
@@ -3865,80 +3870,6 @@ func (runtime Runtime) Ninox() (results Results) {
 	return
 }
 
-func (runtime Runtime) Zenjob() (results Results) {
-	start_url := "https://zenjob.teamtailor.com"
-	base_job_url := "https://zenjob.teamtailor.com%s"
-	type Job struct {
-		Url      string
-		Title    string
-		Location string
-	}
-	c := colly.NewCollector()
-	c.OnHTML(".jobs", func(e *colly.HTMLElement) {
-		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
-			result_title := el.ChildText(".title")
-			result_location := el.ChildText(".meta")
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				Job{
-					result_url,
-					result_title,
-					result_location,
-				},
-			)
-		})
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-
-func (runtime Runtime) Coachhub() (results Results) {
-	start_url := "https://coachhub-jobs.personio.de/"
-	type Job struct {
-		Url      string
-		Title    string
-		Location string
-	}
-	c := colly.NewCollector()
-	c.OnHTML(".panel-container", func(e *colly.HTMLElement) {
-		e.ForEach(".recent-job-list", func(_ int, el *colly.HTMLElement) {
-			result_url := el.ChildAttr("a", "href")
-			result_title := el.ChildText("h6")
-			result_location := strings.Split(el.ChildText("p"), "·")[1]
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				Job{
-					result_url,
-					result_title,
-					result_location,
-				},
-			)
-		})
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Bonify() (results Results) {
 	start_url := "http://www.bonify.de/jobs"
 	base_job_url := "https://www.bonify.de/jobs/%s"
@@ -4057,7 +3988,6 @@ func (runtime Runtime) Bunch() (results Results) {
 		"New York City • Berlin • Remote",
 		[]byte("{}"),
 	})
-
 	results = append(results, Result{
 		runtime.Name,
 		"Product Launch Intern (Internship)",
@@ -4065,9 +3995,22 @@ func (runtime Runtime) Bunch() (results Results) {
 		"Berlin • Remote",
 		[]byte("{}"),
 	})
+	results = append(results, Result{
+		runtime.Name,
+		"Generalist Product Engineer",
+		"https://angel.co/company/bunch-hq/jobs/987023-generalist-product-engineer",
+		"Berlin",
+		[]byte("{}"),
+	})
+	results = append(results, Result{
+		runtime.Name,
+		"Mobile Product Engineer",
+		"https://angel.co/company/bunch-hq/jobs/967400-mobile-product-engineer",
+		"Berlin • Remote",
+		[]byte("{}"),
+	})
 	return
 }
-
 
 func (runtime Runtime) Bytedance() (results Results) {
 	base_url := "https://job.bytedance.com/en/position/detail/%s"
@@ -4411,101 +4354,6 @@ func (runtime Runtime) Porsche() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Bosch() (results Results) {
-	start_url := "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings?offset=%d"
-	base_job_url := "https://www.smartrecruiters.com/BoschGroup/%s"
-	number_results_per_page := 100
-	type Jobs struct {
-		Content []struct {
-			Company struct {
-				Identifier string `json:"identifier"`
-				Name       string `json:"name"`
-			} `json:"company"`
-			Creator struct {
-				Name string `json:"name"`
-			} `json:"creator"`
-			CustomField []struct {
-				FieldID    string `json:"fieldId"`
-				FieldLabel string `json:"fieldLabel"`
-				ValueID    string `json:"valueId"`
-				ValueLabel string `json:"valueLabel"`
-			} `json:"customField"`
-			Department      struct{} `json:"department"`
-			ExperienceLevel struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"experienceLevel"`
-			Function struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"function"`
-			ID       string `json:"id"`
-			Industry struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"industry"`
-			Language struct {
-				Code        string `json:"code"`
-				Label       string `json:"label"`
-				LabelNative string `json:"labelNative"`
-			} `json:"language"`
-			Location struct {
-				Address    string `json:"address"`
-				City       string `json:"city"`
-				Country    string `json:"country"`
-				PostalCode string `json:"postalCode"`
-				Region     string `json:"region"`
-				Remote     bool   `json:"remote"`
-			} `json:"location"`
-			Name             string `json:"name"`
-			Ref              string `json:"ref"`
-			RefNumber        string `json:"refNumber"`
-			ReleasedDate     string `json:"releasedDate"`
-			TypeOfEmployment struct {
-				Label string `json:"label"`
-			} `json:"typeOfEmployment"`
-			UUID string `json:"uuid"`
-		} `json:"content"`
-		Limit      int64 `json:"limit"`
-		Offset     int64 `json:"offset"`
-		TotalFound int64 `json:"totalFound"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs Jobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Content {
-			result_title := elem.Name
-			result_url := fmt.Sprintf(base_job_url, elem.ID)
-			result_location := elem.Location.City + "," + elem.Location.Country
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-		total_matches := int(jsonJobs.TotalFound)
-		total_pages := total_matches / number_results_per_page
-		for i := 1; i <= total_pages; i++ {
-			time.Sleep(SecondsSleep * time.Second)
-			c.Visit(fmt.Sprintf(start_url, number_results_per_page*i))
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(fmt.Sprintf(start_url, 0))
 	return
 }
 
@@ -5437,99 +5285,6 @@ func (runtime Runtime) Twaice() (results Results) {
 	return
 }
 
-func (runtime Runtime) Volocopter() (results Results) {
-	start_url := "https://api.smartrecruiters.com/v1/companies/VolocopterGmbH/postings"
-	type JsonJobs struct {
-		Offset     int `json:"offset"`
-		Limit      int `json:"limit"`
-		TotalFound int `json:"totalFound"`
-		Content    []struct {
-			ID        string `json:"id"`
-			Name      string `json:"name"`
-			UUID      string `json:"uuid"`
-			RefNumber string `json:"refNumber"`
-			Company   struct {
-				Identifier string `json:"identifier"`
-				Name       string `json:"name"`
-			} `json:"company"`
-			ReleasedDate time.Time `json:"releasedDate"`
-			Location     struct {
-				City       string `json:"city"`
-				Region     string `json:"region"`
-				Country    string `json:"country"`
-				Address    string `json:"address"`
-				PostalCode string `json:"postalCode"`
-				Remote     bool   `json:"remote"`
-			} `json:"location,omitempty"`
-			Industry struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"industry"`
-			Department struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"department,omitempty"`
-			Function struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"function"`
-			TypeOfEmployment struct {
-				Label string `json:"label"`
-			} `json:"typeOfEmployment"`
-			ExperienceLevel struct {
-				ID    string `json:"id"`
-				Label string `json:"label"`
-			} `json:"experienceLevel"`
-			CustomField []struct {
-				FieldID    string `json:"fieldId"`
-				FieldLabel string `json:"fieldLabel"`
-				ValueID    string `json:"valueId"`
-				ValueLabel string `json:"valueLabel"`
-			} `json:"customField"`
-			Ref     string `json:"ref"`
-			Creator struct {
-				Name string `json:"name"`
-			} `json:"creator"`
-			Language struct {
-				Code        string `json:"code"`
-				Label       string `json:"label"`
-				LabelNative string `json:"labelNative"`
-			} `json:"language"`
-		} `json:"content"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Content {
-			result_title := elem.Name
-			result_url := elem.Ref
-			result_location := elem.Location.City + "," + elem.Location.Country
-			if elem.Location.Remote {
-				result_location = result_location + "," + "Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Idnow() (results Results) {
 	start_url := "https://idnow.jobbase.io"
 	base_url := "https://idnow.jobbase.io%s"
@@ -5674,7 +5429,6 @@ func (runtime Runtime) Demodesk() (results Results) {
 	return
 }
 
-
 func (runtime Runtime) Holidu() (results Results) {
 	start_url := "https://api.holidu.com/api/careers"
 	type JsonJobs struct {
@@ -5768,7 +5522,6 @@ func (runtime Runtime) Westwing() (results Results) {
 	c.Visit(start_url)
 	return
 }
-
 
 func (runtime Runtime) Mylivn() (results Results) {
 	start_url := "https://mylivn.com/jobs"
@@ -5882,7 +5635,6 @@ func (runtime Runtime) Inmindcloud() (results Results) {
 	c.Visit(url)
 	return
 }
-
 
 func (runtime Runtime) Censhare() (results Results) {
 	start_url := "https://www.censhare.com/company/careers"
