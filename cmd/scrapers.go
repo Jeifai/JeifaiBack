@@ -82,30 +82,12 @@ func Greenhouse(start_url string, runtime_name string, results *Results) {
 	type JsonJobs struct {
 		Jobs []struct {
 			AbsoluteURL    string `json:"absolute_url"`
-			DataCompliance []struct {
-				Type            string      `json:"type"`
-				RequiresConsent bool        `json:"requires_consent"`
-				RetentionPeriod interface{} `json:"retention_period"`
-			} `json:"data_compliance"`
-			InternalJobID int `json:"internal_job_id"`
 			Location      struct {
 				Name string `json:"name"`
 			} `json:"location"`
-			Metadata []struct {
-				ID        int    `json:"id"`
-				Name      string `json:"name"`
-				Value     string `json:"value"`
-				ValueType string `json:"value_type"`
-			} `json:"metadata"`
-			ID            int    `json:"id"`
-			UpdatedAt     string `json:"updated_at"`
-			RequisitionID string `json:"requisition_id"`
-			Title         string `json:"title"`
-			Education     string `json:"education,omitempty"`
+			Title         string        `json:"title"`
+			UpdatedAt     string        `json:"updated_at"`
 		} `json:"jobs"`
-		Meta struct {
-			Total int `json:"total"`
-		} `json:"meta"`
 	}
 	c := colly.NewCollector()
 	c.OnResponse(func(r *colly.Response) {
@@ -169,6 +151,12 @@ func (runtime Runtime) Pairfinance() (results Results) {
 
 func (runtime Runtime) Flixbus() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/flix/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Penta() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/penta/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
 	return
 }
@@ -295,6 +283,30 @@ func (runtime Runtime) Globalsavingsgroup() (results Results) {
 
 func (runtime Runtime) Alyne() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/Alyne/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Gympass() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/gympass/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Contentful() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/contentful/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Urbansport() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/urbansportsclub/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Soundcloud() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/soundcloud71/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
 	return
 }
@@ -1009,7 +1021,6 @@ func (runtime Runtime) Smartreporting() (results Results) {
 	return
 }
 
-
 func (runtime Runtime) Speexx() (results Results) {
 	start_url := "https://apply.workable.com/api/v3/accounts/speexx/jobs"
 	base_job_url := "https://apply.workable.com/speexx/j/%s"
@@ -1432,8 +1443,8 @@ func Join(start_url string, base_job_url string, runtime_name string, results *R
 }
 
 func (runtime Runtime) Paintgun() (results Results) {
-	start_url := "https://joblift-talent.freshteam.com/jobs"
-	base_job_url := "https://joblift-talent.freshteam.com%s"
+	start_url := "https://join.com/api/public/companies/9628/jobs?page=1&pageSize=100"
+	base_job_url := "https://paintgun.join.com/jobs/%s"
 	Join(start_url, base_job_url, runtime.Name, &results)
 	return
 }
@@ -1511,24 +1522,13 @@ func (runtime Runtime) Hometogo() (results Results) {
 	return
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/**
+███████ ████████  █████  ███    ██ ██████   █████  ██       ██████  ███    ██ ███████
+██         ██    ██   ██ ████   ██ ██   ██ ██   ██ ██      ██    ██ ████   ██ ██
+███████    ██    ███████ ██ ██  ██ ██   ██ ███████ ██      ██    ██ ██ ██  ██ █████
+     ██    ██    ██   ██ ██  ██ ██ ██   ██ ██   ██ ██      ██    ██ ██  ██ ██ ██
+███████    ██    ██   ██ ██   ████ ██████  ██   ██ ███████  ██████  ██   ████ ███████
+*/
 
 func (runtime Runtime) Dreamingjobs() (results Results) {
 	start_url := "https://robimalco.github.io/dreamingjobs.github.io/"
@@ -1764,47 +1764,6 @@ func (runtime Runtime) Google() (results Results) {
 	return
 }
 
-func (runtime Runtime) Soundcloud() (results Results) {
-	start_url := "https://boards.greenhouse.io/embed/job_board?for=soundcloud71"
-	type Job struct {
-		Title      string
-		Url        string
-		Department string
-		Location   string
-	}
-	c := colly.NewCollector()
-	c.OnHTML("section", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("class"), "level-0") {
-			result_department := e.ChildText("h3")
-			e.ForEach("div", func(_ int, el *colly.HTMLElement) {
-				result_title := el.ChildText("a")
-				result_url := el.ChildAttr("a", "href")
-				result_location := el.ChildText("span")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_title,
-						result_url,
-						result_department,
-						result_location,
-					},
-				)
-			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Microsoft() (results Results) {
 	start_url := "https://careers.microsoft.com/us/en/search-results?s=1&from=0"
 	base_url := "https://careers.microsoft.com/us/en/search-results?s=1&from=%d"
@@ -1959,47 +1918,6 @@ func (runtime Runtime) Twitter() (results Results) {
 	return
 }
 
-func (runtime Runtime) Urbansport() (results Results) {
-	start_url := "https://boards.greenhouse.io/urbansportsclub"
-	type Job struct {
-		Title      string
-		Url        string
-		Department string
-		Location   string
-	}
-	c := colly.NewCollector()
-	c.OnHTML("section", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("class"), "level-0") {
-			result_department := e.ChildText("h3")
-			e.ForEach("div", func(_ int, el *colly.HTMLElement) {
-				result_title := el.ChildText("a")
-				result_url := el.ChildAttr("a", "href")
-				result_location := el.ChildText("span")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_title,
-						result_url,
-						result_department,
-						result_location,
-					},
-				)
-			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) N26() (results Results) {
 	start_url := "https://n26.com/en/careers"
 	base_url := "https://www.n26.com%s"
@@ -2128,129 +2046,6 @@ func (runtime Runtime) Deutschebahn() (results Results) {
 			Red("\nError:"), Red(err))
 	})
 	c.Visit(fmt.Sprintf(start_url, "0"))
-	return
-}
-
-func (runtime Runtime) Penta() (results Results) {
-	start_url := "https://boards.greenhouse.io/embed/job_board?for=penta"
-	type Job struct {
-		Title      string
-		Url        string
-		Department string
-		Location   string
-	}
-	c := colly.NewCollector()
-	c.OnHTML("section", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("class"), "level-0") {
-			result_department := e.ChildText("h3")
-			e.ForEach("div", func(_ int, el *colly.HTMLElement) {
-				result_title := el.ChildText("a")
-				result_url := el.ChildAttr("a", "href")
-				result_location := el.ChildText("span")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_title,
-						result_url,
-						result_department,
-						result_location,
-					},
-				)
-			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Contentful() (results Results) {
-	start_url := "https://boards.greenhouse.io/embed/job_board?for=contentful"
-	type Job struct {
-		Title      string
-		Url        string
-		Department string
-		Location   string
-	}
-	c := colly.NewCollector()
-	c.OnHTML("section", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("class"), "level-0") {
-			result_department := e.ChildText("h3")
-			e.ForEach("div", func(_ int, el *colly.HTMLElement) {
-				result_title := el.ChildText("a")
-				result_url := el.ChildAttr("a", "href")
-				result_location := el.ChildText("span")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_title,
-						result_url,
-						result_department,
-						result_location,
-					},
-				)
-			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Gympass() (results Results) {
-	start_url := "https://boards.greenhouse.io/embed/job_board?for=gympass"
-	type Job struct {
-		Title      string
-		Url        string
-		Department string
-		Location   string
-	}
-	c := colly.NewCollector()
-	c.OnHTML("section", func(e *colly.HTMLElement) {
-		if strings.Contains(e.Attr("class"), "level-0") {
-			result_department := e.ChildText("h3")
-			e.ForEach("div", func(_ int, el *colly.HTMLElement) {
-				result_title := el.ChildText("a")
-				result_url := el.ChildAttr("a", "href")
-				result_location := el.ChildText("span")
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_title,
-						result_url,
-						result_department,
-						result_location,
-					},
-				)
-			})
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
 	return
 }
 
@@ -2393,6 +2188,7 @@ func (runtime Runtime) Slack() (results Results) {
 	c.Visit(start_url)
 	return
 }
+
 func (runtime Runtime) Docker() (results Results) {
 	start_url := "https://newton.newtonsoftware.com/career/CareerHome.action?clientId=8a7883c6708df1d40170a6df29950b39"
 	type Job struct {
@@ -5264,7 +5060,6 @@ func (runtime Runtime) Holidu() (results Results) {
 		}
 		for _, elem := range jsonJobs.Positions {
 			result_title := elem.Name
-			fmt.Println(result_title)
 			result_url := "https://www.holidu.com/careers?" + elem.ID
 			result_location := elem.Office
 			results.Add(
@@ -5697,10 +5492,6 @@ func (runtime Runtime) Uniper() (results Results) {
 			counter++
 			c.Visit(temp_v_url)
 		}
-	})
-
-	c.OnResponse(func(r *colly.Response) {
-		SaveResponseToFileWithFileName(string(r.Body), "Uniper.html")
 	})
 
 	c.OnRequest(func(r *colly.Request) {
