@@ -1239,13 +1239,59 @@ func (runtime Runtime) Zenjob() (results Results) {
 	return
 }
 
+/**
+███████ ██████  ███████ ███████ ██   ██ ████████ ███████  █████  ███    ███
+██      ██   ██ ██      ██      ██   ██    ██    ██      ██   ██ ████  ████
+█████   ██████  █████   ███████ ███████    ██    █████   ███████ ██ ████ ██
+██      ██   ██ ██           ██ ██   ██    ██    ██      ██   ██ ██  ██  ██
+██      ██   ██ ███████ ███████ ██   ██    ██    ███████ ██   ██ ██      ██
+*/
+func Freshteam(start_url string, base_job_url string, runtime_name string, results *Results) {
+	type Job struct {
+		Url        string
+		Title      string
+		Location   string
+		Department string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".job-role-list", func(e *colly.HTMLElement) {
+		e.ForEach("li:not([class])", func(_ int, el *colly.HTMLElement) {
+			result_department := strings.Split(el.ChildText(".role-title"), "-")[0]
+			el.ForEach(".job-list-info", func(_ int, ell *colly.HTMLElement) {
+				result_url := fmt.Sprintf(base_job_url, ell.ChildAttr("a", "href"))
+				result_title := ell.ChildText(".job-title")
+				result_location := strings.Split(ell.ChildText(".location-info"), "\n")[0]
+				results.Add(
+					runtime_name,
+					result_title,
+					result_url,
+					result_location,
+					Job{
+						result_url,
+						result_title,
+						result_location,
+						result_department,
+					},
+				)
+			})
+		})
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
 
-
-
-
-
-
-
+func (runtime Runtime) Joblift() (results Results) {
+	start_url := "https://joblift-talent.freshteam.com/jobs"
+	base_job_url := "https://joblift-talent.freshteam.com%s"
+	Freshteam(start_url, base_job_url, runtime.Name, &results)
+	return
+}
 
 
 
@@ -3643,49 +3689,6 @@ func (runtime Runtime) Amboss() (results Results) {
 }
 
 
-
-func (runtime Runtime) Joblift() (results Results) {
-	start_url := "https://joblift-talent.freshteam.com/jobs"
-	base_job_url := "https://joblift-talent.freshteam.com%s"
-	type Job struct {
-		Url        string
-		Title      string
-		Location   string
-		Department string
-	}
-	c := colly.NewCollector()
-	c.OnHTML(".job-role-list", func(e *colly.HTMLElement) {
-		e.ForEach("li:not([class])", func(_ int, el *colly.HTMLElement) {
-			result_department := strings.Split(el.ChildText(".role-title"), "-")[0]
-			el.ForEach(".job-list-info", func(_ int, ell *colly.HTMLElement) {
-				result_url := fmt.Sprintf(base_job_url, ell.ChildAttr("a", "href"))
-				result_title := ell.ChildText(".job-title")
-				result_location := strings.Split(ell.ChildText(".location-info"), "\n")[0]
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					Job{
-						result_url,
-						result_title,
-						result_location,
-						result_department,
-					},
-				)
-			})
-		})
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Kontist() (results Results) {
 	start_url := "https://kontist.com/careers/jobs.json"
 	type Jobs struct {
@@ -3833,7 +3836,6 @@ func (runtime Runtime) Medwing() (results Results) {
 	c.Visit(start_url)
 	return
 }
-
 
 func (runtime Runtime) Ninox() (results Results) {
 	start_url := "https://ninox.com/en/jobs"
