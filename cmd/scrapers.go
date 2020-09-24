@@ -877,6 +877,137 @@ func (runtime Runtime) Teleclinic() (results Results) {
 	return
 }
 
+/**
+██     ██  ██████  ██████  ██   ██  █████  ██████  ██      ███████
+██     ██ ██    ██ ██   ██ ██  ██  ██   ██ ██   ██ ██      ██
+██  █  ██ ██    ██ ██████  █████   ███████ ██████  ██      █████
+██ ███ ██ ██    ██ ██   ██ ██  ██  ██   ██ ██   ██ ██      ██
+ ███ ███   ██████  ██   ██ ██   ██ ██   ██ ██████  ███████ ███████
+*/
+func Workable(start_url string, base_job_url string, runtime_name string, results *Results) {
+	type JsonJobs struct {
+		Total   int `json:"total"`
+		Results []struct {
+			ID           int    `json:"id"`
+			Shortcode    string `json:"shortcode"`
+			Title        string `json:"title"`
+			Description  string `json:"description"`
+			Requirements string `json:"requirements"`
+			Benefits     string `json:"benefits"`
+			Remote       bool   `json:"remote"`
+			Location     struct {
+				Country     string `json:"country"`
+				CountryCode string `json:"countryCode"`
+				City        string `json:"city"`
+				Region      string `json:"region"`
+			} `json:"location"`
+			State          string      `json:"state"`
+			IsInternal     bool        `json:"isInternal"`
+			Code           interface{} `json:"code"`
+			Published      time.Time   `json:"published"`
+			Type           string      `json:"type"`
+			Language       string      `json:"language"`
+			Department     []string    `json:"department"`
+			AccountUID     string      `json:"accountUid"`
+			ApprovalStatus string      `json:"approvalStatus"`
+		} `json:"results"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Results {
+			result_title := elem.Title
+			result_url := fmt.Sprintf(base_job_url, elem.Shortcode)
+			result_location := elem.Location.City + "," + elem.Location.Country
+			if elem.Remote {
+				result_location = result_location + "," + "Remote"
+			}
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Request(
+		"POST",
+		start_url,
+		strings.NewReader(""),
+		nil,
+		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
+	)
+	return
+}
+
+func (runtime Runtime) Depositsolutions() (results Results) {
+	start_url := "https://careers-page.workable.com/api/v3/accounts/deposit-solutions/jobs"
+	base_job_url := "https://apply.workable.com/deposit-solutions/j/"
+	Workable(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Tado() (results Results) {
+	start_url := "https://apply.workable.com/api/v3/accounts/tado/jobs"
+	base_job_url := "https://apply.workable.com/tado/j/%s"
+	Workable(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Riskmethods() (results Results) {
+	start_url := "https://apply.workable.com/api/v3/accounts/riskmethods/jobs"
+	base_job_url := "https://apply.workable.com/riskmethods/j/%s"
+	Workable(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Smartreporting() (results Results) {
+	start_url := "https://apply.workable.com/api/v3/accounts/smartreporting/jobs"
+	base_job_url := "https://apply.workable.com/smartreporting/j/%s"
+	Workable(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+
+func (runtime Runtime) Speexx() (results Results) {
+	start_url := "https://apply.workable.com/api/v3/accounts/speexx/jobs"
+	base_job_url := "https://apply.workable.com/speexx/j/%s"
+	Workable(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 func (runtime Runtime) Dreamingjobs() (results Results) {
 	start_url := "https://robimalco.github.io/dreamingjobs.github.io/"
 	type Job struct {
@@ -2282,74 +2413,6 @@ func (runtime Runtime) Aboutyou() (results Results) {
 	return
 }
 
-func (runtime Runtime) Depositsolutions() (results Results) {
-	start_url := "https://careers-page.workable.com/api/v3/accounts/deposit-solutions/jobs"
-	base_job_url := "https://apply.workable.com/deposit-solutions/j/"
-	type JsonJobs struct {
-		Total   int `json:"total"`
-		Results []struct {
-			ID           int    `json:"id"`
-			Shortcode    string `json:"shortcode"`
-			Title        string `json:"title"`
-			Description  string `json:"description"`
-			Requirements string `json:"requirements"`
-			Benefits     string `json:"benefits"`
-			Remote       bool   `json:"remote"`
-			Location     struct {
-				Country     string `json:"country"`
-				CountryCode string `json:"countryCode"`
-				City        string `json:"city"`
-				Region      string `json:"region"`
-			} `json:"location"`
-			State          string      `json:"state"`
-			IsInternal     bool        `json:"isInternal"`
-			Code           interface{} `json:"code"`
-			Published      time.Time   `json:"published"`
-			Type           string      `json:"type"`
-			Language       string      `json:"language"`
-			Department     []string    `json:"department"`
-			AccountUID     string      `json:"accountUid"`
-			ApprovalStatus string      `json:"approvalStatus"`
-		} `json:"results"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Results {
-			result_title := elem.Title
-			result_url := fmt.Sprintf(base_job_url, elem.Shortcode)
-			result_location := elem.Location.City + "," + elem.Location.Country
-			if elem.Remote {
-				result_location = result_location + "," + "Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Request(
-		"POST",
-		start_url,
-		strings.NewReader(""),
-		nil,
-		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
-	)
-	return
-}
 
 
 func (runtime Runtime) Talentgarden() (results Results) {
@@ -5641,74 +5704,6 @@ func (runtime Runtime) Demodesk() (results Results) {
 	return
 }
 
-func (runtime Runtime) Tado() (results Results) {
-	start_url := "https://apply.workable.com/api/v3/accounts/tado/jobs"
-	base_job_url := "https://apply.workable.com/tado/j/%s"
-	type JsonJobs struct {
-		Total   int `json:"total"`
-		Results []struct {
-			ID           int    `json:"id"`
-			Shortcode    string `json:"shortcode"`
-			Title        string `json:"title"`
-			Description  string `json:"description"`
-			Requirements string `json:"requirements"`
-			Benefits     string `json:"benefits"`
-			Remote       bool   `json:"remote"`
-			Location     struct {
-				Country     string `json:"country"`
-				CountryCode string `json:"countryCode"`
-				City        string `json:"city"`
-				Region      string `json:"region"`
-			} `json:"location"`
-			State          string      `json:"state"`
-			IsInternal     bool        `json:"isInternal"`
-			Code           interface{} `json:"code"`
-			Published      time.Time   `json:"published"`
-			Type           string      `json:"type"`
-			Language       string      `json:"language"`
-			Department     []string    `json:"department"`
-			AccountUID     string      `json:"accountUid"`
-			ApprovalStatus string      `json:"approvalStatus"`
-		} `json:"results"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Results {
-			result_title := elem.Title
-			result_url := fmt.Sprintf(base_job_url, elem.Shortcode)
-			result_location := elem.Location.City + "," + elem.Location.Country
-			if elem.Remote {
-				result_location = result_location + "," + "Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Request(
-		"POST",
-		start_url,
-		strings.NewReader(""),
-		nil,
-		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
-	)
-	return
-}
 
 func (runtime Runtime) Holidu() (results Results) {
 	start_url := "https://api.holidu.com/api/careers"
@@ -5804,75 +5799,6 @@ func (runtime Runtime) Westwing() (results Results) {
 	return
 }
 
-
-func (runtime Runtime) Riskmethods() (results Results) {
-	start_url := "https://apply.workable.com/api/v3/accounts/riskmethods/jobs"
-	base_job_url := "https://apply.workable.com/riskmethods/j/%s"
-	type JsonJobs struct {
-		Total   int `json:"total"`
-		Results []struct {
-			ID           int    `json:"id"`
-			Shortcode    string `json:"shortcode"`
-			Title        string `json:"title"`
-			Description  string `json:"description"`
-			Requirements string `json:"requirements"`
-			Benefits     string `json:"benefits"`
-			Remote       bool   `json:"remote"`
-			Location     struct {
-				Country     string `json:"country"`
-				CountryCode string `json:"countryCode"`
-				City        string `json:"city"`
-				Region      string `json:"region"`
-			} `json:"location"`
-			State          string      `json:"state"`
-			IsInternal     bool        `json:"isInternal"`
-			Code           interface{} `json:"code"`
-			Published      time.Time   `json:"published"`
-			Type           string      `json:"type"`
-			Language       string      `json:"language"`
-			Department     []string    `json:"department"`
-			AccountUID     string      `json:"accountUid"`
-			ApprovalStatus string      `json:"approvalStatus"`
-		} `json:"results"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Results {
-			result_title := elem.Title
-			result_url := fmt.Sprintf(base_job_url, elem.Shortcode)
-			result_location := elem.Location.City + "," + elem.Location.Country
-			if elem.Remote {
-				result_location = result_location + "," + "Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Request(
-		"POST",
-		start_url,
-		strings.NewReader(""),
-		nil,
-		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
-	)
-	return
-}
 
 func (runtime Runtime) Mylivn() (results Results) {
 	start_url := "https://mylivn.com/jobs"
@@ -5987,74 +5913,6 @@ func (runtime Runtime) Inmindcloud() (results Results) {
 	return
 }
 
-func (runtime Runtime) Smartreporting() (results Results) {
-	start_url := "https://apply.workable.com/api/v3/accounts/smartreporting/jobs"
-	base_job_url := "https://apply.workable.com/smartreporting/j/%s"
-	type JsonJobs struct {
-		Total   int `json:"total"`
-		Results []struct {
-			ID           int    `json:"id"`
-			Shortcode    string `json:"shortcode"`
-			Title        string `json:"title"`
-			Description  string `json:"description"`
-			Requirements string `json:"requirements"`
-			Benefits     string `json:"benefits"`
-			Remote       bool   `json:"remote"`
-			Location     struct {
-				Country     string `json:"country"`
-				CountryCode string `json:"countryCode"`
-				City        string `json:"city"`
-				Region      string `json:"region"`
-			} `json:"location"`
-			State          string      `json:"state"`
-			IsInternal     bool        `json:"isInternal"`
-			Code           interface{} `json:"code"`
-			Published      time.Time   `json:"published"`
-			Type           string      `json:"type"`
-			Language       string      `json:"language"`
-			Department     []string    `json:"department"`
-			AccountUID     string      `json:"accountUid"`
-			ApprovalStatus string      `json:"approvalStatus"`
-		} `json:"results"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Results {
-			result_title := elem.Title
-			result_url := fmt.Sprintf(base_job_url, elem.Shortcode)
-			result_location := elem.Location.City + "," + elem.Location.Country
-			if elem.Remote {
-				result_location = result_location + "," + "Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Request(
-		"POST",
-		start_url,
-		strings.NewReader(""),
-		nil,
-		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
-	)
-	return
-}
 
 func (runtime Runtime) Censhare() (results Results) {
 	start_url := "https://www.censhare.com/company/careers"
@@ -6209,74 +6067,6 @@ func (runtime Runtime) Codasip() (results Results) {
 	return
 }
 
-func (runtime Runtime) Speexx() (results Results) {
-	start_url := "https://apply.workable.com/api/v3/accounts/speexx/jobs"
-	base_job_url := "https://apply.workable.com/speexx/j/%s"
-	type JsonJobs struct {
-		Total   int `json:"total"`
-		Results []struct {
-			ID           int    `json:"id"`
-			Shortcode    string `json:"shortcode"`
-			Title        string `json:"title"`
-			Description  string `json:"description"`
-			Requirements string `json:"requirements"`
-			Benefits     string `json:"benefits"`
-			Remote       bool   `json:"remote"`
-			Location     struct {
-				Country     string `json:"country"`
-				CountryCode string `json:"countryCode"`
-				City        string `json:"city"`
-				Region      string `json:"region"`
-			} `json:"location"`
-			State          string      `json:"state"`
-			IsInternal     bool        `json:"isInternal"`
-			Code           interface{} `json:"code"`
-			Published      time.Time   `json:"published"`
-			Type           string      `json:"type"`
-			Language       string      `json:"language"`
-			Department     []string    `json:"department"`
-			AccountUID     string      `json:"accountUid"`
-			ApprovalStatus string      `json:"approvalStatus"`
-		} `json:"results"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Results {
-			result_title := elem.Title
-			result_url := fmt.Sprintf(base_job_url, elem.Shortcode)
-			result_location := elem.Location.City + "," + elem.Location.Country
-			if elem.Remote {
-				result_location = result_location + "," + "Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Request(
-		"POST",
-		start_url,
-		strings.NewReader(""),
-		nil,
-		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
-	)
-	return
-}
 
 func (runtime Runtime) Allianz() (results Results) {
 	start_url := "https://jobs.allianz.com/sap/hcmx/hitlist_na"
