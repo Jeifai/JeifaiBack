@@ -674,6 +674,12 @@ func (runtime Runtime) Ndgit() (results Results) {
 	return
 }
 
+func (runtime Runtime) Tier() (results Results) {
+	start_url := "https://tier-mobility-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██████  ██████  ███████ ███████ ███████ ██    ██
 ██   ██ ██   ██ ██      ██         ███   ██  ██
@@ -6813,42 +6819,6 @@ func (runtime Runtime) Allianz() (results Results) {
 		if err != nil {
 			panic(err.Error())
 		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Tier() (results Results) {
-	start_url := "https://tier-mobility-jobs.personio.de/"
-	type Job struct {
-		Url      string
-		Title    string
-		Location string
-	}
-	c := colly.NewCollector()
-	c.OnHTML(".panel-container", func(e *colly.HTMLElement) {
-		e.ForEach(".recent-job-list", func(_ int, el *colly.HTMLElement) {
-			result_url := el.ChildAttr("a", "href")
-			result_title := el.ChildText("h6")
-			result_location := strings.Split(el.ChildText("p"), "·")[1]
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				Job{
-					result_url,
-					result_title,
-					result_location,
-				},
-			)
-		})
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
