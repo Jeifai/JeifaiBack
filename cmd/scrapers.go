@@ -1293,6 +1293,119 @@ func (runtime Runtime) Joblift() (results Results) {
 	return
 }
 
+/**
+     ██  ██████  ██ ███    ██
+     ██ ██    ██ ██ ████   ██
+     ██ ██    ██ ██ ██ ██  ██
+██   ██ ██    ██ ██ ██  ██ ██
+ █████   ██████  ██ ██   ████
+*/
+func Join(start_url string, base_job_url string, runtime_name string, results *Results) {
+	type JsonJobs struct {
+		Items []struct {
+			ID               int       `json:"id"`
+			LastID           int       `json:"lastId"`
+			OriginIDParam    string    `json:"originIdParam"`
+			IDParam          string    `json:"idParam"`
+			Title            string    `json:"title"`
+			PlaceID          string    `json:"placeId"`
+			Zip              string    `json:"zip"`
+			IsRemote         bool      `json:"isRemote"`
+			CountryID        int       `json:"countryId"`
+			EmploymentTypeID int       `json:"employmentTypeId"`
+			LanguageID       int       `json:"languageId"`
+			CategoryID       int       `json:"categoryId"`
+			CreatedAt        time.Time `json:"createdAt"`
+			EmploymentType   struct {
+				ID          int       `json:"id"`
+				Name        string    `json:"name"`
+				Slug        string    `json:"slug"`
+				CreatedAt   time.Time `json:"createdAt"`
+				UpdatedAt   time.Time `json:"updatedAt"`
+				IsNullValue bool      `json:"isNullValue"`
+				GoogleType  string    `json:"googleType"`
+				NameEn      string    `json:"nameEn"`
+				NameDe      string    `json:"nameDe"`
+				NameIt      string    `json:"nameIt"`
+				NameFr      string    `json:"nameFr"`
+				SortOrder   int       `json:"sortOrder"`
+			} `json:"employmentType"`
+			Language struct {
+				ID        int       `json:"id"`
+				Name      string    `json:"name"`
+				Iso6391   string    `json:"iso6391"`
+				IsDefault bool      `json:"isDefault"`
+				CreatedAt time.Time `json:"createdAt"`
+				UpdatedAt time.Time `json:"updatedAt"`
+				Locale    string    `json:"locale"`
+			} `json:"language"`
+			Country struct {
+				ID        int       `json:"id"`
+				Name      string    `json:"name"`
+				Iso3166   string    `json:"iso3166"`
+				CreatedAt time.Time `json:"createdAt"`
+				UpdatedAt time.Time `json:"updatedAt"`
+			} `json:"country"`
+			UnifiedDescription bool `json:"unifiedDescription"`
+			PendingDeletion    bool `json:"pendingDeletion"`
+			EducationID        int  `json:"educationId,omitempty"`
+			Education          struct {
+				ID          int       `json:"id"`
+				Name        string    `json:"name"`
+				Slug        string    `json:"slug"`
+				CreatedAt   time.Time `json:"createdAt"`
+				UpdatedAt   time.Time `json:"updatedAt"`
+				IsNullValue bool      `json:"isNullValue"`
+			} `json:"education,omitempty"`
+		} `json:"items"`
+		Pagination struct {
+			RowCount  int `json:"rowCount"`
+			PageCount int `json:"pageCount"`
+			Page      int `json:"page"`
+			PageSize  int `json:"pageSize"`
+		} `json:"pagination"`
+		Aggregations      []interface{} `json:"aggregations"`
+		UsingFallbackData bool          `json:"usingFallbackData"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Items {
+			result_title := elem.Title
+			result_url := fmt.Sprintf(base_job_url, elem.IDParam)
+			result_location := elem.Country.Name
+			if elem.IsRemote {
+				result_location = result_location + "," + "Remote"
+			}
+			results.Add(
+				runtime_name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Paintgun() (results Results) {
+	start_url := "https://joblift-talent.freshteam.com/jobs"
+	base_job_url := "https://joblift-talent.freshteam.com%s"
+	Join(start_url, base_job_url, runtime.Name, &results)
+	return
+}
 
 
 
@@ -3536,107 +3649,6 @@ func (runtime Runtime) Facebook() (results Results) {
 	return
 }
 
-func (runtime Runtime) Paintgun() (results Results) {
-	start_url := "https://join.com/api/public/companies/9628/jobs?page=1&pageSize=100"
-	job_base_url := "https://paintgun.join.com/jobs/%s"
-	type JsonJobs struct {
-		Items []struct {
-			ID               int       `json:"id"`
-			LastID           int       `json:"lastId"`
-			OriginIDParam    string    `json:"originIdParam"`
-			IDParam          string    `json:"idParam"`
-			Title            string    `json:"title"`
-			PlaceID          string    `json:"placeId"`
-			Zip              string    `json:"zip"`
-			IsRemote         bool      `json:"isRemote"`
-			CountryID        int       `json:"countryId"`
-			EmploymentTypeID int       `json:"employmentTypeId"`
-			LanguageID       int       `json:"languageId"`
-			CategoryID       int       `json:"categoryId"`
-			CreatedAt        time.Time `json:"createdAt"`
-			EmploymentType   struct {
-				ID          int       `json:"id"`
-				Name        string    `json:"name"`
-				Slug        string    `json:"slug"`
-				CreatedAt   time.Time `json:"createdAt"`
-				UpdatedAt   time.Time `json:"updatedAt"`
-				IsNullValue bool      `json:"isNullValue"`
-				GoogleType  string    `json:"googleType"`
-				NameEn      string    `json:"nameEn"`
-				NameDe      string    `json:"nameDe"`
-				NameIt      string    `json:"nameIt"`
-				NameFr      string    `json:"nameFr"`
-				SortOrder   int       `json:"sortOrder"`
-			} `json:"employmentType"`
-			Language struct {
-				ID        int       `json:"id"`
-				Name      string    `json:"name"`
-				Iso6391   string    `json:"iso6391"`
-				IsDefault bool      `json:"isDefault"`
-				CreatedAt time.Time `json:"createdAt"`
-				UpdatedAt time.Time `json:"updatedAt"`
-				Locale    string    `json:"locale"`
-			} `json:"language"`
-			Country struct {
-				ID        int       `json:"id"`
-				Name      string    `json:"name"`
-				Iso3166   string    `json:"iso3166"`
-				CreatedAt time.Time `json:"createdAt"`
-				UpdatedAt time.Time `json:"updatedAt"`
-			} `json:"country"`
-			UnifiedDescription bool `json:"unifiedDescription"`
-			PendingDeletion    bool `json:"pendingDeletion"`
-			EducationID        int  `json:"educationId,omitempty"`
-			Education          struct {
-				ID          int       `json:"id"`
-				Name        string    `json:"name"`
-				Slug        string    `json:"slug"`
-				CreatedAt   time.Time `json:"createdAt"`
-				UpdatedAt   time.Time `json:"updatedAt"`
-				IsNullValue bool      `json:"isNullValue"`
-			} `json:"education,omitempty"`
-		} `json:"items"`
-		Pagination struct {
-			RowCount  int `json:"rowCount"`
-			PageCount int `json:"pageCount"`
-			Page      int `json:"page"`
-			PageSize  int `json:"pageSize"`
-		} `json:"pagination"`
-		Aggregations      []interface{} `json:"aggregations"`
-		UsingFallbackData bool          `json:"usingFallbackData"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Items {
-			result_title := elem.Title
-			result_url := fmt.Sprintf(job_base_url, elem.IDParam)
-			result_location := elem.Country.Name
-			if elem.IsRemote {
-				result_location = result_location + "," + "Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
 
 func (runtime Runtime) Nen() (results Results) {
 	/*
