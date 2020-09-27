@@ -679,8 +679,278 @@ func (runtime Runtime) Climatepartner() (results Results) {
 	return
 }
 
-func (runtime Runtime) Blickfeld() (results Results) {
-	start_url := "https://blickfeld-jobs.personio.de"
+func (runtime Runtime) Lanesplanes() (results Results) {
+	start_url := "https://lanes-planes-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Instamotion() (results Results) {
+	start_url := "https://instamotionretail-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) F24() (results Results) {
+	start_url := "https://f24-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Mynaric() (results Results) {
+	start_url := "https://mynaric-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Cevotec() (results Results) {
+	start_url := "https://cevotec-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Banovo() (results Results) {
+	start_url := "https://banovo-gmbh-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Refineprojects() (results Results) {
+	start_url := "https://refine-projects-ag-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Adnymics() (results Results) {
+	start_url := "https://adnymics-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Igp() (results Results) {
+	start_url := "https://igpingenieurag-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Lumas() (results Results) {
+	start_url := "https://avenso-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Planetsports() (results Results) {
+	start_url := "https://planet-sports-gmbh-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Agrando() (results Results) {
+	start_url := "https://agrando-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Mid() (results Results) {
+	start_url := "https://mid-gmbh-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Adamos() (results Results) {
+	start_url := "https://adamos-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Westhousegroup() (results Results) {
+	start_url := "https://westhouse-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Printvision() (results Results) {
+	start_url := "https://printvision-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Pmone() (results Results) {
+	start_url := "https://pmone-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Pact() (results Results) {
+	start_url := "https://pact-holding-ag-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Konversionskraft() (results Results) {
+	start_url := "https://konversionskraft-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Visunext() (results Results) {
+	start_url := "https://visunext-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Atcp() (results Results) {
+	start_url := "https://atcp-management-gmbh-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Reisenthel() (results Results) {
+	start_url := "https://reisenthel-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Chargery() (results Results) {
+	start_url := "https://chargery-gmbh-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Elexial() (results Results) {
+	start_url := "https://elexial-germany-gmbh-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Cobrainer() (results Results) {
+	start_url := "https://cobrainer-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Nonplusultra() (results Results) {
+	start_url := "https://nonplusultra-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Gymondo() (results Results) {
+	start_url := "https://gymondo-gmbh-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Honestly() (results Results) {
+	start_url := "https://honestly-gmbh-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Epages() (results Results) {
+	start_url := "https://epages-gmbh-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Cipmarketing() (results Results) {
+	start_url := "https://cip-marketing-gmbh-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+ 
+func (runtime Runtime) Kartenmacherei() (results Results) {
+	start_url := "https://kartenmacherei-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Studysmarter() (results Results) {
+	start_url := "https://studysmarter-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Careship() (results Results) {
+	start_url := "https://careship-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Astyx() (results Results) {
+	start_url := "https://astyx-gmbhcruise-munich-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Arculus() (results Results) {
+	start_url := "https://arculus-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Everreal() (results Results) {
+	start_url := "https://everreal-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Workpath() (results Results) {
+	start_url := "https://workpath-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Mybacsvertrieb() (results Results) {
+	start_url := "https://mybacs-vertriebs-gmbh-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Undconsorten() (results Results) {
+	start_url := "https://undconsorten-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Tradedoubler() (results Results) {
+	start_url := "https://tradedoubler-en-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Nunatak() (results Results) {
+	start_url := "https://nunatak-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Presize() (results Results) {
+	start_url := "https://presize-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Helpling() (results Results) {
+	start_url := "https://helpling-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Internations() (results Results) {
+	start_url := "https://internations-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Orda() (results Results) {
+	start_url := "https://orda-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Treefin() (results Results) {
+	start_url := "https://treefin-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
@@ -770,9 +1040,92 @@ func (runtime Runtime) Gridx() (results Results) {
 	return
 }
 
+func (runtime Runtime) Eviom() (results Results) {
+	start_url := "https://eviom-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Veact() (results Results) {
+	start_url := "https://veact-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Kumovis() (results Results) {
+	start_url := "https://kumovis-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Allgeierengineering() (results Results) {
+	start_url := "https://aen-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Neubaukompass() (results Results) {
+	start_url := "https://neubau-kompass-ag-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Realeyes() (results Results) {
+	start_url := "https://realeyes-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Oberender() (results Results) {
+	start_url := "https://oberender-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Blickfeld() (results Results) {
+	start_url := "https://blickfeld-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Freachly() (results Results) {
+	start_url := "https://freachly-gmbh-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Syrocon() (results Results) {
+	start_url := "https://syrocon-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Zmi() (results Results) {
+	start_url := "https://zmi-gmbh-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Tattersalllorenz() (results Results) {
+	start_url := "https://tattersall-lorenz-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Soley() (results Results) {
+	start_url := "https://soley-gmbh-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Apworks() (results Results) {
+	start_url := "https://apworks-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
 
 func (runtime Runtime) Acatus() (results Results) {
-	start_url := "https://acatus-jobs.personio.de/?language=en#all"
+	start_url := "https://acatus-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
@@ -785,6 +1138,35 @@ func (runtime Runtime) Casavi() (results Results) {
 
 func (runtime Runtime) Emmy() (results Results) {
 	start_url := "https://emmysharing-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+func (runtime Runtime) Petsdeli() (results Results) {
+	start_url := "https://pets-deli-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Media4care() (results Results) {
+	start_url := "https://m4c-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Framos() (results Results) {
+	start_url := "https://framos-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Lavita() (results Results) {
+	start_url := "https://lavita-gmbh-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Benfleetservices() (results Results) {
+	start_url := "https://ben-fleet-services-gmbh-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
@@ -849,8 +1231,116 @@ func (runtime Runtime) Coachhub() (results Results) {
 	return
 }
 
+func (runtime Runtime) Blackroll() (results Results) {
+	start_url := "https://blackroll-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Nickis() (results Results) {
+	start_url := "https://nickis-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Ftapi() (results Results) {
+	start_url := "https://ftapi-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Thinxnet() (results Results) {
+	start_url := "https://thinxnet-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Sonomotors() (results Results) {
+	start_url := "https://sonomotors-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Troi() (results Results) {
 	start_url := "https://troi-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Nfon() (results Results) {
+	start_url := "https://nfon-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Eqsgroup() (results Results) {
+	start_url := "https://eqs-group-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Dataco() (results Results) {
+	start_url := "https://dataco-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Mycs() (results Results) {
+	start_url := "https://mycs-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Bloompartners() (results Results) {
+	start_url := "https://bloom-partners-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Preisenergie() (results Results) {
+	start_url := "https://preisenergie-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Jobambition() (results Results) {
+	start_url := "https://job-ambition-gmbh-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Maltego() (results Results) {
+	start_url := "https://maltego-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Iconmobile() (results Results) {
+	start_url := "https://iconmobile-gmbh-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Climedo() (results Results) {
+	start_url := "https://climedo-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Caresyntax() (results Results) {
+	start_url := "https://caresyntax-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Homefully() (results Results) {
+	start_url := "https://homefully-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Segmenta() (results Results) {
+	start_url := "https://segmenta-communications-gmbh-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
@@ -4930,41 +5420,6 @@ func (runtime Runtime) Limehome() (results Results) {
 				result_title,
 				result_location,
 				result_department,
-			},
-		)
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
-func (runtime Runtime) Sonomotors() (results Results) {
-	start_url := "https://sonomotors.com/de/career/"
-	base_job_url := "https://sonomotors.com%s"
-	type Job struct {
-		Url      string
-		Title    string
-		Location string
-	}
-	c := colly.NewCollector()
-	c.OnHTML(".job", func(e *colly.HTMLElement) {
-		result_url := fmt.Sprintf(base_job_url, e.Attr("href"))
-		result_title := e.ChildText("h3")
-		result_location := e.ChildText("p")
-		results.Add(
-			runtime.Name,
-			result_title,
-			result_url,
-			result_location,
-			Job{
-				result_url,
-				result_title,
-				result_location,
 			},
 		)
 	})
