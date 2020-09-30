@@ -3001,7 +3001,7 @@ func (runtime Runtime) Facileit() (results Results) {
 
 func (runtime Runtime) Vodafone() (results Results) {
 	start_url := "https://careers.vodafone.com/search/?startrow=%d"
-	base_job_url := "https://careers.vodafone.com"
+	base_job_url := "https://careers.vodafone.com%s"
 	number_results_per_page := 25
 	counter := 0
 	type Job struct {
@@ -5199,7 +5199,7 @@ func (runtime Runtime) Researchgate() (results Results) {
 	c.OnHTML("html", func(e *colly.HTMLElement) {
 		e.ForEach(".jobs-list-item-nova", func(_ int, el *colly.HTMLElement) {
 			result_title := el.ChildText(".nova-v-job-item__title")
-			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
+			result_url := strings.Split(fmt.Sprintf(base_job_url, el.ChildAttr("a", "href")), "?")[0]
 			result_infos := el.ChildTexts(".nova-v-job-item__info-section-list-item")
 			result_institute := result_infos[0]
 			result_location := result_infos[1]
