@@ -125,14 +125,80 @@ func (runtime Runtime) Greenhouse() (results Results) {
 	return
 }
 
+func (runtime Runtime) Autoscout24() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/autoscout24/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Apaleo() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/apaleo/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Bluebeam() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/bluebeam/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Xgeeks() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/xgeeks/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Quora() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/quora/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
 	return
 }
 
+func (runtime Runtime) Appdirect() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/appdirect/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Blacklane() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/blacklane/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Argumed() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/argumed2/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Snowflake() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/snowflakecomputing/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Recogni() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/recogni/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Pacificoenergypartners() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/pacificoenergypartners/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Take2games() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/taketwo/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Scout24() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/scout24/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
 	return
 }
@@ -281,8 +347,26 @@ func (runtime Runtime) Globalsavingsgroup() (results Results) {
 	return
 }
 
-func (runtime Runtime) Alyne() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/Alyne/jobs"
+func (runtime Runtime) Thoughtworks() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/thoughtworksreferral/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Projecta() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/projectaservicesgmbhcokg/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Kiperformance() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/kiperformance/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Schrodinger() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/schrdinger/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
 	return
 }
@@ -307,6 +391,42 @@ func (runtime Runtime) Urbansport() (results Results) {
 
 func (runtime Runtime) Soundcloud() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/soundcloud71/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Capco() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/capco/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Commercetools() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/commercetools/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Twilio() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/twilio/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Persado() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/persado/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Apexai() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/apexai/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Superunion() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/superunion/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
 	return
 }
@@ -6089,5 +6209,100 @@ func (runtime Runtime) Uniper() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Altair() (results Results) {
+	start_url := "https://chu.tbe.taleo.net/chu01/ats/careers/v2/jobSearch?act=redirectCwsV2&cws=39&org=ALTAENGI"
+	file_name := "altair.html"
+	new_page_url := "https://chu.tbe.taleo.net/chu01/ats/careers/v2/searchResults?next&rowFrom=%d"
+	// base_job_url := "https://jobs.uniper.energy"
+	number_results_per_page := 10
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+
+
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+	var initialResponse string
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(start_url),
+		chromedp.Sleep(SecondsSleep*time.Second),
+		chromedp.OuterHTML("html", &initialResponse),
+	); err != nil {
+		panic(err)
+	}
+	SaveResponseToFileWithFileName(initialResponse, file_name)
+	c := colly.NewCollector()
+	l := c.Clone()
+
+	c.OnHTML(".oracletaleocwsv2-panel-number", func(e *colly.HTMLElement) {
+		total_results, err := strconv.Atoi(e.Text)
+		if err != nil {
+			panic(err.Error())
+		}
+		total_pages := total_results / number_results_per_page
+		_ = total_pages
+
+		for i := 0; i <= 2; i++ {
+			time.Sleep(SecondsSleep * time.Second)
+			results_url := fmt.Sprintf(new_page_url, number_results_per_page*i)
+
+			fmt.Println(results_url)
+
+			var initialResponse string
+			if err := chromedp.Run(ctx,
+				chromedp.Navigate(results_url),
+				chromedp.Sleep(SecondsSleep*time.Second),
+				chromedp.OuterHTML("html", &initialResponse),
+			); err != nil {
+				panic(err)
+			}
+			SaveResponseToFileWithFileName(initialResponse, "CIAO.html")
+
+
+
+			// l.Visit(fmt.Sprintf(new_page_url, number_results_per_page*i))
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+
+	l.OnHTML("html", func(e *colly.HTMLElement) {
+		/**
+		e.ForEach(".sub-section", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText("a")
+			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
+			result_location := strings.TrimSpace(strings.ReplaceAll(el.ChildText(".location"), "Location", ""))
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		})
+		*/
+	})
+
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	c.WithTransport(t)
+	c.Visit("file:" + dir + "/" + file_name)
 	return
 }
