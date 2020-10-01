@@ -176,7 +176,6 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 		if err != nil {
 			panic(err.Error())
 		}
-		url_short := "https://jeifai.com/j/" + unique_url_id
 		str1 := "$" + strconv.Itoa(1+i*9) + ","
 		str2 := "$" + strconv.Itoa(2+i*9) + ","
 		str3 := "$" + strconv.Itoa(3+i*9) + ","
@@ -192,7 +191,7 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 		valueArgs = append(valueArgs, scraping.Id)
 		valueArgs = append(valueArgs, elem.Title)
 		valueArgs = append(valueArgs, elem.ResultUrl)
-		valueArgs = append(valueArgs, url_short)
+		valueArgs = append(valueArgs, unique_url_id)
 		valueArgs = append(valueArgs, elem.Location)
 		valueArgs = append(valueArgs, elem.Data)
 		valueArgs = append(valueArgs, timeNow)
