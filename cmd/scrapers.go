@@ -11,7 +11,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
-	"strconv"	
+	"strconv"
 	"strings"
 	"time"
 
@@ -81,12 +81,12 @@ func (results *Results) Add(
 func Greenhouse(start_url string, runtime_name string, results *Results) {
 	type JsonJobs struct {
 		Jobs []struct {
-			AbsoluteURL    string `json:"absolute_url"`
-			Location      struct {
+			AbsoluteURL string `json:"absolute_url"`
+			Location    struct {
 				Name string `json:"name"`
 			} `json:"location"`
-			Title         string        `json:"title"`
-			UpdatedAt     string        `json:"updated_at"`
+			Title     string `json:"title"`
+			UpdatedAt string `json:"updated_at"`
 		} `json:"jobs"`
 	}
 	c := colly.NewCollector()
@@ -978,7 +978,7 @@ func (runtime Runtime) Cipmarketing() (results Results) {
 	Personio1(start_url, runtime.Name, &results)
 	return
 }
- 
+
 func (runtime Runtime) Kartenmacherei() (results Results) {
 	start_url := "https://kartenmacherei-jobs.personio.de/"
 	Personio1(start_url, runtime.Name, &results)
@@ -1096,7 +1096,7 @@ func Personio2(start_url string, runtime_name string, results *Results) {
 			result_title := el.ChildText("a")
 			result_info := strings.Split(el.ChildText("p"), "·")
 			result_type := strings.Join(strings.Fields(strings.TrimSpace(result_info[0])), " ")
-			var result_location string 
+			var result_location string
 			if len(result_info) > 1 {
 				result_location = strings.Join(strings.Fields(strings.TrimSpace(result_info[1])), " ")
 			}
@@ -1261,6 +1261,7 @@ func (runtime Runtime) Emmy() (results Results) {
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
+
 func (runtime Runtime) Petsdeli() (results Results) {
 	start_url := "https://pets-deli-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
@@ -1738,7 +1739,7 @@ func Workable(start_url string, base_job_url string, runtime_name string, result
 
 func (runtime Runtime) Depositsolutions() (results Results) {
 	start_url := "https://careers-page.workable.com/api/v3/accounts/deposit-solutions/jobs"
-	base_job_url := "https://apply.workable.com/deposit-solutions/j/"
+	base_job_url := "https://apply.workable.com/deposit-solutions/j/%s"
 	Workable(start_url, base_job_url, runtime.Name, &results)
 	return
 }
@@ -6155,7 +6156,7 @@ func (runtime Runtime) Allianz() (results Results) {
 func (runtime Runtime) Uniper() (results Results) {
 	start_url := "https://jobs.uniper.energy/search"
 	new_page_url := "https://jobs.uniper.energy/tile-search-results/?startrow=%d"
-	base_job_url := "https://jobs.uniper.energy"
+	base_job_url := "https://jobs.uniper.energy%s"
 	number_results_per_page := 10
 	total_pages := 0
 	counter := 0
@@ -6213,89 +6214,58 @@ func (runtime Runtime) Uniper() (results Results) {
 }
 
 func (runtime Runtime) Altair() (results Results) {
-	start_url := "https://chu.tbe.taleo.net/chu01/ats/careers/v2/jobSearch?act=redirectCwsV2&cws=39&org=ALTAENGI"
+	start_url := "https://chu.tbe.taleo.net/chu01/ats/careers/v2/searchResults?org=ALTAENGI&cws=39"
 	file_name := "altair.html"
-	new_page_url := "https://chu.tbe.taleo.net/chu01/ats/careers/v2/searchResults?next&rowFrom=%d"
-	// base_job_url := "https://jobs.uniper.energy"
-	number_results_per_page := 10
 	type Job struct {
 		Title    string
 		Url      string
 		Location string
 	}
-
-
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
 	var initialResponse string
+	var res []byte
 	if err := chromedp.Run(ctx,
 		chromedp.Navigate(start_url),
 		chromedp.Sleep(SecondsSleep*time.Second),
+		chromedp.EvaluateAsDevTools(`
+			for (var i = 0; i < 20; i++) {
+				window.scrollBy(0, 500);
+				console.log(i)
+				setTimeout(function(){}, 2000);
+			}`, &res),
+		chromedp.Sleep(5*SecondsSleep*time.Second),
 		chromedp.OuterHTML("html", &initialResponse),
 	); err != nil {
 		panic(err)
 	}
 	SaveResponseToFileWithFileName(initialResponse, file_name)
 	c := colly.NewCollector()
-	l := c.Clone()
-
-	c.OnHTML(".oracletaleocwsv2-panel-number", func(e *colly.HTMLElement) {
-		total_results, err := strconv.Atoi(e.Text)
-		if err != nil {
-			panic(err.Error())
-		}
-		total_pages := total_results / number_results_per_page
-		_ = total_pages
-
-		for i := 0; i <= 2; i++ {
-			time.Sleep(SecondsSleep * time.Second)
-			results_url := fmt.Sprintf(new_page_url, number_results_per_page*i)
-
-			fmt.Println(results_url)
-
-			var initialResponse string
-			if err := chromedp.Run(ctx,
-				chromedp.Navigate(results_url),
-				chromedp.Sleep(SecondsSleep*time.Second),
-				chromedp.OuterHTML("html", &initialResponse),
-			); err != nil {
-				panic(err)
-			}
-			SaveResponseToFileWithFileName(initialResponse, "CIAO.html")
-
-
-
-			// l.Visit(fmt.Sprintf(new_page_url, number_results_per_page*i))
-		}
+	c.OnHTML(".oracletaleocwsv2-accordion-head-info", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".oracletaleocwsv2-head-title")
+		result_url := e.ChildAttr("a", "href")
+		result_location := e.ChildTexts("div")[0]
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 	})
+	c.OnScraped(func(r *colly.Response) {
+		RemoveFileWithFileName(file_name)
+	})
 	c.OnError(func(r *colly.Response, err error) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
-
-	l.OnHTML("html", func(e *colly.HTMLElement) {
-		/**
-		e.ForEach(".sub-section", func(_ int, el *colly.HTMLElement) {
-			result_title := el.ChildText("a")
-			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
-			result_location := strings.TrimSpace(strings.ReplaceAll(el.ChildText(".location"), "Location", ""))
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				Job{
-					result_title,
-					result_url,
-					result_location,
-				},
-			)
-		})
-		*/
-	})
-
 	t := &http.Transport{}
 	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
 	dir, err := os.Getwd()
@@ -6304,5 +6274,103 @@ func (runtime Runtime) Altair() (results Results) {
 	}
 	c.WithTransport(t)
 	c.Visit("file:" + dir + "/" + file_name)
+	return
+}
+
+func (runtime Runtime) Lieferando() (results Results) {
+	start_url := "https://careers.takeaway.com/global/en/search-results?s=1&from=%d"
+	base_job_url := "https://careers.takeaway.com/global/en/job/%s"
+	number_results_per_page := 50
+	counter := 0
+	type JsonJobs struct {
+		EagerLoadRefineSearch struct {
+			Status    int `json:"status"`
+			Hits      int `json:"hits"`
+			TotalHits int `json:"totalHits"`
+			Data      struct {
+				Jobs []struct {
+					Country            string   `json:"country"`
+					CityState          string   `json:"cityState"`
+					SubCategory        string   `json:"subCategory"`
+					City               string   `json:"city"`
+					MlSkills           []string `json:"ml_skills"`
+					PostalCode         string   `json:"postalCode"`
+					Industry           string   `json:"industry"`
+					Type               string   `json:"type"`
+					MultiLocation      []string `json:"multi_location"`
+					Locale             string   `json:"locale"`
+					Title              string   `json:"title"`
+					MultiLocationArray []struct {
+						Location string `json:"location"`
+					} `json:"multi_location_array"`
+					JobSeqNo           string    `json:"jobSeqNo"`
+					PostedDate         time.Time `json:"postedDate"`
+					DescriptionTeaser  string    `json:"descriptionTeaser"`
+					DateCreated        time.Time `json:"dateCreated"`
+					State              string    `json:"state"`
+					CityStateCountry   string    `json:"cityStateCountry"`
+					Brand              string    `json:"brand"`
+					VisibilityType     string    `json:"visibilityType"`
+					SiteType           string    `json:"siteType"`
+					Address            string    `json:"address"`
+					IsMultiCategory    bool      `json:"isMultiCategory"`
+					MultiCategory      []string  `json:"multi_category"`
+					ReqID              string    `json:"reqId"`
+					JobID              string    `json:"jobId"`
+					Badge              string    `json:"badge"`
+					JobVisibility      []string  `json:"jobVisibility"`
+					IsMultiLocation    bool      `json:"isMultiLocation"`
+					ApplyURL           string    `json:"applyUrl"`
+					MultiCategoryArray []struct {
+						Category string `json:"category"`
+					} `json:"multi_category_array"`
+					Location        string      `json:"location"`
+					Category        string      `json:"category"`
+					ExternalApply   bool        `json:"externalApply"`
+					LocationLatlong interface{} `json:"locationLatlong"`
+				} `json:"jobs"`
+			} `json:"data"`
+		} `json:"eagerLoadRefineSearch"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		response := Response{r.Body}
+		response_body := string(response.Html)
+		response_json := strings.Split(
+			strings.Split(
+				response_body, "phApp.ddo = ")[1], "; phApp.experimentData")[0]
+		var jsonJobs JsonJobs
+		err := json.Unmarshal([]byte(response_json), &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.EagerLoadRefineSearch.Data.Jobs {
+			result_title := elem.Title
+			result_url := fmt.Sprintf(base_job_url, elem.JobID)
+			result_location := elem.MultiLocationArray[0].Location
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+		total_pages := jsonJobs.EagerLoadRefineSearch.TotalHits / number_results_per_page
+		if counter > total_pages {
+			return
+		} else {
+			counter++
+			time.Sleep(SecondsSleep * time.Second)
+			c.Visit(fmt.Sprintf(start_url, counter*number_results_per_page))
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(fmt.Sprintf(start_url, 0))
 	return
 }
