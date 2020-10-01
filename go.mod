@@ -29,6 +29,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.4.0
+	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
 	golang.org/x/sys v0.0.0-20200810151505-1b9f1253b3ed // indirect
 	google.golang.org/api v0.28.0

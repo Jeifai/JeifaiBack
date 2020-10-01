@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-
 	_ "github.com/lib/pq"
 	. "github.com/logrusorgru/aurora"
+	"github.com/teris-io/shortid"
 )
 
 type Scraping struct {
@@ -169,29 +169,37 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
 	timeNow := time.Now() // updatedAt and createdAt will be identical
+	sid, err := shortid.New(1, shortid.DefaultABC, 2342)
 
 	for i, elem := range results {
-		str1 := "$" + strconv.Itoa(1+i*8) + ","
-		str2 := "$" + strconv.Itoa(2+i*8) + ","
-		str3 := "$" + strconv.Itoa(3+i*8) + ","
-		str4 := "$" + strconv.Itoa(4+i*8) + ","
-		str5 := "$" + strconv.Itoa(5+i*8) + ","
-		str6 := "$" + strconv.Itoa(6+i*8) + ","
-		str7 := "$" + strconv.Itoa(7+i*8) + ","
-		str8 := "$" + strconv.Itoa(8+i*8)
-		str_n := "(" + str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + ")"
+		unique_url_id, err := sid.Generate()
+		if err != nil {
+			panic(err.Error())
+		}
+		url_short := "https://jeifai.com/j/" + unique_url_id
+		str1 := "$" + strconv.Itoa(1+i*9) + ","
+		str2 := "$" + strconv.Itoa(2+i*9) + ","
+		str3 := "$" + strconv.Itoa(3+i*9) + ","
+		str4 := "$" + strconv.Itoa(4+i*9) + ","
+		str5 := "$" + strconv.Itoa(5+i*9) + ","
+		str6 := "$" + strconv.Itoa(6+i*9) + ","
+		str7 := "$" + strconv.Itoa(7+i*9) + ","
+		str8 := "$" + strconv.Itoa(8+i*9) + ","
+		str9 := "$" + strconv.Itoa(9+i*9)
+		str_n := "(" + str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + str9 + ")"
 		valueStrings = append(valueStrings, str_n)
 		valueArgs = append(valueArgs, scraper.Id)
 		valueArgs = append(valueArgs, scraping.Id)
 		valueArgs = append(valueArgs, elem.Title)
 		valueArgs = append(valueArgs, elem.ResultUrl)
+		valueArgs = append(valueArgs, url_short)
 		valueArgs = append(valueArgs, elem.Location)
 		valueArgs = append(valueArgs, elem.Data)
 		valueArgs = append(valueArgs, timeNow)
 		valueArgs = append(valueArgs, timeNow)
 	}
 	smt := `INSERT INTO results (
-                scraperid, scrapingid, title, url, location, data, createdat, updatedat)
+                scraperid, scrapingid, title, url, urlshort, location, data, createdat, updatedat)
             VALUES %s ON CONFLICT (url) DO UPDATE
             SET scrapingid = EXCLUDED.scrapingid,
                 title = EXCLUDED.title,
@@ -200,7 +208,7 @@ func SaveResults(scraper Scraper, scraping Scraping, results []Result) {
                 data = EXCLUDED.data`
 	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
 
-	_, err := Db.Exec(smt, valueArgs...)
+	_, err = Db.Exec(smt, valueArgs...)
 	if err != nil {
 		panic(err.Error())
 	}

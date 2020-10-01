@@ -125,6 +125,12 @@ func (runtime Runtime) Greenhouse() (results Results) {
 	return
 }
 
+func (runtime Runtime) Alyne() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/alyne/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Autoscout24() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/autoscout24/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
