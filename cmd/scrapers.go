@@ -2295,24 +2295,26 @@ func Softgarden(start_url string, base_job_url string, runtime_name string, resu
 	}
 	c := colly.NewCollector()
 	c.OnHTML(".matchElement", func(e *colly.HTMLElement) {
-		result_title := e.ChildText("a")
-		result_url := fmt.Sprintf(base_job_url, strings.ReplaceAll(e.ChildAttr("a", "href"), "../..", ""))
-		result_location := e.ChildText(".ProjectGeoLocationCity")
-		result_date := e.ChildText(".date")
-		result_category := e.ChildText(".jobcategory")
-		results.Add(
-			runtime_name,
-			result_title,
-			result_url,
-			result_location,
-			Job{
+		if strings.Contains(e.ChildAttr("a", "href"), "/job/") {
+			result_title := e.ChildText("a")
+			result_url := fmt.Sprintf(base_job_url, strings.Split(e.ChildAttr("a", "href") ,"/job/")[1])
+			result_location := e.ChildText(".ProjectGeoLocationCity")
+			result_date := e.ChildText(".date")
+			result_category := e.ChildText(".jobcategory")
+			results.Add(
+				runtime_name,
 				result_title,
 				result_url,
 				result_location,
-				result_date,
-				result_category,
-			},
-		)
+				Job{
+					result_title,
+					result_url,
+					result_location,
+					result_date,
+					result_category,
+				},
+			)
+		}
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
@@ -2324,9 +2326,79 @@ func Softgarden(start_url string, base_job_url string, runtime_name string, resu
 	return
 }
 
+func (runtime Runtime) Softgarden() (results Results) {
+	start_url := "https://softgarden.softgarden.io/de/widgets/jobs"
+	base_job_url := "https://softgarden.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Muehlbauer() (results Results) {
 	start_url := "https://muehlbauer.softgarden.io/de/widgets/jobs"
-	base_job_url := "https://muehlbauer.softgarden.io%s"
+	base_job_url := "https://muehlbauer.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Brainlab() (results Results) {
+	start_url := "https://brainlab.softgarden.io/en/vacancies"
+	base_job_url := "https://brainlab.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Munichelectrification() (results Results) {
+	start_url := "https://munichelectrification.softgarden.io/en/vacancies"
+	base_job_url := "https://munichelectrification.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Htmhelicopters() (results Results) {
+	start_url := "https://helitravel.softgarden.io/en/vacancies"
+	base_job_url := "https://helitravel.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Munichbusinessschool() (results Results) {
+	start_url := "https://munich-business-school.softgarden.io/en/vacancies"
+	base_job_url := "https://munich-business-school.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Europeanhrservices() (results Results) {
+	start_url := "https://european-hr-services.softgarden.io/en/vacancies"
+	base_job_url := "https://european-hr-services.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Fcbayern() (results Results) {
+	start_url := "https://fcbayern.softgarden.io/de/vacancies"
+	base_job_url := "https://fcbayern.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Esrlabs() (results Results) {
+	start_url := "https://esrlabs.softgarden.io/en/vacancies"
+	base_job_url := "https://esrlabs.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Serviceplan() (results Results) {
+	start_url := "https://serviceplan.softgarden.io/de/vacancies"
+	base_job_url := "https://serviceplan.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Fluid() (results Results) {
+	start_url := "https://fluid.softgarden.io/de/vacancies"
+	base_job_url := "https://serviceplan.softgarden.io/job/%s"
 	Softgarden(start_url, base_job_url, runtime.Name, &results)
 	return
 }
@@ -6569,6 +6641,184 @@ func (runtime Runtime) Reev() (results Results) {
 		)
 	})
 
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Crxmarkets() (results Results) {
+	start_url := "https://www.crxmarkets.com/crx/career"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("article", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".job-title")
+		result_url := e.Attr("data-url")
+		result_location := e.ChildText(".job-location")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Check24() (results Results) {
+	start_url := "https://jobs.check24.de/search"
+	base_job_url := "https://jobs.check24.de%s"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".box", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".vacancy--title")
+		result_url := fmt.Sprintf(base_job_url, e.Attr("href"))
+		result_location := e.ChildText(".vacancy--location")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Brunatametrona() (results Results) {
+	start_url := "https://www.brunata-metrona.de/unternehmen/karriere/stellenangebote.html"
+	base_job_url := "https://www.brunata-metrona.de/%s"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".stoggle", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("a")
+		if strings.Contains(strings.ReplaceAll(result_title, "(m/w/d)", ""), "(") {
+			result_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
+			result_location := strings.Split(
+				strings.Split(
+					strings.ReplaceAll(result_title, "(m/w/d)", ""), "(")[1], ")")[0]
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Microfuzzy() (results Results) {
+	start_url := "https://www.microfuzzy.com/en/vacancies"
+	base_job_url := "https://www.microfuzzy.com/%s"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".uk-article-title", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("a")
+		result_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
+		result_location := "Munich / Regensburg"
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Jember() (results Results) {
+	start_url := "https://www.jember.de/en/careers"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".type-job_listing", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("h3")
+		result_url := e.ChildAttr("a", "href")
+		result_location := strings.Split(result_title, "–")[1]
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 	})
