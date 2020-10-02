@@ -2297,7 +2297,7 @@ func Softgarden(start_url string, base_job_url string, runtime_name string, resu
 	c.OnHTML(".matchElement", func(e *colly.HTMLElement) {
 		if strings.Contains(e.ChildAttr("a", "href"), "/job/") {
 			result_title := e.ChildText("a")
-			result_url := fmt.Sprintf(base_job_url, strings.Split(e.ChildAttr("a", "href") ,"/job/")[1])
+			result_url := fmt.Sprintf(base_job_url, strings.Split(e.ChildAttr("a", "href"), "/job/")[1])
 			result_location := e.ChildText(".ProjectGeoLocationCity")
 			result_date := e.ChildText(".date")
 			result_category := e.ChildText(".jobcategory")
@@ -4116,15 +4116,13 @@ func (runtime Runtime) Facebook() (results Results) {
 }
 
 func (runtime Runtime) Nen() (results Results) {
-	/*
-		results = append(results, Result{
-			runtime.Name,
-			"Salesforce Lead",
-			"https://www.linkedin.com/jobs/view/1947567619",
-			"Milano",
-			[]byte("{}"),
-		})
-	*/
+	results = append(results, Result{
+		runtime.Name,
+		"AWS Lead",
+		"https://www.linkedin.com/jobs/view/2181653127",
+		"Milano",
+		[]byte("{}"),
+	})
 	return
 }
 
@@ -6826,5 +6824,86 @@ func (runtime Runtime) Jember() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Adobe() (results Results) {
+	start_url := "https://adobe.wd5.myworkdayjobs.com/external_experienced/10/searchPagination/318c8bb6f553100021d223d9780d30be/%d"
+	base_job_url := "https://adobe.wd5.myworkdayjobs.com%s"
+	number_results_per_page := 50
+	counter := 0
+	type JsonJobs struct {
+		Body struct {
+			Children []struct {
+				Children []struct {
+					ListItems []struct {
+						Title struct {
+							ID           string `json:"id"`
+							Widget       string `json:"widget"`
+							Ecid         string `json:"ecid"`
+							PropertyName string `json:"propertyName"`
+							Singular     bool   `json:"singular"`
+							Instances    []struct {
+								ID     string `json:"id"`
+								Widget string `json:"widget"`
+								Text   string `json:"text"`
+								Action string `json:"action"`
+								V      bool   `json:"v"`
+							} `json:"instances"`
+							CommandLink string `json:"commandLink"`
+						} `json:"title"`
+						Subtitles []struct {
+							Instances []struct {
+								ID     string `json:"id"`
+								Widget string `json:"widget"`
+								Text   string `json:"text"`
+							} `json:"instances"`
+						} `json:"subtitles"`
+					} `json:"listItems"`
+				} `json:"children,omitempty"`
+			} `json:"children"`
+			TabContent bool `json:"tabContent"`
+		} `json:"body"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		temp_counter := 0
+		for _, elem := range jsonJobs.Body.Children {
+			for _, elem_2 := range elem.Children {
+				for _, elem_3 := range elem_2.ListItems {
+					result_title := elem_3.Title.Instances[0].Text
+					result_url := fmt.Sprintf(base_job_url, elem_3.Title.CommandLink)
+					result_location := elem_3.Subtitles[1].Instances[0].Text
+					results.Add(
+						runtime.Name,
+						result_title,
+						result_url,
+						result_location,
+						elem_3,
+					)
+					temp_counter++
+				}
+			}
+		}
+		if temp_counter == 0 {
+			return
+		} else {
+			counter++
+			time.Sleep(SecondsSleep * time.Second)
+			c.Visit(fmt.Sprintf(start_url, number_results_per_page*counter))
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(fmt.Sprintf(start_url, 0))
 	return
 }
