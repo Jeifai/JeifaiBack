@@ -2279,6 +2279,59 @@ func (runtime Runtime) Hometogo() (results Results) {
 }
 
 /**
+███████  ██████  ███████ ████████  ██████   █████  ██████  ██████  ███████ ███    ██
+██      ██    ██ ██         ██    ██       ██   ██ ██   ██ ██   ██ ██      ████   ██
+███████ ██    ██ █████      ██    ██   ███ ███████ ██████  ██   ██ █████   ██ ██  ██
+     ██ ██    ██ ██         ██    ██    ██ ██   ██ ██   ██ ██   ██ ██      ██  ██ ██
+███████  ██████  ██         ██     ██████  ██   ██ ██   ██ ██████  ███████ ██   ████
+*/
+func Softgarden(start_url string, base_job_url string, runtime_name string, results *Results) {
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+		Date     string
+		Category string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".matchElement", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("a")
+		result_url := fmt.Sprintf(base_job_url, strings.ReplaceAll(e.ChildAttr("a", "href"), "../..", ""))
+		result_location := e.ChildText(".ProjectGeoLocationCity")
+		result_date := e.ChildText(".date")
+		result_category := e.ChildText(".jobcategory")
+		results.Add(
+			runtime_name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+				result_date,
+				result_category,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Muehlbauer() (results Results) {
+	start_url := "https://muehlbauer.softgarden.io/de/widgets/jobs"
+	base_job_url := "https://muehlbauer.softgarden.io%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+/**
 ███████ ████████  █████  ███    ██ ██████   █████  ██       ██████  ███    ██ ███████
 ██         ██    ██   ██ ████   ██ ██   ██ ██   ██ ██      ██    ██ ████   ██ ██
 ███████    ██    ███████ ██ ██  ██ ██   ██ ███████ ██      ██    ██ ██ ██  ██ █████
@@ -6384,5 +6437,144 @@ func (runtime Runtime) Lieferando() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(fmt.Sprintf(start_url, 0))
+	return
+}
+
+func (runtime Runtime) Jetbrains() (results Results) {
+	start_url := "https://www.jetbrains.com/careers/jobs"
+	base_result_url := "https://www.jetbrains.com/careers/jobs/%s"
+	type Jobs []struct {
+		ID           int      `json:"id"`
+		Title        string   `json:"title"`
+		Slug         string   `json:"slug"`
+		Description  string   `json:"description"`
+		Role         []string `json:"role"`
+		Technologies []string `json:"technologies,omitempty"`
+		Location     []string `json:"location"`
+		Team         []string `json:"team"`
+		Language     []string `json:"language"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		temp_resultsJson := strings.Split(string(r.Body), `var VACANCIES = `)[1]
+		s_resultsJson := strings.Split(temp_resultsJson, `</script>`)[0]
+		resultsJson := []byte(s_resultsJson)
+		var jobs Jobs
+		err := json.Unmarshal(resultsJson, &jobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jobs {
+			result_title := elem.Title
+			result_url := fmt.Sprintf(base_result_url, elem.Slug)
+			result_location := strings.Join(elem.Location, ",")
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Emocean() (results Results) {
+	start_url := "https://www.emocean.io/career"
+	file_name := "emocean.html"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+	var initialResponse string
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(start_url),
+		chromedp.Sleep(SecondsSleep*time.Second),
+		chromedp.WaitVisible(".job_listings"),
+		chromedp.OuterHTML("html", &initialResponse),
+	); err != nil {
+		panic(err)
+	}
+	SaveResponseToFileWithFileName(initialResponse, file_name)
+	c := colly.NewCollector()
+	c.OnHTML(".job_listing", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("h3")
+		result_url := e.ChildAttr("a", "href")
+		result_location := e.ChildText(".location")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnScraped(func(r *colly.Response) {
+		RemoveFileWithFileName(file_name)
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	c.WithTransport(t)
+	c.Visit("file:" + dir + "/" + file_name)
+	return
+}
+
+func (runtime Runtime) Reev() (results Results) {
+	start_url := "https://reev.com/jobs/"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".job-listing__job", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("a")
+		result_url := e.ChildAttr("a", "href")
+		result_location := "Munich"
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
 	return
 }

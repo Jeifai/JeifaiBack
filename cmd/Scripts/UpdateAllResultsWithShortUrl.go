@@ -4,19 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"strings"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
-	"github.com/teris-io/shortid"
 	_ "github.com/lib/pq"
+	"github.com/teris-io/shortid"
 )
 
 var Db *sql.DB
 
 func main() {
-
-
 	db := DbConnect()
 	defer db.Close()
 	Db = db
@@ -89,8 +87,6 @@ func UpdateShortUrl() {
 			FROM (VALUES %s ) AS c(id, urlshort) 
 			WHERE c.id = t.id;`
 
-
-
 	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
 
 	_, err = Db.Exec(smt)
@@ -99,7 +95,6 @@ func UpdateShortUrl() {
 	}
 
 	rows.Close()
-
 
 	return
 }
