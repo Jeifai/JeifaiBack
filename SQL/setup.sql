@@ -179,3 +179,9 @@ create table usersresultsvisits (
   resultid        integer references results(id),
   createdat       timestamp not null
 )
+
+create table subscribers (
+  id              serial primary key,
+  email           text not null unique,
+  createdat       timestamp not null
+)
