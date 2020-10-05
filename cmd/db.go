@@ -25,46 +25,6 @@ type Scraper struct {
 	Name string
 }
 
-type Matching struct {
-	Id        int
-	CreatedAt time.Time
-}
-
-type Match struct {
-	Id          int
-	JobTitle    string
-	JobUrl      string
-	KeywordText string
-	KeywordId   int
-	ResultId    int
-	CreatedAt   time.Time
-	MatchingId  int
-}
-
-type Notifier struct {
-	Id        int
-	UserId    int
-	CreatedAt time.Time
-}
-
-type Notification struct {
-	MatchId     int
-	UserId      int
-	UserName    string
-	UserEmail   string
-	CompanyName string
-	Title       string
-	Url         string
-}
-
-type Email struct {
-	MatchId   int
-	UserId    int
-	UserName  string
-	UserEmail string
-	Company   []Company
-}
-
 type Company struct {
 	Name string
 	Job  []Job
