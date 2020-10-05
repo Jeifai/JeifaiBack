@@ -18,8 +18,8 @@ type Invitation struct {
 
 func main() {
 	invitation := Invitation{
-		"devidfusco@gmail.com",
-		"c8f27e9b-2896-45e9-6fd4-9b839a6420d4",
+		"sadotix998@pickybuys.com",
+		"d82a41ce-f5c7-4d0e-6845-7c56ffda00ad",
 	}
 
 	invitation.SendInvitationCode()
