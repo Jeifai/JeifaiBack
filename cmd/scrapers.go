@@ -6907,3 +6907,37 @@ func (runtime Runtime) Adobe() (results Results) {
 	c.Visit(fmt.Sprintf(start_url, 0))
 	return
 }
+
+func (runtime Runtime) Wolt() (results Results) {
+	start_url := "https://wolt.com/en/jobs/search"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".JobItem__container___1bNgQ", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("h3")
+		result_url := e.ChildAttr("a", "href")
+		result_location := e.ChildText(".JobItem__location___VwcMB")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
