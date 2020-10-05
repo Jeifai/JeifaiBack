@@ -2,12 +2,9 @@
 
 Here everything happening behind the scenes of Jaifai.
 
-There are currently 4 programs available:
+There are currently 1 program available:
 
 * *scrape*: extract data from the web
-* *match*: create relations between job offers and keywords
-* *notify*: whenever a match happens, notify all the interested users 
-* *check*: identitfy whenever a scrape returns bad results
 
 ## Scrape
 
@@ -107,4 +104,3 @@ go build
 * Dependencies
 * Write architecture_decision_record
 * Describe Scripts folder
-* How to scrape LinkedIn 
