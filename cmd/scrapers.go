@@ -1988,6 +1988,13 @@ func (runtime Runtime) Volocopter() (results Results) {
 	return
 }
 
+func (runtime Runtime) Tricentis() (results Results) {
+	start_url := "https://api.smartrecruiters.com/v1/companies/tricentis/postings?offset=%d"
+	base_job_url := "https://www.smartrecruiters.com/tricentis/%s"
+	Smartrecruiters(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
 /**
 ████████ ███████  █████  ███    ███ ████████  █████  ██ ██       ██████  ██████
    ██    ██      ██   ██ ████  ████    ██    ██   ██ ██ ██      ██    ██ ██   ██
@@ -6939,5 +6946,51 @@ func (runtime Runtime) Wolt() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Ottobock() (results Results) {
+	start_url := "https://stellenangebote.ottobock.de/cgi-bin/appl/selfservice.pl?action=search;page=%d"
+	counter := 1
+	c := colly.NewCollector()
+	c.OnHTML("html", func(e *colly.HTMLElement) {
+		e.ForEach(".bordered_dashed", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText("a")
+			result_url := el.ChildAttr("a", "href")
+			result_location := el.ChildTexts("td")[1]
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		})
+		goqueryselect := e.DOM
+		pages := goqueryselect.Find("#search_breadcrumb_trail").Find("a").Nodes
+		s_last_page := strings.Split(pages[len(pages) - 1].Attr[0].Val, "page=")[1]
+		last_page, err := strconv.Atoi(s_last_page)
+		if err != nil {
+			panic(err.Error())
+		}
+		if counter > last_page {
+			return
+		} else {
+			counter++
+			time.Sleep(SecondsSleep * time.Second)
+			c.Visit(fmt.Sprintf(start_url, counter))
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(fmt.Sprintf(start_url, 1))
 	return
 }

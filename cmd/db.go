@@ -31,8 +31,9 @@ type Company struct {
 }
 
 type Job struct {
-	Title string
-	Url   string
+	Title 		string
+	Url   	 	string
+	Location 	string
 }
 
 var Db *sql.DB
