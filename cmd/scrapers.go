@@ -161,6 +161,12 @@ func (runtime Runtime) Xgeeks() (results Results) {
 	return
 }
 
+func (runtime Runtime) Smava() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/smavagmbh/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Quora() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/quora/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
@@ -443,6 +449,12 @@ func (runtime Runtime) Superunion() (results Results) {
 	return
 }
 
+func (runtime Runtime) Signavio() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/signavio/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██      ███████ ██    ██ ███████ ██████
 ██      ██      ██    ██ ██      ██   ██
@@ -574,6 +586,12 @@ func (runtime Runtime) Cargoone() (results Results) {
 	return
 }
 
+func (runtime Runtime) Figma() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/figma?mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Klarna() (results Results) {
 	start_url := "https://api.lever.co/v0/postings/klarna?mode=json"
 	Lever(start_url, runtime.Name, &results)
@@ -594,6 +612,12 @@ func (runtime Runtime) Improbable() (results Results) {
 
 func (runtime Runtime) Klarx() (results Results) {
 	start_url := "https://api.lever.co/v0/postings/klarx?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Mambu() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/mambu?&mode=json"
 	Lever(start_url, runtime.Name, &results)
 	return
 }
@@ -1081,9 +1105,15 @@ func (runtime Runtime) Orda() (results Results) {
 	return
 }
 
-func (runtime Runtime) Treefin() (results Results) {
-	start_url := "https://treefin-jobs.personio.de/"
-	Personio2(start_url, runtime.Name, &results)
+func (runtime Runtime) Flaconi() (results Results) {
+	start_url := "https://flaconi-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Amorelie() (results Results) {
+	start_url := "https://amorelie-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
 	return
 }
 
@@ -1234,6 +1264,12 @@ func (runtime Runtime) Syrocon() (results Results) {
 
 func (runtime Runtime) Zmi() (results Results) {
 	start_url := "https://zmi-gmbh-jobs.personio.de"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Treefin() (results Results) {
+	start_url := "https://treefin-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
@@ -1478,6 +1514,12 @@ func (runtime Runtime) Segmenta() (results Results) {
 	return
 }
 
+func (runtime Runtime) Nu3() (results Results) {
+	start_url := "https://nu3gmbh-jobs.personio.de/"
+	Personio2(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██████  ███████  ██████ ██████  ██    ██ ██ ████████ ███████ ███████
 ██   ██ ██      ██      ██   ██ ██    ██ ██    ██    ██      ██
@@ -1585,6 +1627,12 @@ func (runtime Runtime) Plantix() (results Results) {
 
 func (runtime Runtime) Candis() (results Results) {
 	start_url := "https://career.recruitee.com/api/c/50731/widget/?widget=true"
+	Recruitee(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Deepl() (results Results) {
+	start_url := "https://deepl.recruitee.com/api/offers"
 	Recruitee(start_url, runtime.Name, &results)
 	return
 }
@@ -2286,6 +2334,58 @@ func (runtime Runtime) Hometogo() (results Results) {
 }
 
 /**
+██████  ███████ ██   ██ ██   ██
+██   ██ ██       ██ ██   ██ ██
+██████  █████     ███     ███
+██   ██ ██       ██ ██   ██ ██
+██   ██ ███████ ██   ██ ██   ██
+*/
+func Rexx(start_url string, runtime_name string, results *Results) {
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".joboffer_container", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("a")
+		result_url := e.ChildAttr("a", "href")
+		result_location := e.ChildText(".joboffer_informations")
+		results.Add(
+			runtime_name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Curevac() (results Results) {
+	start_url := "https://career.curevac.com"
+	Rexx(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Kare() (results Results) {
+	start_url := "https://jobs.kare.de/job-offers.html"
+	Rexx(start_url, runtime.Name, &results)
+	return
+}
+
+/**
 ███████  ██████  ███████ ████████  ██████   █████  ██████  ██████  ███████ ███    ██
 ██      ██    ██ ██         ██    ██       ██   ██ ██   ██ ██   ██ ██      ████   ██
 ███████ ██    ██ █████      ██    ██   ███ ███████ ██████  ██   ██ █████   ██ ██  ██
@@ -2339,6 +2439,14 @@ func (runtime Runtime) Softgarden() (results Results) {
 	Softgarden(start_url, base_job_url, runtime.Name, &results)
 	return
 }
+
+func (runtime Runtime) Internetstores() (results Results) {
+	start_url := "https://internetstores.softgarden.io/de/widgets/jobs"
+	base_job_url := "https://internetstores.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
 
 func (runtime Runtime) Muehlbauer() (results Results) {
 	start_url := "https://muehlbauer.softgarden.io/de/widgets/jobs"
@@ -6952,6 +7060,11 @@ func (runtime Runtime) Wolt() (results Results) {
 func (runtime Runtime) Ottobock() (results Results) {
 	start_url := "https://stellenangebote.ottobock.de/cgi-bin/appl/selfservice.pl?action=search;page=%d"
 	counter := 1
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
 	c := colly.NewCollector()
 	c.OnHTML("html", func(e *colly.HTMLElement) {
 		e.ForEach(".bordered_dashed", func(_ int, el *colly.HTMLElement) {
@@ -6992,5 +7105,98 @@ func (runtime Runtime) Ottobock() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(fmt.Sprintf(start_url, 1))
+	return
+}
+
+func (runtime Runtime) Mydays() (results Results) {
+	start_url := "https://career.jsmd-group.com/jobs"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".plain", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("h6")
+		result_url := e.Attr("href")
+		result_location := "Munich"
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Amadeus() (results Results) {
+	start_url := "https://opportunities.jobs.amadeus.com/search/?startrow=%d"
+	base_job_url := "https://opportunities.jobs.amadeus.com%s"
+	number_results_per_page := 25
+	counter := 0
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+		Date 	 string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("html", func(e *colly.HTMLElement) {
+		e.ForEach(".data-row", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText("a")
+			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
+			result_location := el.ChildText(".jobLocation")
+			result_date := el.ChildText(".jobDate")
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+					result_date,
+				},
+			)
+		})
+		pages := e.ChildText(".srHelp")
+		a_last_page := strings.Split(pages, " of ")
+		s_last_page := a_last_page[len(a_last_page) - 1]
+		last_page, err := strconv.Atoi(s_last_page)
+		if err != nil {
+			return
+		}
+		if counter > last_page {
+			return
+		} else {
+			counter++
+			time.Sleep(SecondsSleep * time.Second)
+			c.Visit(fmt.Sprintf(start_url, counter*number_results_per_page))
+		}
+	})
+	c.OnResponse(func(r *colly.Response) {
+		SaveResponseToFileWithFileName(string(r.Body), "amadeus.html")
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(fmt.Sprintf(start_url, 0))
 	return
 }
