@@ -66,4 +66,3 @@ func RemoveFileWithFileName(filename string) {
 		panic(err.Error())
 	}
 }
-

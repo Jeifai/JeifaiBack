@@ -2447,7 +2447,6 @@ func (runtime Runtime) Internetstores() (results Results) {
 	return
 }
 
-
 func (runtime Runtime) Muehlbauer() (results Results) {
 	start_url := "https://muehlbauer.softgarden.io/de/widgets/jobs"
 	base_job_url := "https://muehlbauer.softgarden.io/job/%s"
@@ -7085,7 +7084,7 @@ func (runtime Runtime) Ottobock() (results Results) {
 		})
 		goqueryselect := e.DOM
 		pages := goqueryselect.Find("#search_breadcrumb_trail").Find("a").Nodes
-		s_last_page := strings.Split(pages[len(pages) - 1].Attr[0].Val, "page=")[1]
+		s_last_page := strings.Split(pages[len(pages)-1].Attr[0].Val, "page=")[1]
 		last_page, err := strconv.Atoi(s_last_page)
 		if err != nil {
 			panic(err.Error())
@@ -7151,7 +7150,7 @@ func (runtime Runtime) Amadeus() (results Results) {
 		Title    string
 		Url      string
 		Location string
-		Date 	 string
+		Date     string
 	}
 	c := colly.NewCollector()
 	c.OnHTML("html", func(e *colly.HTMLElement) {
@@ -7175,7 +7174,7 @@ func (runtime Runtime) Amadeus() (results Results) {
 		})
 		pages := e.ChildText(".srHelp")
 		a_last_page := strings.Split(pages, " of ")
-		s_last_page := a_last_page[len(a_last_page) - 1]
+		s_last_page := a_last_page[len(a_last_page)-1]
 		last_page, err := strconv.Atoi(s_last_page)
 		if err != nil {
 			return
@@ -7199,14 +7198,34 @@ func (runtime Runtime) Amadeus() (results Results) {
 }
 
 func (runtime Runtime) Cisco() (results Results) {
-	start_url := "https://jobs.cisco.com/jobs/SearchJobs/?projectOffset=%d"
+	start_url := "https://jobs.cisco.com/jobs/SearchJobs/?projectOffset=0"
+	file_name := "cisco_%d.html"
+	counter := 0
 	type Job struct {
-		Title    		string
-		Url      		string
-		Location 		string
-		Department    	string
+		Title      string
+		Url        string
+		Location   string
+		Department string
 	}
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+	var initialResponse string
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(start_url),
+		chromedp.Sleep(SecondsSleep*time.Second),
+		chromedp.OuterHTML("html", &initialResponse),
+	); err != nil {
+		panic(err)
+	}
+	SaveResponseToFileWithFileName(initialResponse, fmt.Sprintf(file_name, counter))
 	c := colly.NewCollector()
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	c.WithTransport(t)
 	c.OnHTML("html", func(e *colly.HTMLElement) {
 		e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
 			result_title := el.ChildText("a")
@@ -7231,8 +7250,21 @@ func (runtime Runtime) Cisco() (results Results) {
 			return
 		} else {
 			time.Sleep(SecondsSleep * time.Second)
-			c.Visit(next_page)
+			if err := chromedp.Run(ctx,
+				chromedp.Navigate(next_page),
+				chromedp.Sleep(SecondsSleep*time.Second),
+				chromedp.OuterHTML("html", &initialResponse),
+			); err != nil {
+				panic(err)
+			}
+			counter++
+			SaveResponseToFileWithFileName(initialResponse, fmt.Sprintf(file_name, counter))
+			c.Visit("file:" + dir + "/" + fmt.Sprintf(file_name, counter))
 		}
+	})
+	c.OnScraped(func(r *colly.Response) {
+		a_file_path := strings.Split(r.Request.URL.Path, "/")
+		RemoveFileWithFileName(a_file_path[len(a_file_path)-1])
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
@@ -7240,6 +7272,6 @@ func (runtime Runtime) Cisco() (results Results) {
 	c.OnError(func(r *colly.Response, err error) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
-	c.Visit(fmt.Sprintf(start_url, 0))
+	c.Visit("file:" + dir + "/" + fmt.Sprintf(file_name, counter))
 	return
 }
