@@ -7188,8 +7188,51 @@ func (runtime Runtime) Amadeus() (results Results) {
 			c.Visit(fmt.Sprintf(start_url, counter*number_results_per_page))
 		}
 	})
-	c.OnResponse(func(r *colly.Response) {
-		SaveResponseToFileWithFileName(string(r.Body), "amadeus.html")
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(fmt.Sprintf(start_url, 0))
+	return
+}
+
+func (runtime Runtime) Cisco() (results Results) {
+	start_url := "https://jobs.cisco.com/jobs/SearchJobs/?projectOffset=%d"
+	type Job struct {
+		Title    		string
+		Url      		string
+		Location 		string
+		Department    	string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("html", func(e *colly.HTMLElement) {
+		e.ForEach("tr", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText("a")
+			result_url := el.ChildAttr("a", "href")
+			result_location := el.ChildText("td[data-th=Location]")
+			result_department := el.ChildText("td[data-th=Actions]")
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+					result_department,
+				},
+			)
+		})
+		next_page := e.ChildAttr(".paginationNextLink", "href")
+		if next_page == "" {
+			return
+		} else {
+			time.Sleep(SecondsSleep * time.Second)
+			c.Visit(next_page)
+		}
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
