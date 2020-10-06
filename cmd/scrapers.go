@@ -455,6 +455,12 @@ func (runtime Runtime) Signavio() (results Results) {
 	return
 }
 
+func (runtime Runtime) Netlify() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/netlify/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██      ███████ ██    ██ ███████ ██████
 ██      ██      ██    ██ ██      ██   ██
