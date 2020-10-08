@@ -1123,6 +1123,18 @@ func (runtime Runtime) Amorelie() (results Results) {
 	return
 }
 
+func (runtime Runtime) Sevenmind() (results Results) {
+	start_url := "https://7mind-gmbh-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Gemueseackerdemie() (results Results) {
+	start_url := "https://ackerdemia-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██████  ███████ ██████  ███████  ██████  ███    ██ ██  ██████      ██████
 ██   ██ ██      ██   ██ ██      ██    ██ ████   ██ ██ ██    ██          ██
@@ -7279,5 +7291,78 @@ func (runtime Runtime) Cisco() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit("file:" + dir + "/" + fmt.Sprintf(file_name, counter))
+	return
+}
+
+func (runtime Runtime) Studio3t() (results Results) {
+	start_url := "https://studio3t.com/career"
+	base_job_url := "https://studio3t.com"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".kc-wrap-columns", func(e *colly.HTMLElement) {
+		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText("a")
+			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
+			result_location := "Berlin / Remote"
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		})
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Allex() (results Results) {
+	start_url := "https://allex.ai/en/careers/#open-positions"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".row.row-child", func(e *colly.HTMLElement) {
+		result_url := e.ChildAttr("a", "href")
+		if result_url != "" {
+			result_title := e.ChildText("h2")
+			result_location := e.ChildText(".wpb_wrapper")
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
 	return
 }
