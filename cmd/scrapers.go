@@ -1105,6 +1105,12 @@ func (runtime Runtime) Internations() (results Results) {
 	return
 }
 
+func (runtime Runtime) Ftapi() (results Results) {
+	start_url := "https://ftapi-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Orda() (results Results) {
 	start_url := "https://orda-jobs.personio.de/"
 	Personio1(start_url, runtime.Name, &results)
@@ -1426,12 +1432,6 @@ func (runtime Runtime) Blackroll() (results Results) {
 
 func (runtime Runtime) Nickis() (results Results) {
 	start_url := "https://nickis-jobs.personio.de/"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
-func (runtime Runtime) Ftapi() (results Results) {
-	start_url := "https://ftapi-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
