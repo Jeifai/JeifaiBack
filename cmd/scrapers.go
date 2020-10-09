@@ -2076,8 +2076,8 @@ func Teamtailor(start_url string, base_job_url string, runtime_name string, resu
 	}
 	c := colly.NewCollector()
 	c.OnHTML(".jobs", func(e *colly.HTMLElement) {
-		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-			result_url := fmt.Sprintf(base_job_url, el.ChildAttr("a", "href"))
+		e.ForEach("a", func(_ int, el *colly.HTMLElement) {
+			result_url := fmt.Sprintf(base_job_url, el.Attr("href"))
 			result_title := el.ChildText(".title")
 			result_location := el.ChildText(".meta")
 			results.Add(
@@ -2106,6 +2106,13 @@ func Teamtailor(start_url string, base_job_url string, runtime_name string, resu
 func (runtime Runtime) Zenjob() (results Results) {
 	start_url := "https://zenjob.teamtailor.com"
 	base_job_url := "https://zenjob.teamtailor.com%s"
+	Teamtailor(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Southpole() (results Results) {
+	start_url := "https://careers.southpole.com/jobs"
+	base_job_url := "https://southpole.teamtailor.com%s"
 	Teamtailor(start_url, base_job_url, runtime.Name, &results)
 	return
 }
