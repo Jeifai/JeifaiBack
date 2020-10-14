@@ -497,6 +497,36 @@ func (runtime Runtime) Newstore() (results Results) {
 	return
 }
 
+func (runtime Runtime) Audibene() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/audibenehearcom/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Friendsurance() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/friendsurance/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Scoutbee() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/scoutbee/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Vice() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/vice/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Thebeat() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/thebeat/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██      ███████ ██    ██ ███████ ██████
 ██      ██      ██    ██ ██      ██   ██
