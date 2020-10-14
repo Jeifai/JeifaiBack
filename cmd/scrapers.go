@@ -461,6 +461,42 @@ func (runtime Runtime) Netlify() (results Results) {
 	return
 }
 
+func (runtime Runtime) Solarisbank() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/solarisbank/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Wooga() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/wooga/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Planetlabs() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/planetlabs/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Prisma() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/prisma/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Foodspring() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/foodspring/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Newstore() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/newstore/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██      ███████ ██    ██ ███████ ██████
 ██      ██      ██    ██ ██      ██   ██
@@ -2536,8 +2572,15 @@ func (runtime Runtime) Serviceplan() (results Results) {
 }
 
 func (runtime Runtime) Fluid() (results Results) {
-	start_url := "https://fluid.softgarden.io/de/vacancies"
-	base_job_url := "https://serviceplan.softgarden.io/job/%s"
+	start_url := "https://fluid.softgarden.io/en/vacancies"
+	base_job_url := "https://fluid.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Advertima() (results Results) {
+	start_url := "https://advertima.softgarden.io/en/vacancies"
+	base_job_url := "https://advertima.softgarden.io/job/%s"
 	Softgarden(start_url, base_job_url, runtime.Name, &results)
 	return
 }
@@ -7363,6 +7406,79 @@ func (runtime Runtime) Allex() (results Results) {
 				},
 			)
 		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Orderbird() (results Results) {
+	start_url := "https://www.orderbird.com/de/karriere"
+	type Job struct {
+		Title    	string
+		Url      	string
+		Location 	string
+		Department 	string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".career-category", func(e *colly.HTMLElement) {
+		result_department := e.Attr("data-category")
+		e.ForEach(".job-posting", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText("h4")
+			result_url := el.ChildAttr("a", "href")
+			result_location := "Berlin"
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+					result_department,
+				},
+			)
+		})
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Salesup() (results Results) {
+	start_url := "https://sales-up.io/karriere"
+	type Job struct {
+		Title    	string
+		Url      	string
+		Location 	string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".elementor-toggle-item", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".elementor-toggle-title")
+		result_url := e.ChildAttr("p a", "href")
+		result_location := "Munich"
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
