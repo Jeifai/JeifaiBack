@@ -3369,52 +3369,6 @@ func (runtime Runtime) Zapier() (results Results) {
 	return
 }
 
-func (runtime Runtime) Aboutyou() (results Results) {
-	start_url := "https://corporate.aboutyou.de/app/api/openpositions.php?posts_per_page=500"
-	type JsonJobs struct {
-		Posts []struct {
-			ID         int    `json:"id"`
-			Title      string `json:"title"`
-			Department string `json:"department"`
-			Location   string `json:"location"`
-			URL        string `json:"url"`
-			Type       struct {
-				ID   int    `json:"id"`
-				Name string `json:"name"`
-			} `json:"type"`
-		} `json:"posts"`
-		TotalCount int `json:"totalCount"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Posts {
-			result_title := elem.Title
-			result_url := elem.URL
-			result_location := elem.Location
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
-	return
-}
-
 func (runtime Runtime) Facileit() (results Results) {
 	start_url := "https://inrecruiting.intervieweb.it/app.php?module=iframeAnnunci&k=1382636f10340a4ca6713ef6df70205a&LAC=Facileit&act1=23"
 	file_name := "facileit.html"
@@ -6539,7 +6493,6 @@ func (runtime Runtime) Uniper() (results Results) {
 
 		if counter == 0 {
 			temp_total_results := strings.Split(e.ChildText(".paginationLabel"), " ")
-			fmt.Println(temp_total_results)
 			string_total_results := temp_total_results[len(temp_total_results)-1]
 			total_results, err := strconv.Atoi(string_total_results)
 			if err != nil {
@@ -7457,10 +7410,10 @@ func (runtime Runtime) Allex() (results Results) {
 func (runtime Runtime) Orderbird() (results Results) {
 	start_url := "https://www.orderbird.com/de/karriere"
 	type Job struct {
-		Title    	string
-		Url      	string
-		Location 	string
-		Department 	string
+		Title      string
+		Url        string
+		Location   string
+		Department string
 	}
 	c := colly.NewCollector()
 	c.OnHTML(".career-category", func(e *colly.HTMLElement) {
@@ -7496,9 +7449,9 @@ func (runtime Runtime) Orderbird() (results Results) {
 func (runtime Runtime) Salesup() (results Results) {
 	start_url := "https://sales-up.io/karriere"
 	type Job struct {
-		Title    	string
-		Url      	string
-		Location 	string
+		Title    string
+		Url      string
+		Location string
 	}
 	c := colly.NewCollector()
 	c.OnHTML(".elementor-toggle-item", func(e *colly.HTMLElement) {
@@ -7524,5 +7477,60 @@ func (runtime Runtime) Salesup() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Aboutyou() (results Results) {
+	type Jobs struct {
+		Results []struct {
+			Hits []struct {
+				PostID       int    `json:"post_id"`
+				PostTitle    string `json:"post_title"`
+				PostDate     int    `json:"post_date"`
+				PostModified int    `json:"post_modified"`
+				Permalink    string `json:"permalink"`
+				Taxonomies   struct {
+					JobsCategories []string `json:"jobs-categories"`
+					Departments    []string `json:"departments"`
+					Location       []string `json:"location"`
+				} `json:"taxonomies,omitempty"`
+			} `json:"hits"`
+		} `json:"results"`
+	}
+	for i := 0; i < 20; i++ {
+		client := &http.Client{}
+		data := strings.NewReader(`{"requests":[{"indexName":"dev_production_posts_jobs","params":"query=&maxValuesPerFacet=10&highlightPreTag=__ais-highlight__&highlightPostTag=__%2Fais-highlight__&page=` + strconv.Itoa(i) + `&facets=%5B%22departments_level0_en%22%2C%22taxonomies_en.jobs-categories%22%2C%22taxonomies_en.location%22%5D&tagFilters="}]}`)
+		req, err := http.NewRequest("POST", "https://oi9vwiy1t8-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(4.5.1)%3B%20Browser%20(lite)%3B%20instantsearch.js%20(4.8.2)%3B%20Vue%20(2.6.12)%3B%20Vue%20InstantSearch%20(3.2.0)%3B%20JS%20Helper%20(3.2.2)&x-algolia-api-key=25c6c8b1c4226e4543a1d793096c6f1d&x-algolia-application-id=OI9VWIY1T8", data)
+		if err != nil {
+			panic(err.Error())
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err.Error())
+		}
+		bodyText, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err.Error())
+		}
+		var jsonJobs Jobs
+		err = json.Unmarshal(bodyText, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Results {
+			for _, elem_2 := range elem.Hits {
+				result_title := elem_2.PostTitle
+				result_url := elem_2.Permalink
+				result_location := elem_2.Taxonomies.Location[0]
+				results.Add(
+					runtime.Name,
+					result_title,
+					result_url,
+					result_location,
+					elem,
+				)
+			}
+		}
+	}
 	return
 }
