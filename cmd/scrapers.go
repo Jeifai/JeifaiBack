@@ -6731,29 +6731,16 @@ func (runtime Runtime) Jetbrains() (results Results) {
 
 func (runtime Runtime) Emocean() (results Results) {
 	start_url := "https://www.emocean.io/career"
-	file_name := "emocean.html"
 	type Job struct {
 		Title    string
 		Url      string
 		Location string
 	}
-	ctx, cancel := chromedp.NewContext(context.Background())
-	defer cancel()
-	var initialResponse string
-	if err := chromedp.Run(ctx,
-		chromedp.Navigate(start_url),
-		chromedp.Sleep(SecondsSleep*time.Second),
-		chromedp.WaitVisible(".job_listings"),
-		chromedp.OuterHTML("html", &initialResponse),
-	); err != nil {
-		panic(err)
-	}
-	SaveResponseToFileWithFileName(initialResponse, file_name)
 	c := colly.NewCollector()
-	c.OnHTML(".job_listing", func(e *colly.HTMLElement) {
-		result_title := e.ChildText("h3")
+	c.OnHTML(".job-content", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("h5")
 		result_url := e.ChildAttr("a", "href")
-		result_location := e.ChildText(".location")
+		result_location := "Munich"
 		results.Add(
 			runtime.Name,
 			result_title,
@@ -6769,22 +6756,13 @@ func (runtime Runtime) Emocean() (results Results) {
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
 	})
-	c.OnScraped(func(r *colly.Response) {
-		RemoveFileWithFileName(file_name)
-	})
 	c.OnError(func(r *colly.Response, err error) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
-	t := &http.Transport{}
-	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err.Error())
-	}
-	c.WithTransport(t)
-	c.Visit("file:" + dir + "/" + file_name)
+	c.Visit(start_url)
 	return
 }
+
 
 func (runtime Runtime) Reev() (results Results) {
 	start_url := "https://reev.com/jobs/"
