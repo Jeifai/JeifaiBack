@@ -522,6 +522,12 @@ func (runtime Runtime) Thebeat() (results Results) {
 	return
 }
 
+func (runtime Runtime) Konux() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/konux/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██      ███████ ██    ██ ███████ ██████
 ██      ██      ██    ██ ██      ██   ██
@@ -6766,7 +6772,6 @@ func (runtime Runtime) Emocean() (results Results) {
 	return
 }
 
-
 func (runtime Runtime) Reev() (results Results) {
 	start_url := "https://reev.com/jobs/"
 	type Job struct {
@@ -7513,5 +7518,110 @@ func (runtime Runtime) Aboutyou() (results Results) {
 			}
 		}
 	}
+	return
+}
+
+func (runtime Runtime) Finanzchef24() (results Results) {
+	start_url := "https://www.finanzchef24.de/ueber-uns/karriere"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("blockquote", func(e *colly.HTMLElement) {
+		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText("a")
+			result_url := el.ChildAttr("a", "href")
+			result_location := "Munich"
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		})
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Visa() (results Results) {
+	start_url := "https://usa.visa.com/careers.html"
+	base_job_url := "https://usa.visa.com%s"
+	file_name := "visa.html"
+	type Job struct {
+		Url      string
+		Title    string
+		Category string
+		Type     string
+		Location string
+		Date     string
+	}
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+	var initialResponse string
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(start_url),
+		chromedp.Sleep(SecondsSleep*time.Second),
+		chromedp.OuterHTML("html", &initialResponse),
+	); err != nil {
+		panic(err.Error())
+	}
+	SaveResponseToFileWithFileName(initialResponse, file_name)
+	c := colly.NewCollector()
+	c.OnHTML("tr", func(e *colly.HTMLElement) {
+		result_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
+		result_title := e.ChildText("a")
+		result_infos := e.ChildTexts("p")
+		if len(result_infos) > 0 {
+			result_category := result_infos[1]
+			result_type := result_infos[2]
+			result_location := result_infos[3]
+			result_date := result_infos[4]
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_category,
+					result_type,
+					result_location,
+					result_date,
+				},
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.OnScraped(func(r *colly.Response) {
+		RemoveFileWithFileName(file_name)
+	})
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	c.WithTransport(t)
+	c.Visit("file:" + dir + "/" + file_name)
 	return
 }
