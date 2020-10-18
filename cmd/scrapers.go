@@ -5837,7 +5837,10 @@ func (runtime Runtime) Limehome() (results Results) {
 		result_url := fmt.Sprintf(base_job_url, e.Attr("href"))
 		result_title := e.ChildText(".title")
 		result_location := e.ChildText(".location")
-		result_department := e.ChildTexts(".department")[0]
+		var result_department string
+		if len(e.ChildTexts(".department")) > 0 {
+			result_department = e.ChildTexts(".department")[0]
+		}
 		results.Add(
 			runtime.Name,
 			result_title,
