@@ -185,6 +185,7 @@ func (runtime Runtime) Blacklane() (results Results) {
 	return
 }
 
+// NOT WORKING STATUS: Not anymore on Greenhouse, waiting
 func (runtime Runtime) Argumed() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/argumed2/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
@@ -427,12 +428,6 @@ func (runtime Runtime) Commercetools() (results Results) {
 
 func (runtime Runtime) Twilio() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/twilio/jobs"
-	Greenhouse(start_url, runtime.Name, &results)
-	return
-}
-
-func (runtime Runtime) Persado() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/persado/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
 	return
 }
@@ -1165,6 +1160,7 @@ func (runtime Runtime) Helpling() (results Results) {
 	return
 }
 
+// NOT WORKING STATUS: No results
 func (runtime Runtime) Internations() (results Results) {
 	start_url := "https://internations-jobs.personio.de/"
 	Personio1(start_url, runtime.Name, &results)
@@ -1376,6 +1372,7 @@ func (runtime Runtime) Soley() (results Results) {
 	return
 }
 
+// NOT WORKING STATUS: no results
 func (runtime Runtime) Apworks() (results Results) {
 	start_url := "https://apworks-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
@@ -1586,6 +1583,7 @@ func (runtime Runtime) Caresyntax() (results Results) {
 	return
 }
 
+// NOT WORKING STATUS: No results
 func (runtime Runtime) Homefully() (results Results) {
 	start_url := "https://homefully-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
@@ -1727,6 +1725,7 @@ func (runtime Runtime) Fineway() (results Results) {
 	return
 }
 
+// NOT WORKING STATUS: No results
 func (runtime Runtime) Combyne() (results Results) {
 	start_url := "https://combyne.recruitee.com/api/offers"
 	Recruitee(start_url, runtime.Name, &results)
@@ -1884,6 +1883,13 @@ func Workable(start_url string, base_job_url string, runtime_name string, result
 func (runtime Runtime) Depositsolutions() (results Results) {
 	start_url := "https://careers-page.workable.com/api/v3/accounts/deposit-solutions/jobs"
 	base_job_url := "https://apply.workable.com/deposit-solutions/j/%s"
+	Workable(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Persado() (results Results) {
+	start_url := "https://careers-page.workable.com/api/v3/accounts/persado/jobs"
+	base_job_url := "https://apply.workable.com/persado/j/%s"
 	Workable(start_url, base_job_url, runtime.Name, &results)
 	return
 }
@@ -6532,8 +6538,9 @@ func (runtime Runtime) Uniper() (results Results) {
 		})
 
 		if counter == 0 {
-			temp_total_results := strings.Split(e.ChildText("#tile-search-results-label"), " ")
-			string_total_results := temp_total_results[len(temp_total_results)-2]
+			temp_total_results := strings.Split(e.ChildText(".paginationLabel"), " ")
+			fmt.Println(temp_total_results)
+			string_total_results := temp_total_results[len(temp_total_results)-1]
 			total_results, err := strconv.Atoi(string_total_results)
 			if err != nil {
 				panic(err.Error())
