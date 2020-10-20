@@ -5635,8 +5635,14 @@ func (runtime Runtime) Researchgate() (results Results) {
 			result_title := el.ChildText(".nova-v-job-item__title")
 			result_url := strings.Split(fmt.Sprintf(base_job_url, el.ChildAttr("a", "href")), "?")[0]
 			result_infos := el.ChildTexts(".nova-v-job-item__info-section-list-item")
-			result_institute := result_infos[0]
-			result_location := result_infos[1]
+			var result_institute string
+			if len(result_infos) > 0 {
+				result_institute = result_infos[0]
+			}
+			var result_location string
+			if len(result_infos) > 1 {
+				result_location = result_infos[1]
+			}
 			results.Add(
 				runtime.Name,
 				result_title,
