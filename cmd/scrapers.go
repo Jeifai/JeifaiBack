@@ -7625,3 +7625,54 @@ func (runtime Runtime) Visa() (results Results) {
 	c.Visit("file:" + dir + "/" + file_name)
 	return
 }
+
+func (runtime Runtime) Olx() (results Results) {
+	start_url := "https://www.olxgroup.com/api/search"
+	base_job_url := "https://www.olxgroup.com%s"
+	type JsonJobs struct {
+		Results []struct {
+			ID       int    `json:"id"`
+			Slug     string `json:"slug"`
+			Role     string `json:"role"`
+			Category string `json:"category"`
+			Location string `json:"location"`
+			Brand    string `json:"brand"`
+		} `json:"results"`
+		QueryAmount int `json:"queryAmount"`
+		Amount      int `json:"amount"`
+	}
+	c := colly.NewCollector()
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Results {
+			result_title := elem.Role
+			result_url := fmt.Sprintf(base_job_url, elem.Slug)
+			result_location := elem.Location
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Request(
+		"POST",
+		start_url,
+		strings.NewReader(""),
+		nil,
+		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
+	)
+	return
+}
