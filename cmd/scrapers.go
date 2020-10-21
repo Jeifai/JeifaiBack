@@ -7682,3 +7682,42 @@ func (runtime Runtime) Olx() (results Results) {
 	)
 	return
 }
+
+func (runtime Runtime) Everstox() (results Results) {
+	start_url := "https://everstox.com/career/"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".vc_tta-panel", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".vc_tta-title-text")
+		if result_title != "" {
+			result_url := e.ChildAttr(".gem-button-container a", "href")
+			if !strings.Contains(result_url, "everstox.com") {
+				result_url = " https://everstox.com" + result_url
+			}
+			result_location := e.ChildTexts(".gem-icon-with-text p")[0]
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
