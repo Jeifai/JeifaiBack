@@ -1209,6 +1209,12 @@ func (runtime Runtime) Gemueseackerdemie() (results Results) {
 	return
 }
 
+func (runtime Runtime) Unzer() (results Results) {
+	start_url := "https://unzer-group-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██████  ███████ ██████  ███████  ██████  ███    ██ ██  ██████      ██████
 ██   ██ ██      ██   ██ ██      ██    ██ ████   ██ ██ ██    ██          ██
@@ -7711,6 +7717,41 @@ func (runtime Runtime) Everstox() (results Results) {
 				},
 			)
 		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Grover() (results Results) {
+	start_url := "https://jobs.grover.com/"
+	base_job_url := "https://jobs.grover.com%s"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".col-md-6", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".title")
+		result_url := fmt.Sprintf(base_job_url, e.Attr("href"))
+		result_location := e.ChildText(".location")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
