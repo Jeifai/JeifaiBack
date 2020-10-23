@@ -6675,7 +6675,10 @@ func (runtime Runtime) Lieferando() (results Results) {
 		for _, elem := range jsonJobs.EagerLoadRefineSearch.Data.Jobs {
 			result_title := elem.Title
 			result_url := fmt.Sprintf(base_job_url, elem.JobID)
-			result_location := elem.MultiLocationArray[0].Location
+			var result_location string
+			if len(elem.MultiLocationArray) > 0 {
+				result_location = elem.MultiLocationArray[0].Location
+			}
 			results.Add(
 				runtime.Name,
 				result_title,
@@ -7873,9 +7876,9 @@ func (runtime Runtime) Avenga() (results Results) {
 }
 
 func (runtime Runtime) Softserveinc() (results Results) {
-	start_url := "https://career.softserveinc.com/en-us/vacancy/search?page=1"
-	file_name := "softserveinc.html"
-	// counter := 1
+	start_url := "https://career.softserveinc.com/en-us/vacancy/search?page=%d"
+	file_name := "softserveinc_%d.html"
+	counter := 1
 	type JsonJobs struct {
 		Data []struct {
 			ID        int    `json:"id"`
@@ -7903,14 +7906,21 @@ func (runtime Runtime) Softserveinc() (results Results) {
 	defer cancel()
 	var initialResponse string
 	if err := chromedp.Run(ctx,
-		chromedp.Navigate(start_url),
+		chromedp.Navigate(fmt.Sprintf(start_url, counter)),
 		chromedp.Sleep(SecondsSleep*time.Second),
 		chromedp.OuterHTML("html", &initialResponse),
 	); err != nil {
+		panic(err)
+	}
+	SaveResponseToFileWithFileName(initialResponse, fmt.Sprintf(file_name, counter))
+	c := colly.NewCollector()
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	dir, err := os.Getwd()
+	if err != nil {
 		panic(err.Error())
 	}
-	SaveResponseToFileWithFileName(initialResponse, file_name)
-	c := colly.NewCollector()
+	c.WithTransport(t)
 	c.OnHTML("body", func(e *colly.HTMLElement) {
 		var jsonJobs JsonJobs
 		err := json.Unmarshal([]byte(e.ChildText("pre")), &jsonJobs)
@@ -7932,10 +7942,24 @@ func (runtime Runtime) Softserveinc() (results Results) {
 				elem,
 			)
 		}
+		counter++
+		next_page := fmt.Sprintf(start_url, counter)
 		if jsonJobs.Meta.CurrentPage <= jsonJobs.Meta.LastPage {
-			counter++
-			c.Visit(fmt.Sprintf(start_url, counter))
+			time.Sleep(SecondsSleep * time.Second)
+			if err := chromedp.Run(ctx,
+				chromedp.Navigate(next_page),
+				chromedp.Sleep(SecondsSleep*time.Second),
+				chromedp.OuterHTML("html", &initialResponse),
+			); err != nil {
+				panic(err)
+			}
+			SaveResponseToFileWithFileName(initialResponse, fmt.Sprintf(file_name, counter))
+			c.Visit("file:" + dir + "/" + fmt.Sprintf(file_name, counter))
 		}
+	})
+	c.OnScraped(func(r *colly.Response) {
+		a_file_path := strings.Split(r.Request.URL.Path, "/")
+		RemoveFileWithFileName(a_file_path[len(a_file_path)-1])
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
@@ -7943,13 +7967,6 @@ func (runtime Runtime) Softserveinc() (results Results) {
 	c.OnError(func(r *colly.Response, err error) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
-	t := &http.Transport{}
-	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err.Error())
-	}
-	c.WithTransport(t)
-	c.Visit("file:" + dir + "/" + file_name)
+	c.Visit("file:" + dir + "/" + fmt.Sprintf(file_name, counter))
 	return
 }
