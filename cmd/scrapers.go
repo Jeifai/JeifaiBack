@@ -7762,3 +7762,112 @@ func (runtime Runtime) Grover() (results Results) {
 	c.Visit(start_url)
 	return
 }
+
+func (runtime Runtime) Fyber() (results Results) {
+	start_url := "https://www.fyber.com/careers"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".accordion-item", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".title")
+		result_url := e.ChildAttr(".button__green", "href")
+		result_location := e.ChildText(".location")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Interact() (results Results) {
+	start_url := "https://www.interact.io/careers"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML("html", func(e *colly.HTMLElement) {
+		e.ForEach("span", func(_ int, el *colly.HTMLElement) {
+			result_title := el.ChildText("a")
+			result_url := el.ChildAttr("a", "href")
+			result_location := "Berlin"
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		})
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Avenga() (results Results) {
+	start_urls := []string{
+		"https://www.avenga.com/career/germany/job-offers", 
+		"https://www.avenga.com/career/poland/all-openings", 
+		"https://www.avenga.com/career/ukraine/all-openings"}
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	for _, start_url := range start_urls {
+		c := colly.NewCollector()
+		c.OnHTML(".joboffer-item.pfs4", func(e *colly.HTMLElement) {
+			result_title := e.ChildText(".joboffer-item__title")
+			result_url := e.Attr("href")
+			result_location := e.ChildText(".joboffer-item__location")
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				Job{
+					result_title,
+					result_url,
+					result_location,
+				},
+			)
+		})
+		c.OnRequest(func(r *colly.Request) {
+			fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+		})
+		c.OnError(func(r *colly.Response, err error) {
+			fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+		})
+		c.Visit(start_url)
+	}
+	return
+}
