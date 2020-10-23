@@ -1215,6 +1215,12 @@ func (runtime Runtime) Unzer() (results Results) {
 	return
 }
 
+func (runtime Runtime) Dance() (results Results) {
+	start_url := "https://dance-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██████  ███████ ██████  ███████  ██████  ███    ██ ██  ██████      ██████
 ██   ██ ██      ██   ██ ██      ██    ██ ████   ██ ██ ██    ██          ██
