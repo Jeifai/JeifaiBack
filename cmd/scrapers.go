@@ -7871,3 +7871,85 @@ func (runtime Runtime) Avenga() (results Results) {
 	}
 	return
 }
+
+func (runtime Runtime) Softserveinc() (results Results) {
+	start_url := "https://career.softserveinc.com/en-us/vacancy/search?page=1"
+	file_name := "softserveinc.html"
+	// counter := 1
+	type JsonJobs struct {
+		Data []struct {
+			ID        int    `json:"id"`
+			URL       string `json:"url"`
+			Name      string `json:"name"`
+			Country   string `json:"country"`
+			City      string `json:"city"`
+			Direction string `json:"direction"`
+			Hot       int    `json:"hot"`
+			Onsite    int    `json:"onsite"`
+			Remote    int    `json:"remote"`
+			Highlight string `json:"highlight"`
+		} `json:"data"`
+		Meta struct {
+			CurrentPage int    `json:"current_page"`
+			From        int    `json:"from"`
+			LastPage    int    `json:"last_page"`
+			Path        string `json:"path"`
+			PerPage     int    `json:"per_page"`
+			To          int    `json:"to"`
+			Total       int    `json:"total"`
+		} `json:"meta"`
+	}
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+	var initialResponse string
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(start_url),
+		chromedp.Sleep(SecondsSleep*time.Second),
+		chromedp.OuterHTML("html", &initialResponse),
+	); err != nil {
+		panic(err.Error())
+	}
+	SaveResponseToFileWithFileName(initialResponse, file_name)
+	c := colly.NewCollector()
+	c.OnHTML("body", func(e *colly.HTMLElement) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal([]byte(e.ChildText("pre")), &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Data {
+			result_title := elem.Name
+			result_url := elem.URL
+			result_location := elem.Country + "," + elem.City
+			if elem.Remote > 0 {
+				result_location = result_location + "," + "Remote"
+			}
+			results.Add(
+				runtime.Name,
+				result_title,
+				result_url,
+				result_location,
+				elem,
+			)
+		}
+		if jsonJobs.Meta.CurrentPage <= jsonJobs.Meta.LastPage {
+			counter++
+			c.Visit(fmt.Sprintf(start_url, counter))
+		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	c.WithTransport(t)
+	c.Visit("file:" + dir + "/" + file_name)
+	return
+}
