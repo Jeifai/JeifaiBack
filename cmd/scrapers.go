@@ -7057,7 +7057,12 @@ func (runtime Runtime) Adobe() (results Results) {
 				for _, elem_3 := range elem_2.ListItems {
 					result_title := elem_3.Title.Instances[0].Text
 					result_url := fmt.Sprintf(base_job_url, elem_3.Title.CommandLink)
-					result_location := elem_3.Subtitles[1].Instances[0].Text
+					var result_location string
+					if len(elem_3.Subtitles) > 1 {
+						if len(elem_3.Subtitles[1].Instances) > 0 {
+							result_location = elem_3.Subtitles[1].Instances[0].Text
+						}
+					}
 					results.Add(
 						runtime.Name,
 						result_title,
