@@ -540,6 +540,12 @@ func (runtime Runtime) Reddit() (results Results) {
 	return
 }
 
+func (runtime Runtime) Crunchyroll() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/crunchyroll/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██      ███████ ██    ██ ███████ ██████
 ██      ██      ██    ██ ██      ██   ██
