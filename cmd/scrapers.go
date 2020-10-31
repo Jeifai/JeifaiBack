@@ -528,6 +528,18 @@ func (runtime Runtime) Konux() (results Results) {
 	return
 }
 
+func (runtime Runtime) Similarweb() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/similarweb/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Reddit() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/reddit/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██      ███████ ██    ██ ███████ ██████
 ██      ██      ██    ██ ██      ██   ██
@@ -691,6 +703,18 @@ func (runtime Runtime) Klarx() (results Results) {
 
 func (runtime Runtime) Mambu() (results Results) {
 	start_url := "https://api.lever.co/v0/postings/mambu?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Outrider() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/outrider?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Ordermark() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/getordermark?&mode=json"
 	Lever(start_url, runtime.Name, &results)
 	return
 }
@@ -7979,5 +8003,40 @@ func (runtime Runtime) Softserveinc() (results Results) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
 	c.Visit("file:" + dir + "/" + fmt.Sprintf(file_name, counter))
+	return
+}
+
+func (runtime Runtime) Salto() (results Results) {
+	start_url := "https://www.salto.io/careers"
+	base_job_url := "https://www.salto.io%s"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".career", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".career-name")
+		result_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
+		result_location := e.ChildText(".career-location")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
 	return
 }
