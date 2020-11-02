@@ -185,9 +185,8 @@ func (runtime Runtime) Blacklane() (results Results) {
 	return
 }
 
-// NOT WORKING STATUS: Not anymore on Greenhouse, waiting
 func (runtime Runtime) Argumed() (results Results) {
-	start_url := "https://api.greenhouse.io/v1/boards/argumed2/jobs"
+	start_url := "https://api.greenhouse.io/v1/boards/dialogueargumed/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
 	return
 }
@@ -836,6 +835,7 @@ func (runtime Runtime) Personio() (results Results) {
 	return
 }
 
+// No Jobs
 func (runtime Runtime) Egym() (results Results) {
 	start_url := "https://egym-jobs.personio.de/"
 	Personio1(start_url, runtime.Name, &results)
@@ -1100,6 +1100,7 @@ func (runtime Runtime) Gymondo() (results Results) {
 	return
 }
 
+// No jobs
 func (runtime Runtime) Honestly() (results Results) {
 	start_url := "https://honestly-gmbh-jobs.personio.de/"
 	Personio1(start_url, runtime.Name, &results)
@@ -1247,6 +1248,12 @@ func (runtime Runtime) Unzer() (results Results) {
 
 func (runtime Runtime) Dance() (results Results) {
 	start_url := "https://dance-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Emmy() (results Results) {
+	start_url := "https://emmysharing-jobs.personio.de/"
 	Personio1(start_url, runtime.Name, &results)
 	return
 }
@@ -1439,12 +1446,6 @@ func (runtime Runtime) Casavi() (results Results) {
 	return
 }
 
-func (runtime Runtime) Emmy() (results Results) {
-	start_url := "https://emmysharing-jobs.personio.de/"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
 func (runtime Runtime) Petsdeli() (results Results) {
 	start_url := "https://pets-deli-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
@@ -1487,6 +1488,7 @@ func (runtime Runtime) Juniqe() (results Results) {
 	return
 }
 
+// No Jobs
 func (runtime Runtime) Skoove() (results Results) {
 	start_url := "https://skoove-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
@@ -7130,10 +7132,10 @@ func (runtime Runtime) Wolt() (results Results) {
 		Location string
 	}
 	c := colly.NewCollector()
-	c.OnHTML(".JobItem__container___1bNgQ", func(e *colly.HTMLElement) {
+	c.OnHTML(".JobItem__container___1bAoS", func(e *colly.HTMLElement) {
 		result_title := e.ChildText("h3")
 		result_url := e.ChildAttr("a", "href")
-		result_location := e.ChildText(".JobItem__location___VwcMB")
+		result_location := e.ChildText(".JobItem__location___rc9tq")
 		results.Add(
 			runtime.Name,
 			result_title,
@@ -7962,9 +7964,10 @@ func (runtime Runtime) Softserveinc() (results Results) {
 		panic(err.Error())
 	}
 	c.WithTransport(t)
-	c.OnHTML("body", func(e *colly.HTMLElement) {
+	// c.OnHTML("body", func(e *colly.HTMLElement) {
+	c.OnResponse(func(r *colly.Response) {
 		var jsonJobs JsonJobs
-		err := json.Unmarshal([]byte(e.ChildText("pre")), &jsonJobs)
+		err := json.Unmarshal(r.Body, &jsonJobs)
 		if err != nil {
 			panic(err.Error())
 		}
