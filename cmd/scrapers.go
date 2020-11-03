@@ -724,6 +724,12 @@ func (runtime Runtime) Ordermark() (results Results) {
 	return
 }
 
+func (runtime Runtime) Daedalean() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/daedalean?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██████  ███████ ██████  ███████  ██████  ███    ██ ██  ██████       ██
 ██   ██ ██      ██   ██ ██      ██    ██ ████   ██ ██ ██    ██     ███
@@ -2037,6 +2043,12 @@ func (runtime Runtime) Talentgarden() (results Results) {
 	return
 }
 
+func (runtime Runtime) Kandou() (results Results) {
+	start_url := "https://kandou.bamboohr.com/jobs/embed2.php?departmentId=0"
+	Bamboohr(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ███████ ███    ███  █████  ██████  ████████ ██████  ███████  ██████ ██████  ██    ██ ██ ████████ ███████ ██████  ███████
 ██      ████  ████ ██   ██ ██   ██    ██    ██   ██ ██      ██      ██   ██ ██    ██ ██    ██    ██      ██   ██ ██
@@ -2179,6 +2191,13 @@ func (runtime Runtime) Volocopter() (results Results) {
 func (runtime Runtime) Tricentis() (results Results) {
 	start_url := "https://api.smartrecruiters.com/v1/companies/tricentis/postings?offset=%d"
 	base_job_url := "https://www.smartrecruiters.com/tricentis/%s"
+	Smartrecruiters(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Nexthink() (results Results) {
+	start_url := "https://api.smartrecruiters.com/v1/companies/nexthink/postings?offset=%d"
+	base_job_url := "https://www.smartrecruiters.com/nexthink/%s"
 	Smartrecruiters(start_url, base_job_url, runtime.Name, &results)
 	return
 }
@@ -7881,9 +7900,10 @@ func (runtime Runtime) Interact() (results Results) {
 
 func (runtime Runtime) Avenga() (results Results) {
 	start_urls := []string{
-		"https://www.avenga.com/career/germany/job-offers", 
-		"https://www.avenga.com/career/poland/all-openings", 
-		"https://www.avenga.com/career/ukraine/all-openings"}
+		"https://www.avenga.com/career/germany/job-offers",
+		"https://www.avenga.com/career/poland/all-openings",
+		"https://www.avenga.com/career/ukraine/all-openings",
+	}
 	type Job struct {
 		Title    string
 		Url      string
@@ -7964,10 +7984,9 @@ func (runtime Runtime) Softserveinc() (results Results) {
 		panic(err.Error())
 	}
 	c.WithTransport(t)
-	// c.OnHTML("body", func(e *colly.HTMLElement) {
-	c.OnResponse(func(r *colly.Response) {
+	c.OnHTML("body", func(e *colly.HTMLElement) {
 		var jsonJobs JsonJobs
-		err := json.Unmarshal(r.Body, &jsonJobs)
+		err := json.Unmarshal([]byte(e.ChildText("pre")), &jsonJobs)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -8039,6 +8058,147 @@ func (runtime Runtime) Salto() (results Results) {
 				result_location,
 			},
 		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Beekeeper() (results Results) {
+	start_url := "https://www.beekeeper.io/en/company/jobs"
+	base_job_url := "https://www.beekeeper.io%s"
+	type Job struct {
+		Title      string
+		Url        string
+		Location   string
+		Department string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".views-row", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("h4")
+		result_url := fmt.Sprintf(base_job_url, e.ChildAttr("a", "href"))
+		result_location := e.ChildText(".views-field-field-location")
+		result_department := e.ChildText(".views-field-field-department")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+				result_department,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Avaloq() (results Results) {
+	start_url := "https://www.avaloq.com/en/job-openings"
+	file_name := "avaloq.html"
+	type Job struct {
+		Url        string
+		Title      string
+		Location   string
+		Department string
+	}
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+	var initialResponse string
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(start_url),
+		chromedp.Sleep(SecondsSleep*time.Second),
+		chromedp.OuterHTML("html", &initialResponse),
+	); err != nil {
+		panic(err.Error())
+	}
+	SaveResponseToFileWithFileName(initialResponse, file_name)
+	c := colly.NewCollector()
+	c.OnHTML(".avlq-list-item", func(e *colly.HTMLElement) {
+		result_title := e.ChildText(".avlq-list-item-title")
+		result_infos := e.ChildTexts(".quote-title")
+		result_url := start_url + "?" + result_title
+		result_location := result_infos[0]
+		result_department := result_infos[1]
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+				result_department,
+			},
+		)
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.OnScraped(func(r *colly.Response) {
+		RemoveFileWithFileName(file_name)
+	})
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	c.WithTransport(t)
+	c.Visit("file:" + dir + "/" + file_name)
+	return
+}
+
+func (runtime Runtime) Wire() (results Results) {
+	start_url := "https://wire.com/de/jobs/"
+	type Job struct {
+		Title    string
+		Url      string
+		Location string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".css-175adb5", func(e *colly.HTMLElement) {
+		var result_titles []string
+		var result_urls []string
+		var result_locations []string
+		e.ForEach("div > a[class=css-1ycdsks]", func(_ int, el *colly.HTMLElement) {
+			result_titles = append(result_titles, el.Text)
+			result_urls = append(result_urls, el.Attr("href"))
+		})
+		e.ForEach("div > span[class=css-qir5l9]", func(_ int, el *colly.HTMLElement) {
+			result_locations = append(result_locations, el.Text)
+		})
+		for i := range result_titles {
+			results.Add(
+				runtime.Name,
+				result_titles[i],
+				result_urls[i],
+				result_locations[i],
+				Job{
+					result_titles[i],
+					result_urls[i],
+					result_locations[i],
+				},
+			)
+		}
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
