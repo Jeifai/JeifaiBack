@@ -7606,22 +7606,24 @@ func (runtime Runtime) Finanzchef24() (results Results) {
 		Location string
 	}
 	c := colly.NewCollector()
-	c.OnHTML("blockquote", func(e *colly.HTMLElement) {
+	c.OnHTML("ul", func(e *colly.HTMLElement) {
 		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
 			result_title := el.ChildText("a")
 			result_url := el.ChildAttr("a", "href")
 			result_location := "Munich"
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				Job{
+			if strings.Contains(result_url, "www.finanzchef24.de") {
+				results.Add(
+					runtime.Name,
 					result_title,
 					result_url,
 					result_location,
-				},
-			)
+					Job{
+						result_title,
+						result_url,
+						result_location,
+					},
+				)
+			}
 		})
 	})
 	c.OnRequest(func(r *colly.Request) {
