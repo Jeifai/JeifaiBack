@@ -1325,6 +1325,7 @@ func (runtime Runtime) Liqid() (results Results) {
 	return
 }
 
+// At the moment using LinkedIn..
 func (runtime Runtime) Pylot() (results Results) {
 	start_url := "https://pylot-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
@@ -2616,13 +2617,6 @@ func (runtime Runtime) Internetstores() (results Results) {
 func (runtime Runtime) Muehlbauer() (results Results) {
 	start_url := "https://muehlbauer.softgarden.io/de/widgets/jobs"
 	base_job_url := "https://muehlbauer.softgarden.io/job/%s"
-	Softgarden(start_url, base_job_url, runtime.Name, &results)
-	return
-}
-
-func (runtime Runtime) Brainlab() (results Results) {
-	start_url := "https://brainlab.softgarden.io/en/vacancies"
-	base_job_url := "https://brainlab.softgarden.io/job/%s"
 	Softgarden(start_url, base_job_url, runtime.Name, &results)
 	return
 }
@@ -8202,6 +8196,43 @@ func (runtime Runtime) Wire() (results Results) {
 				},
 			)
 		}
+	})
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
+	})
+	c.Visit(start_url)
+	return
+}
+
+func (runtime Runtime) Brainlab() (results Results) {
+	start_url := "https://www.brainlab.com/career/jobs-at-brainlab/"
+	type Job struct {
+		Title      string
+		Url        string
+		Location   string
+		Date       string
+	}
+	c := colly.NewCollector()
+	c.OnHTML(".job-item", func(e *colly.HTMLElement) {
+		result_title := e.ChildText("a")
+		result_url := e.ChildAttr("a", "href")
+		result_location := e.ChildText(".sg-place")
+		result_date := e.ChildText(".sg-date")
+		results.Add(
+			runtime.Name,
+			result_title,
+			result_url,
+			result_location,
+			Job{
+				result_title,
+				result_url,
+				result_location,
+				result_date,
+			},
+		)
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
