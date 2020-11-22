@@ -4351,6 +4351,7 @@ func (runtime Runtime) Facebook() (results Results) {
 }
 
 func (runtime Runtime) Nen() (results Results) {
+	/**
 	results = append(results, Result{
 		runtime.Name,
 		"AWS Lead",
@@ -4358,6 +4359,7 @@ func (runtime Runtime) Nen() (results Results) {
 		"Milano",
 		[]byte("{}"),
 	})
+	*/
 	return
 }
 
