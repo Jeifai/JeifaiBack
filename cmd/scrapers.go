@@ -6570,8 +6570,9 @@ func (runtime Runtime) Uniper() (results Results) {
 		})
 
 		if counter == 0 {
-			temp_total_results := strings.Split(e.ChildText(".paginationLabel"), " ")
-			string_total_results := temp_total_results[len(temp_total_results)-1]
+			temp_total_results := strings.Split(e.ChildText("#tile-search-results-label"), " ")
+			string_total_results := temp_total_results[len(temp_total_results)-2]
+			fmt.Println(string_total_results)
 			total_results, err := strconv.Atoi(string_total_results)
 			if err != nil {
 				panic(err.Error())
