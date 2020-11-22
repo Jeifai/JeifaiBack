@@ -730,6 +730,102 @@ func (runtime Runtime) Daedalean() (results Results) {
 	return
 }
 
+func (runtime Runtime) Divimove() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/divimove?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Spendesk() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/spendesk?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Honeypot() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/honeypot?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Comtravo() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/comtravo?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Berlinbrandsgroup() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/berlin-brands-group?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Unu() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/unu?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Sesame() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/sesame?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Arrival() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/arrival?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Zeitgold() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/zeitgold?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Bonial() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/bonial-2?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Combostrike() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/combostrike?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Joyn() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/joyn?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Zeotap() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/zeotap?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Popcore() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/popcore?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Passbase() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/passbase?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Inkitt() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/inkitt?&mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██████  ███████ ██████  ███████  ██████  ███    ██ ██  ██████       ██
 ██   ██ ██      ██   ██ ██      ██    ██ ████   ██ ██ ██    ██     ███
