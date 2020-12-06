@@ -1010,6 +1010,12 @@ func (runtime Runtime) Usercentrics() (results Results) {
 	return
 }
 
+func (runtime Runtime) Igaming() (results Results) {
+	start_url := "https://igaming-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Volunteervision() (results Results) {
 	start_url := "https://volunteer-vision-jobs.personio.de"
 	Personio1(start_url, runtime.Name, &results)
