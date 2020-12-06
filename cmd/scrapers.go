@@ -877,6 +877,12 @@ func Personio1(start_url string, runtime_name string, results *Results) {
 	return
 }
 
+func (runtime Runtime) Tier() (results Results) {
+	start_url := "https://tier-mobility-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Casparhealth() (results Results) {
 	start_url := "https://goreha-jobs.personio.de"
 	Personio1(start_url, runtime.Name, &results)
@@ -1630,12 +1636,6 @@ func (runtime Runtime) Reflekt() (results Results) {
 
 func (runtime Runtime) Ndgit() (results Results) {
 	start_url := "https://ndgit-jobs.personio.de/"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
-func (runtime Runtime) Tier() (results Results) {
-	start_url := "https://tier-mobility-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
@@ -8314,10 +8314,10 @@ func (runtime Runtime) Wire() (results Results) {
 func (runtime Runtime) Brainlab() (results Results) {
 	start_url := "https://www.brainlab.com/career/jobs-at-brainlab/"
 	type Job struct {
-		Title      string
-		Url        string
-		Location   string
-		Date       string
+		Title    string
+		Url      string
+		Location string
+		Date     string
 	}
 	c := colly.NewCollector()
 	c.OnHTML(".job-item", func(e *colly.HTMLElement) {
