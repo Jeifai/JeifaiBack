@@ -16,5 +16,5 @@ require (
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.1
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf
-	mvdan.cc/gofumpt v0.0.0-20201107090320-a024667a00f1 // indirect
+	mvdan.cc/gofumpt v0.0.0-20201217210418-dbaa36cfdf8e // indirect
 )

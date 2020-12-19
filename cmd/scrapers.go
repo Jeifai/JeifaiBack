@@ -7646,12 +7646,16 @@ func (runtime Runtime) Aboutyou() (results Results) {
 	type Jobs struct {
 		Results []struct {
 			Hits []struct {
-				PostID       int    `json:"post_id"`
-				PostTitle    string `json:"post_title"`
-				PostDate     int    `json:"post_date"`
-				PostModified int    `json:"post_modified"`
-				Permalink    string `json:"permalink"`
-				Taxonomies   struct {
+				PostID            int    `json:"post_id"`
+				PostType          string `json:"post_type"`
+				PostTypeLabel     string `json:"post_type_label"`
+				PostTitle         string `json:"post_title"`
+				PostExcerpt       string `json:"post_excerpt"`
+				Permalink         string `json:"permalink"`
+				PostDate          int    `json:"post_date"`
+				PostDateFormatted string `json:"post_date_formatted"`
+				PostModified      int    `json:"post_modified"`
+				Taxonomies        struct {
 					JobsCategories []string `json:"jobs-categories"`
 					Departments    []string `json:"departments"`
 					Location       []string `json:"location"`
@@ -7676,21 +7680,23 @@ func (runtime Runtime) Aboutyou() (results Results) {
 		}
 		var jsonJobs Jobs
 		err = json.Unmarshal(bodyText, &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Results {
-			for _, elem_2 := range elem.Hits {
-				result_title := elem_2.PostTitle
-				result_url := elem_2.Permalink
-				result_location := elem_2.Taxonomies.Location[0]
-				results.Add(
-					runtime.Name,
-					result_title,
-					result_url,
-					result_location,
-					elem,
-				)
+		if err == nil {
+			for _, elem := range jsonJobs.Results {
+				for _, elem_2 := range elem.Hits {
+					result_title := elem_2.PostTitle
+					result_url := elem_2.Permalink
+					result_location := ""
+					if len(elem_2.Taxonomies.Location) > 0 {
+						result_location = elem_2.Taxonomies.Location[0]
+					}
+					results.Add(
+						runtime.Name,
+						result_title,
+						result_url,
+						result_location,
+						elem,
+					)
+				}
 			}
 		}
 	}
