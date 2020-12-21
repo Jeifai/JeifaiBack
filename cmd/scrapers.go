@@ -1372,6 +1372,24 @@ func (runtime Runtime) Emmy() (results Results) {
 	return
 }
 
+func (runtime Runtime) Blackroll() (results Results) {
+	start_url := "https://blackroll-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Apworks() (results Results) {
+	start_url := "https://apworks-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Cluno() (results Results) {
+	start_url := "https://cluno-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 /**
 ██████  ███████ ██████  ███████  ██████  ███    ██ ██  ██████      ██████
 ██   ██ ██      ██   ██ ██      ██    ██ ████   ██ ██ ██    ██          ██
@@ -1542,13 +1560,6 @@ func (runtime Runtime) Soley() (results Results) {
 	return
 }
 
-// NOT WORKING STATUS: no results
-func (runtime Runtime) Apworks() (results Results) {
-	start_url := "https://apworks-jobs.personio.de"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
 func (runtime Runtime) Acatus() (results Results) {
 	start_url := "https://acatus-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
@@ -1610,12 +1621,6 @@ func (runtime Runtime) Skoove() (results Results) {
 	return
 }
 
-func (runtime Runtime) Cluno() (results Results) {
-	start_url := "https://cluno-jobs.personio.de/"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
 func (runtime Runtime) Navvis() (results Results) {
 	start_url := "https://navvis-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
@@ -1642,12 +1647,6 @@ func (runtime Runtime) Ndgit() (results Results) {
 
 func (runtime Runtime) Coachhub() (results Results) {
 	start_url := "https://coachhub-jobs.personio.de/"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
-func (runtime Runtime) Blackroll() (results Results) {
-	start_url := "https://blackroll-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
