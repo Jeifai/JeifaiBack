@@ -8123,43 +8123,66 @@ func (runtime Runtime) Brainlab() (results Results) {
 }
 
 func (runtime Runtime) Here() (results Results) {
-	start_url := "https://careers-here.icims.com/jobs/search?in_iframe=1&pr=%d"
+	start_url := "https://careers-here.icims.com/proxy/uxs/portals/search/job?limit=100&offset=%d"
 	counter := 0
-	type Job struct {
-		Url         string
-		Title       string
-		Location    string
-		Description string
+	type JsonJobs struct {
+		Jobs []struct {
+			ExternalID       string    `json:"externalId"`
+			Identifier       string    `json:"identifier"`
+			LanguageCode     string    `json:"languageCode"`
+			ApplyURL         string    `json:"applyUrl"`
+			Title            string    `json:"title"`
+			Description      string    `json:"description"`
+			DatePosted       time.Time `json:"datePosted"`
+			DateUpdated      time.Time `json:"dateUpdated"`
+			EmploymentType   string    `json:"employmentType"`
+			Responsibilities string    `json:"responsibilities"`
+			Qualifications   string    `json:"qualifications"`
+			Addresses        []struct {
+				Locality     string   `json:"locality"`
+				PostalCode   string   `json:"postalCode"`
+				RegionCode   string   `json:"regionCode"`
+				AddressLines []string `json:"addressLines"`
+				LocationName string   `json:"locationName"`
+			} `json:"addresses"`
+			UUID       string        `json:"uuid"`
+			Benefits   []interface{} `json:"benefits"`
+			Department string        `json:"department"`
+			IsPublic   bool          `json:"isPublic"`
+		} `json:"jobs"`
+		Offset int `json:"offset"`
+		Limit  int `json:"limit"`
+		Total  int `json:"total"`
 	}
 	c := colly.NewCollector()
-	c.OnHTML("html", func(e *colly.HTMLElement) {
-		e.ForEach(".row", func(_ int, el *colly.HTMLElement) {
-			result_title := strings.TrimSpace(strings.ReplaceAll(el.ChildText(".title"), "Requisition Title", ""))
-			result_url := el.ChildAttr("a", "href")
-			result_location := strings.TrimSpace(strings.ReplaceAll(el.ChildText(".left"), "Job Locations", ""))
-			result_description := el.ChildText(".description")
+	c.OnResponse(func(r *colly.Response) {
+		var jsonJobs JsonJobs
+		err := json.Unmarshal(r.Body, &jsonJobs)
+		if err != nil {
+			panic(err.Error())
+		}
+		for _, elem := range jsonJobs.Jobs {
+			result_title := elem.Title
+			result_url := elem.ApplyURL
+			result_location := elem.Addresses[0].Locality
 			results.Add(
 				runtime.Name,
 				result_title,
 				result_url,
 				result_location,
-				Job{
-					result_title,
-					result_url,
-					result_location,
-					result_description,
-				},
+				elem,
 			)
-		})
-		result_pages := e.ChildTexts(".iCIMS_PagingBatch .sr-only")
-		re := regexp.MustCompile("[0-9]+")
-		temp_total_pages := re.FindAllString(result_pages[len(result_pages)-1], -1)[0]
-		total_pages, _ := strconv.Atoi(temp_total_pages)
-		if counter < (total_pages - 1) {
-			counter++
-			time.Sleep(SecondsSleep * time.Second)
-			temp_url := fmt.Sprintf(start_url, counter)
-			c.Visit(temp_url)
+		}
+		total_results := jsonJobs.Total
+		if counter <= total_results {
+			counter = counter + 100
+			c.Request(
+				"POST",
+				fmt.Sprintf(start_url, counter),
+				strings.NewReader(""),
+				nil,
+				http.Header{"Content-Type": []string{"application/x-www-form-urlencoder"}},
+			)
 		}
 	})
 	c.OnRequest(func(r *colly.Request) {
@@ -8168,6 +8191,12 @@ func (runtime Runtime) Here() (results Results) {
 	c.OnError(func(r *colly.Response, err error) {
 		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
 	})
-	c.Visit(fmt.Sprintf(start_url, 0))
+	c.Request(
+		"POST",
+		fmt.Sprintf(start_url, counter),
+		strings.NewReader(""),
+		nil,
+		http.Header{"Content-Type": []string{"application/x-www-form-urlencoded"}},
+	)
 	return
 }
