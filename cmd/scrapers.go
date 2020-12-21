@@ -185,6 +185,12 @@ func (runtime Runtime) Blacklane() (results Results) {
 	return
 }
 
+func (runtime Runtime) Pylot() (results Results) {
+	start_url := "https://api.greenhouse.io/v1/boards/pylot/jobs"
+	Greenhouse(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Argumed() (results Results) {
 	start_url := "https://api.greenhouse.io/v1/boards/dialogueargumed/jobs"
 	Greenhouse(start_url, runtime.Name, &results)
@@ -664,6 +670,7 @@ func (runtime Runtime) Ecosia() (results Results) {
 	return
 }
 
+// No jobs
 func (runtime Runtime) Automationhero() (results Results) {
 	start_url := "https://api.lever.co/v0/postings/automationhero?mode=json"
 	Lever(start_url, runtime.Name, &results)
@@ -1148,6 +1155,12 @@ func (runtime Runtime) Printvision() (results Results) {
 	return
 }
 
+func (runtime Runtime) Tattersalllorenz() (results Results) {
+	start_url := "https://tattersall-lorenz-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Pmone() (results Results) {
 	start_url := "https://pmone-jobs.personio.de"
 	Personio1(start_url, runtime.Name, &results)
@@ -1311,6 +1324,12 @@ func (runtime Runtime) Helpling() (results Results) {
 	return
 }
 
+func (runtime Runtime) Oberender() (results Results) {
+	start_url := "https://oberender-jobs.personio.de"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 // NOT WORKING STATUS: No results
 func (runtime Runtime) Internations() (results Results) {
 	start_url := "https://internations-jobs.personio.de/"
@@ -1451,13 +1470,6 @@ func (runtime Runtime) Liqid() (results Results) {
 	return
 }
 
-// At the moment using LinkedIn..
-func (runtime Runtime) Pylot() (results Results) {
-	start_url := "https://pylot-jobs.personio.de"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
 func (runtime Runtime) Elli() (results Results) {
 	start_url := "https://elli-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
@@ -1484,7 +1496,7 @@ func (runtime Runtime) Eviom() (results Results) {
 
 func (runtime Runtime) Veact() (results Results) {
 	start_url := "https://veact-jobs.personio.de"
-	Personio2(start_url, runtime.Name, &results)
+	Personio1(start_url, runtime.Name, &results)
 	return
 }
 
@@ -1512,12 +1524,6 @@ func (runtime Runtime) Realeyes() (results Results) {
 	return
 }
 
-func (runtime Runtime) Oberender() (results Results) {
-	start_url := "https://oberender-jobs.personio.de"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
 func (runtime Runtime) Blickfeld() (results Results) {
 	start_url := "https://blickfeld-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
@@ -1536,20 +1542,8 @@ func (runtime Runtime) Syrocon() (results Results) {
 	return
 }
 
-func (runtime Runtime) Zmi() (results Results) {
-	start_url := "https://zmi-gmbh-jobs.personio.de"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
 func (runtime Runtime) Treefin() (results Results) {
 	start_url := "https://treefin-jobs.personio.de/"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
-func (runtime Runtime) Tattersalllorenz() (results Results) {
-	start_url := "https://tattersall-lorenz-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
@@ -2704,6 +2698,13 @@ func Softgarden(start_url string, base_job_url string, runtime_name string, resu
 func (runtime Runtime) Softgarden() (results Results) {
 	start_url := "https://softgarden.softgarden.io/de/widgets/jobs"
 	base_job_url := "https://softgarden.softgarden.io/job/%s"
+	Softgarden(start_url, base_job_url, runtime.Name, &results)
+	return
+}
+
+func (runtime Runtime) Zmi() (results Results) {
+	start_url := "https://zmi-karriere.softgarden.io/de/widgets/jobs"
+	base_job_url := "https://zmi-karriere.softgarden.io/job/%s"
 	Softgarden(start_url, base_job_url, runtime.Name, &results)
 	return
 }
@@ -6948,7 +6949,7 @@ func (runtime Runtime) Reev() (results Results) {
 		Location string
 	}
 	c := colly.NewCollector()
-	c.OnHTML(".job-listing__job", func(e *colly.HTMLElement) {
+	c.OnHTML(".jobs__job", func(e *colly.HTMLElement) {
 		result_title := e.ChildText("a")
 		result_url := e.ChildAttr("a", "href")
 		result_location := "Munich"
@@ -8039,102 +8040,6 @@ func (runtime Runtime) Avenga() (results Results) {
 		})
 		c.Visit(start_url)
 	}
-	return
-}
-
-func (runtime Runtime) Softserveinc() (results Results) {
-	start_url := "https://career.softserveinc.com/en-us/vacancy/search?page=%d"
-	file_name := "softserveinc_%d.html"
-	counter := 1
-	type JsonJobs struct {
-		Data []struct {
-			ID        int    `json:"id"`
-			URL       string `json:"url"`
-			Name      string `json:"name"`
-			Country   string `json:"country"`
-			City      string `json:"city"`
-			Direction string `json:"direction"`
-			Hot       int    `json:"hot"`
-			Onsite    int    `json:"onsite"`
-			Remote    int    `json:"remote"`
-			Highlight string `json:"highlight"`
-		} `json:"data"`
-		Meta struct {
-			CurrentPage int    `json:"current_page"`
-			From        int    `json:"from"`
-			LastPage    int    `json:"last_page"`
-			Path        string `json:"path"`
-			PerPage     int    `json:"per_page"`
-			To          int    `json:"to"`
-			Total       int    `json:"total"`
-		} `json:"meta"`
-	}
-	ctx, cancel := chromedp.NewContext(context.Background())
-	defer cancel()
-	var initialResponse string
-	if err := chromedp.Run(ctx,
-		chromedp.Navigate(fmt.Sprintf(start_url, counter)),
-		chromedp.Sleep(SecondsSleep*time.Second),
-		chromedp.OuterHTML("html", &initialResponse),
-	); err != nil {
-		panic(err)
-	}
-	SaveResponseToFileWithFileName(initialResponse, fmt.Sprintf(file_name, counter))
-	c := colly.NewCollector()
-	t := &http.Transport{}
-	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err.Error())
-	}
-	c.WithTransport(t)
-	c.OnHTML("body", func(e *colly.HTMLElement) {
-		var jsonJobs JsonJobs
-		err := json.Unmarshal([]byte(e.ChildText("pre")), &jsonJobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jsonJobs.Data {
-			result_title := elem.Name
-			result_url := elem.URL
-			result_location := elem.Country + "," + elem.City
-			if elem.Remote > 0 {
-				result_location = result_location + "," + "Remote"
-			}
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-		counter++
-		next_page := fmt.Sprintf(start_url, counter)
-		if jsonJobs.Meta.CurrentPage <= jsonJobs.Meta.LastPage {
-			time.Sleep(SecondsSleep * time.Second)
-			if err := chromedp.Run(ctx,
-				chromedp.Navigate(next_page),
-				chromedp.Sleep(SecondsSleep*time.Second),
-				chromedp.OuterHTML("html", &initialResponse),
-			); err != nil {
-				panic(err)
-			}
-			SaveResponseToFileWithFileName(initialResponse, fmt.Sprintf(file_name, counter))
-			c.Visit("file:" + dir + "/" + fmt.Sprintf(file_name, counter))
-		}
-	})
-	c.OnScraped(func(r *colly.Response) {
-		a_file_path := strings.Split(r.Request.URL.Path, "/")
-		RemoveFileWithFileName(a_file_path[len(a_file_path)-1])
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit("file:" + dir + "/" + fmt.Sprintf(file_name, counter))
 	return
 }
 
