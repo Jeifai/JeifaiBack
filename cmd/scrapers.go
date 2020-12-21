@@ -683,6 +683,12 @@ func (runtime Runtime) Cargoone() (results Results) {
 	return
 }
 
+func (runtime Runtime) Demodesk() (results Results) {
+	start_url := "https://api.lever.co/v0/postings/demodesk?mode=json"
+	Lever(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Figma() (results Results) {
 	start_url := "https://api.lever.co/v0/postings/figma?mode=json"
 	Lever(start_url, runtime.Name, &results)
@@ -1288,6 +1294,12 @@ func (runtime Runtime) Workpath() (results Results) {
 	return
 }
 
+func (runtime Runtime) Gridx() (results Results) {
+	start_url := "https://gridx-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Mybacsvertrieb() (results Results) {
 	start_url := "https://mybacs-vertriebs-gmbh-jobs.personio.de"
 	Personio1(start_url, runtime.Name, &results)
@@ -1478,12 +1490,6 @@ func (runtime Runtime) Elli() (results Results) {
 
 func (runtime Runtime) Wagawin() (results Results) {
 	start_url := "https://Wagawin-jobs.personio.de"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
-func (runtime Runtime) Gridx() (results Results) {
-	start_url := "https://gridx-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
@@ -6129,90 +6135,6 @@ func (runtime Runtime) Idnow() (results Results) {
 	}
 	c.WithTransport(t)
 	c.Visit("file:" + dir + "/" + file_name)
-	return
-}
-
-func (runtime Runtime) Demodesk() (results Results) {
-	start_url := "https://wordpress.demodesk.com/wp-json/wp/v2/jobs"
-	type Jobs []struct {
-		ID      int    `json:"id"`
-		Date    string `json:"date"`
-		DateGmt string `json:"date_gmt"`
-		GUID    struct {
-			Rendered string `json:"rendered"`
-		} `json:"guid"`
-		Modified    string `json:"modified"`
-		ModifiedGmt string `json:"modified_gmt"`
-		Slug        string `json:"slug"`
-		Status      string `json:"status"`
-		Type        string `json:"type"`
-		Link        string `json:"link"`
-		Title       struct {
-			Rendered string `json:"rendered"`
-		} `json:"title"`
-		Content struct {
-			Rendered  string `json:"rendered"`
-			Protected bool   `json:"protected"`
-		} `json:"content"`
-		FeaturedMedia       int         `json:"featured_media"`
-		Template            string      `json:"template"`
-		BetterFeaturedImage interface{} `json:"better_featured_image"`
-		Acf                 struct {
-			Department  string `json:"department"`
-			JobType     string `json:"job_type"`
-			WorkingTime string `json:"working_time"`
-			Location    string `json:"location"`
-			Profile     string `json:"profile"`
-			Blurb       string `json:"blurb"`
-			Order       string `json:"order"`
-		} `json:"acf"`
-		Links struct {
-			Self []struct {
-				Href string `json:"href"`
-			} `json:"self"`
-			Collection []struct {
-				Href string `json:"href"`
-			} `json:"collection"`
-			About []struct {
-				Href string `json:"href"`
-			} `json:"about"`
-			WpAttachment []struct {
-				Href string `json:"href"`
-			} `json:"wp:attachment"`
-			Curies []struct {
-				Name      string `json:"name"`
-				Href      string `json:"href"`
-				Templated bool   `json:"templated"`
-			} `json:"curies"`
-		} `json:"_links"`
-	}
-	c := colly.NewCollector()
-	c.OnResponse(func(r *colly.Response) {
-		var jobs Jobs
-		err := json.Unmarshal(r.Body, &jobs)
-		if err != nil {
-			panic(err.Error())
-		}
-		for _, elem := range jobs {
-			result_title := elem.Title.Rendered
-			result_url := elem.Link
-			result_location := elem.Acf.Location
-			results.Add(
-				runtime.Name,
-				result_title,
-				result_url,
-				result_location,
-				elem,
-			)
-		}
-	})
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println(Gray(8-1, "Visiting"), Gray(8-1, r.URL.String()))
-	})
-	c.OnError(func(r *colly.Response, err error) {
-		fmt.Println(Red("Request URL:"), Red(r.Request.URL))
-	})
-	c.Visit(start_url)
 	return
 }
 
