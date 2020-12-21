@@ -1270,6 +1270,12 @@ func (runtime Runtime) Careship() (results Results) {
 	return
 }
 
+func (runtime Runtime) Casavi() (results Results) {
+	start_url := "https://casavi-jobs.personio.de/"
+	Personio1(start_url, runtime.Name, &results)
+	return
+}
+
 func (runtime Runtime) Astyx() (results Results) {
 	start_url := "https://astyx-gmbhcruise-munich-jobs.personio.de"
 	Personio1(start_url, runtime.Name, &results)
@@ -1506,6 +1512,7 @@ func (runtime Runtime) Veact() (results Results) {
 	return
 }
 
+// No Jobs
 func (runtime Runtime) Kumovis() (results Results) {
 	start_url := "https://kumovis-jobs.personio.de"
 	Personio2(start_url, runtime.Name, &results)
@@ -1562,12 +1569,6 @@ func (runtime Runtime) Soley() (results Results) {
 
 func (runtime Runtime) Acatus() (results Results) {
 	start_url := "https://acatus-jobs.personio.de"
-	Personio2(start_url, runtime.Name, &results)
-	return
-}
-
-func (runtime Runtime) Casavi() (results Results) {
-	start_url := "https://casavi-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
 	return
 }
@@ -1741,7 +1742,7 @@ func (runtime Runtime) Caresyntax() (results Results) {
 	return
 }
 
-// NOT WORKING STATUS: No results
+// No Jobs
 func (runtime Runtime) Homefully() (results Results) {
 	start_url := "https://homefully-jobs.personio.de/"
 	Personio2(start_url, runtime.Name, &results)
@@ -1877,6 +1878,7 @@ func (runtime Runtime) Deepl() (results Results) {
 	return
 }
 
+// No jobs
 func (runtime Runtime) Fineway() (results Results) {
 	start_url := "https://fineway.recruitee.com/api/offers"
 	Recruitee(start_url, runtime.Name, &results)
@@ -6588,8 +6590,8 @@ func (runtime Runtime) Uniper() (results Results) {
 		})
 
 		if counter == 0 {
-			temp_total_results := strings.Split(e.ChildText("#tile-search-results-label"), " ")
-			string_total_results := temp_total_results[len(temp_total_results)-2]
+			temp_total_results := strings.Split(e.ChildText(".paginationLabel"), " ")
+			string_total_results := temp_total_results[len(temp_total_results)-1]
 			fmt.Println(string_total_results)
 			total_results, err := strconv.Atoi(string_total_results)
 			if err != nil {
