@@ -4453,15 +4453,13 @@ func (runtime Runtime) Facebook() (results Results) {
 }
 
 func (runtime Runtime) Nen() (results Results) {
-	/**
 	results = append(results, Result{
 		runtime.Name,
-		"AWS Lead",
-		"https://www.linkedin.com/jobs/view/2181653127",
+		"Project Manager Agile",
+		"https://www.linkedin.com/jobs/view/2327377260",
 		"Milano",
 		[]byte("{}"),
 	})
-	*/
 	return
 }
 
